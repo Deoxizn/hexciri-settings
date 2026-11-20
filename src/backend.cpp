@@ -163,19 +163,24 @@ void Backend::watch(bool events) {
         for (const QString &id : ids)
             refresh(id);
         // Only what a page has shown; the rest loads when one opens.
-        for (const QString &list : lists)
-            if (m_lists.contains(list))
+        for (const QString &list : lists) {
+            if (!m_lists.contains(list))
+                continue;
+            // A change while the list loads loads it once more after, so
+            // what changed between isn't lost.
+            if (m_busy.contains("list:" + list))
+                m_loadAgain.insert(list);
+            else
                 load(list);
+        }
     });
     m_watcher->start(events);
 }
 
 void Backend::load(const QString &list) {
     const QString key = "list:" + list;
-    if (m_busy.contains(key)) {
-        m_loadAgain.insert(list);
+    if (m_busy.contains(key))
         return;
-    }
     setBusy(key, true);
     QPointer<Backend> self(this);
     auto store = m_store;

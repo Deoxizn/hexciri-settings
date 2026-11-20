@@ -5,6 +5,7 @@
 #include "store.h"
 
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -304,12 +305,13 @@ void Store::buildOmarchy() {
         s.type = "text";
         s.label = label;
         s.read = [this, variable] {
-            static const QRegularExpression line("^" + variable + "=(.*)$", QRegularExpression::MultilineOption);
-            const QString value = line.match(fileText(m_paths.config + "/uwsm/env.d/60-omasettings")).captured(1).trimmed();
-            QString unquoted = value;
-            if (unquoted.size() >= 2 && unquoted.startsWith('"') && unquoted.endsWith('"'))
-                unquoted = unquoted.mid(1, unquoted.size() - 2);
-            return QVariant(unquoted.isEmpty() ? QString::fromLocal8Bit(qgetenv(variable.toUtf8())) : unquoted);
+            // What Settings set, not what this session started with, so a
+            // folder put back to Omarchy's shows that at once.
+            static const QRegularExpression line("^(?:export )?" + variable + "=(.*)$", QRegularExpression::MultilineOption);
+            QString value = line.match(fileText(m_paths.config + "/uwsm/env.d/60-omasettings")).captured(1).trimmed();
+            if (value.size() >= 2 && value.startsWith('"') && value.endsWith('"'))
+                value = value.mid(1, value.size() - 2);
+            return QVariant(value);
         };
         s.write = [this, variable](const QVariant &v) { return setSessionVariable(variable, v.toString()); };
         add(s);
@@ -330,10 +332,10 @@ QString Store::setSessionVariable(const QString &name, const QString &value) {
     const QString path = m_paths.config + "/uwsm/env.d/60-omasettings";
     QStringList lines;
     for (const QString &l : fileText(path).split('\n', Qt::SkipEmptyParts))
-        if (!l.startsWith('#') && !l.startsWith(name + "="))
+        if (!l.startsWith('#') && !l.startsWith("export " + name + "=") && !l.startsWith(name + "="))
             lines << l;
     if (!value.isEmpty())
-        lines << name + "=\"" + value + "\"";
+        lines << "export " + name + "=\"" + value + "\"";
     if (lines.isEmpty())
         return QFile::exists(path) && !QFile::remove(path) ? tr("Could not write %1").arg(path) : QString();
     lines.prepend("# Written by Settings; read by every new login.");
@@ -432,15 +434,21 @@ QString Store::actOmarchy(const QString &action, const QVariantList &args) {
         if (!validKey.match(key).hasMatch())
             return tr("Unknown setting %1").arg(key);
         const QString json = args.value(2).toString();
-        QJsonParseError error;
-        QJsonDocument::fromJson("[" + json.toUtf8() + "]", &error);
-        if (json.isEmpty() || error.error != QJsonParseError::NoError)
+        QJsonParseError parsed;
+        QJsonDocument::fromJson("[" + json.toUtf8() + "]", &parsed);
+        if (json.isEmpty() || parsed.error != QJsonParseError::NoError)
             return tr("Unknown setting %1").arg(key);
         QStringList command{"set", a0, key, json, "--json"};
         const QString section = args.value(3).toString();
         if (sections.contains(section))
             command << "--section" << section << "--index" << QString::number(qMax(0, args.value(4).toInt()));
-        return runOk("omarchy-bar", command, 15000);
+        // The shell writes shell.json a moment later; wait for it, so the
+        // page reads back the new value rather than snapping to the old.
+        const QDateTime before = QFileInfo(m_paths.config + "/omarchy/shell.json").lastModified();
+        const QString error = runOk("omarchy-bar", command, 15000);
+        if (error.isEmpty())
+            waitForShellWrite(before);
+        return error;
     }
     if (action == "weather.location") {
         // An empty place goes back to finding it from the network.

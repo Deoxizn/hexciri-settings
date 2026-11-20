@@ -1201,7 +1201,8 @@ bool Store::isMachineSpecific(const QString &id) {
                                  "wifi.enabled", "bluetooth.enabled", "display.brightness", "keyboard.backlight",
                                  "power.profile", "power.acProfile", "power.batteryProfile", "display.laptopScreen",
                                  "display.mirror", "display.nightLight", "notifications.doNotDisturb",
-                                 "pointer.touchpad", "pointer.touchscreen", "lock.stayAwake"};
+                                 "pointer.touchpad", "pointer.touchscreen", "lock.stayAwake",
+                                 "keyboard.model", "general.screenshotDir", "general.screenrecordDir"};
     return ids.contains(id) || id.startsWith("sound.");
 }
 

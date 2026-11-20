@@ -270,7 +270,7 @@ SettingsPage {
             enabled: !page.working
             onClicked: {
                 for (const f of page.fields)
-                    if (page.options[f.key] !== undefined) page.set(f, null)
+                    if (page.options[f.key] !== undefined) page.set(f, f.defaultValue !== undefined ? f.defaultValue : null)
             }
         }
     }

@@ -245,7 +245,12 @@ ApplicationWindow {
         pageLoader.item.reveal(row)
     }
 
-    function openSub(page, pageTitle, params) { subParams = params || {}; go(pane, page, pageTitle) }
+    function openSub(page, pageTitle, params) {
+        subParams = params || {}
+        // The same page for something else (another widget's options).
+        if (page === sub) { subTitle = pageTitle; return }
+        go(pane, page, pageTitle)
+    }
     function back() {
         if (backStack.length === 0) return
         const to = backStack[backStack.length - 1]

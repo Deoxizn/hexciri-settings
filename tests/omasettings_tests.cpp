@@ -393,7 +393,7 @@ private slots:
         const QString file = dir.path() + "/config/uwsm/env.d/60-omasettings";
         QCOMPARE(store.write("general.screenshotDir", "/home/me/Shots"), QString());
         QCOMPARE(store.read("general.screenshotDir").toString(), QString("/home/me/Shots"));
-        QVERIFY(readText(file).contains("OMARCHY_SCREENSHOT_DIR=\"/home/me/Shots\"\n"));
+        QVERIFY(readText(file).contains("\nexport OMARCHY_SCREENSHOT_DIR=\"/home/me/Shots\"\n"));
         QCOMPARE(store.write("general.screenrecordDir", "/home/me/Videos"), QString());
         QVERIFY(readText(file).contains("OMARCHY_SCREENSHOT_DIR="));
         // Nothing a shell would expand or end the line with.
