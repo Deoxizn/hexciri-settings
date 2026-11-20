@@ -11,7 +11,7 @@ SettingsPage {
     tagline: page.layouts.join(" · ")
     glyph: "\u{F030C}"
     description: qsTr("Set how keys repeat, which layouts you type with, and what the special keys do.")
-    lists: ["keyboardLayouts"]
+    lists: ["keyboardLayouts", "keyboardVariants", "keyboardModels"]
 
     readonly property var allLayouts: backend.lists.keyboardLayouts || []
     readonly property var layouts: (backend.values["keyboard.layouts"] || "").split(",").filter(l => l.length > 0)
@@ -20,6 +20,17 @@ SettingsPage {
         return l ? l.name : code
     }
     function setLayouts(list) { backend.set("keyboard.layouts", list.join(",")) }
+    // Each layout's variant, by position, as kb_variant pairs them.
+    readonly property var variants: (backend.values["keyboard.variants"] || "").split(",")
+    function variantsOf(code) {
+        return [{ value: "", text: qsTr("Standard") }].concat((backend.lists.keyboardVariants || [])
+            .filter(v => v.layout === code).map(v => ({ value: v.code, text: v.name })))
+    }
+    function setVariant(index, variant) {
+        const list = page.layouts.map((_, i) => page.variants[i] || "")
+        list[index] = variant
+        backend.set("keyboard.variants", list.join(","))
+    }
 
     SettingsGroup {
         SliderRow {
@@ -53,8 +64,21 @@ SettingsPage {
             delegate: SettingRow {
                 required property string modelData
                 required property int index
+                id: layoutRow
                 label: page.layoutName(modelData)
                 sublabel: modelData
+                // A layout's variants: international with dead keys, Dvorak, ...
+                ChoiceBox {
+                    readonly property var options: page.variantsOf(layoutRow.modelData)
+                    visible: options.length > 1
+                    maxWidth: ui.s(220)
+                    model: options
+                    textRole: "text"
+                    valueRole: "value"
+                    currentIndex: Math.max(0, options.findIndex(o => o.value === (page.variants[layoutRow.index] || "")))
+                    onActivated: page.setVariant(layoutRow.index, currentValue)
+                    Accessible.name: qsTr("Variant of %1").arg(layoutRow.label)
+                }
                 OmaButton {
                     glyph: "\u{F0143}"
                     bordered: false
@@ -95,6 +119,13 @@ SettingsPage {
                 enabled: addLayout.currentIndex >= 0
                 onClicked: page.setLayouts(page.layouts.concat([addLayout.currentValue]))
             }
+        }
+        ChoiceRow {
+            setting: "keyboard.model"
+            label: qsTr("Keyboard model")
+            sublabel: qsTr("Only matters for keys some keyboards have and others don't")
+            menuWidth: ui.s(300)
+            options: [{ value: "", text: qsTr("Automatic") }].concat(backend.lists.keyboardModels || [])
         }
         ChoiceRow {
             setting: "keyboard.switchLayout"

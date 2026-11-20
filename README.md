@@ -22,6 +22,8 @@ monospace font.
   web apps, AppImages), themes, plugins, and chosen dotfiles in a private
   GitHub repository. Changes upload on their own; another computer matches
   it with one click, after showing what will change. Hardware stays behind.
+- **Always current**: change something with a keybinding, the Omarchy menu,
+  or a terminal, and every page shows it at once.
 - **The files behind each page**: a page whose settings live in a config
   file lists it at the bottom with an Open button, and Ctrl+E opens it in
   your default editor, for anything the page can't change itself.
@@ -41,14 +43,14 @@ monospace font.
 | Wi-Fi | Networks, hidden networks, DNS servers, Wi-Fi band |
 | Bluetooth, VPN | Pairing; WireGuard and OpenVPN connections (import, sign in, install support) |
 | Power | Power mode now, on the adapter, and on battery; hibernation |
-| General | About, updates and update channel, language, time zone and clock, default apps and file types, login items, web apps, storage and snapshots, Sync, changes and backup |
+| General | About, updates and update channel, language, time zone and clock, default apps and file types, where screenshots and recordings go, login items, web apps, hooks (your scripts that run after an update or a theme change), Sync, changes and backup |
 | Apps | Everything Omarchy's Install and Remove menus offer (browsers, AI apps, coding agents, services, editors, terminals, games, dev environments, dictation, package pickers), with what's installed, so those menus can stay hidden; AppImages, added to the app launcher with their own icons and updated from where their makers publish them |
-| Appearance | Theme gallery, installing and removing themes, corners, transparency, animations, text size, font |
-| Desktop & Dock, Bar, Omarchy Menu, Plugins | Dock and pinned apps, window layout and gaps, window rules, focus; the bar's widgets and their order; hiding parts of the Omarchy menu, your own menu items, and Settings' pages in the menu search; shell plugins and updates |
+| Appearance | Theme gallery, installing and removing themes, corners or a radius of your own, transparency, animations, shadows, which apps follow the theme, text size, spacing, font |
+| Desktop & Dock, Bar, Omarchy Menu, Plugins | Dock and pinned apps, window layout and gaps, full screen desktop, window rules, focus and the pointer; the bar's widgets, their order, and each widget's own options (the clock, weather and its place, indicators, agents, and any plugin's), the bar's size and opacity; hiding parts of the Omarchy menu, your own menu items, and Settings' pages in the menu search; shell plugins and updates |
 | Displays, Wallpaper | Arranging displays by dragging them edge to edge, identifying which is which, the main display, mirroring, which workspaces open on which display; resolution, refresh, scale, rotation, adaptive sync, 10-bit color and HDR, remembered per monitor whichever port it is plugged into; Night Shift and its schedule; wallpapers and adding your own |
 | Notifications, Sound | Do Not Disturb, crash reports; output and input devices and volume |
 | Lock Screen, Login & Security, Firewall | Idle times; password, fingerprint, security keys; ufw on/off and open ports |
-| Keyboard, Mouse, Printers | Repeat, layouts, special keys, backlight, a shortcut editor; pointer and trackpad; printers |
+| Keyboard, Mouse, Printers | Repeat, layouts and their variants, keyboard model, special keys, backlight, a shortcut editor; pointer and trackpad; printers |
 
 ## Getting to a page
 
@@ -61,7 +63,7 @@ monospace font.
 - **From a terminal or a keybinding.** `omasettings open vpn` opens a pane,
   and `omasettings open general/datetime` a page inside one (the pages:
   `general/about`, `update`, `language`, `datetime`, `loginitems`,
-  `webapps`, `apps`, `troubleshooting`, `sync`, `settingsapp`; `appearance/themes`,
+  `webapps`, `apps`, `hooks`, `troubleshooting`, `sync`, `settingsapp`; `appearance/themes`,
   `desktop/rules`, `lock/bootscreen`, `keyboard/shortcuts`).
 - **One window.** If Settings is already open, any of these switches that
   window to the page and brings it forward instead of opening another.

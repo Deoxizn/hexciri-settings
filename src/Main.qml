@@ -89,9 +89,9 @@ ApplicationWindow {
         { id: "fonts", group: 2, title: qsTr("Fonts"), glyph: "\u{F06D6}", show: true,
           keywords: qsTr("font fonts monospace text size install cjk chinese japanese korean") },
         { id: "desktop", group: 3, title: qsTr("Desktop & Dock"), glyph: "\u{F056E}", show: true,
-          keywords: qsTr("dock windows gaps layout tiling focus pointer") },
+          keywords: qsTr("dock windows gaps layout tiling focus pointer full screen resize columns") },
         { id: "bar", group: 3, title: qsTr("Bar"), glyph: "\u{F06EB}", show: true,
-          keywords: qsTr("bar top panel widgets arrange order clock tray position") },
+          keywords: qsTr("bar top panel widgets arrange order clock tray position height opacity weather indicators") },
         { id: "menu", group: 3, title: qsTr("Omarchy Menu"), glyph: "\u{F035C}", show: true,
           keywords: qsTr("omarchy menu hide items sections launcher entries") },
         { id: "displays", group: 4, title: qsTr("Displays"), glyph: "\u{F0379}", show: true,
@@ -133,6 +133,8 @@ ApplicationWindow {
         { pane: "general", page: "GeneralApps", title: qsTr("Default Apps"), glyph: "\u{F003B}",
           keywords: qsTr("default browser terminal editor coding agent dictation file types open with"),
           settings: ["general.browser", "general.terminal", "general.editor", "general.agent", "general.dictation"] },
+        { pane: "general", page: "GeneralHooks", title: qsTr("Hooks"), glyph: "\u{F0BA3}",
+          keywords: qsTr("hooks scripts run after update theme font boot battery") },
         { pane: "general", page: "GeneralTroubleshooting", title: qsTr("Troubleshooting"), glyph: "\u{F0BC6}",
           keywords: qsTr("restart reset refresh configs kernel start over") },
         { pane: "general", page: "GeneralSync", title: qsTr("Sync"), glyph: "\u{F04E6}",
@@ -217,7 +219,7 @@ ApplicationWindow {
     // Where the page was scrolled, so going back returns there.
     function here() {
         const y = pageLoader.item && pageLoader.item.flick ? pageLoader.item.flick.contentY : 0
-        return { pane: pane, sub: sub, subTitle: subTitle, y: y }
+        return { pane: pane, sub: sub, subTitle: subTitle, y: y, params: subParams }
     }
     property real pendingY: 0
     function go(paneId, subPage, subPageTitle, record, y) {
@@ -249,6 +251,7 @@ ApplicationWindow {
         const to = backStack[backStack.length - 1]
         forwardStack = forwardStack.concat([here()])
         backStack = backStack.slice(0, -1)
+        subParams = to.params || {}
         go(to.pane, to.sub, to.subTitle, false, to.y)
     }
     function forward() {
@@ -256,6 +259,7 @@ ApplicationWindow {
         const to = forwardStack[forwardStack.length - 1]
         backStack = backStack.concat([here()])
         forwardStack = forwardStack.slice(0, -1)
+        subParams = to.params || {}
         go(to.pane, to.sub, to.subTitle, false, to.y)
     }
 

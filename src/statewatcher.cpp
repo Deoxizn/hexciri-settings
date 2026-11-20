@@ -36,7 +36,7 @@ QList<WatchRule> StateWatcher::rules(const Paths &p) {
         {state + "/current", true, {"appearance.theme"}, {"themes", "backgrounds"}},
         {state + "/workspace-layouts", true, {"desktop.layout"}, {}},
         {state + "/defaults", true, {"general.editor"}, {}},
-        {state + "/settings/weather.json", false, {"bar.weatherLocation"}, {"bar"}},
+        {state + "/settings/weather.json", false, {}, {"weather"}},
         // The shell's settings: idle times, the bar, the dock, the clock, plugins.
         {config + "/omarchy/shell.json", false,
          {"lock.screensaverAfter", "lock.lockAfter", "desktop.barPosition", "desktop.dockPosition",

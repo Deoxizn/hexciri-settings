@@ -746,7 +746,7 @@ static const QHash<QString, QVariant> &omarchyDefaults() {
         {"desktop.barVisible", true}, {"bar.batteryPercentage", false},
         {"desktop.dockPosition", "bottom"}, {"desktop.dockAutohide", false}, {"desktop.layout", "dwindle"},
         {"desktop.gaps", true}, {"desktop.gapsInner", 5}, {"desktop.gapsOuter", 10}, {"desktop.borderSize", 2},
-        {"desktop.dimInactive", false}, {"desktop.focusFollowsMouse", true}, {"desktop.cursorWarps", true},
+        {"desktop.dimInactive", false}, {"desktop.cursorWarps", true},
         {"desktop.hideCursor", 0.0}, {"desktop.oneWindowRatio", false},
         {"lock.screensaverAfter", 150.0}, {"lock.lockAfter", 300.0}, {"lock.screensaver", true}, {"lock.stayAwake", false},
         {"power.suspendInMenu", true},
@@ -760,6 +760,10 @@ static const QHash<QString, QVariant> &omarchyDefaults() {
         {"trackpad.scrollSpeed", 0.4}, {"trackpad.disableWhileTyping", true}, {"trackpad.threeFingerDrag", false},
         {"trackpad.swipeWorkspaces", false},
         {"general.clockFormat", "dddd HH:mm"}, {"general.clockVerticalFormat", "HH\n—\nmm"}, {"general.autoTime", true},
+        {"desktop.followMouse", 1}, {"desktop.resizeOnBorder", true}, {"desktop.focusOnActivate", true},
+        {"desktop.preserveSplit", true}, {"desktop.columnWidth", 0.49}, {"desktop.hideOnKeyPress", true},
+        {"desktop.warpOnWorkspace", true}, {"desktop.shadow", false}, {"desktop.fullscreenDesktop", false},
+        {"appearance.backgroundIntros", true}, {"bar.scaleWithFont", true},
     };
     return d;
 }

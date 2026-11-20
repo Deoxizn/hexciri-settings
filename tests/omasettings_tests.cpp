@@ -138,7 +138,7 @@ private slots:
     // ---- The generated Hyprland file ------------------------------------------
     void luaNestsOptionsAndSpellsKeysTheLuaWay() {
         QJsonObject state{{"hypr", QJsonObject{{"input:repeat_rate", 45}, {"input:touchpad:tap-to-click", false},
-                                               {"general:gaps_in", 4}, {"input:sensitivity", 0.25}}}};
+                                               {"general:resize_on_border", true}, {"input:sensitivity", 0.25}}}};
         const QString lua = Hypr::renderLua(state);
         QVERIFY(lua.contains("hl.config({"));
         QVERIFY(lua.contains("    repeat_rate = 45,"));
@@ -169,6 +169,25 @@ private slots:
         QVERIFY(lua.contains(R"(hl.monitor({ output = "eDP-1", disabled = true }))"));
         QVERIFY(lua.contains("hl.gesture({ fingers = 3"));
         QVERIFY(!lua.contains("hl.config"));
+    }
+
+    // Turning off gaps or animations with Omarchy's toggles still works with
+    // a gap or blur set here, though this file loads after the toggles.
+    void optionsAToggleAlsoSetsGiveWayToIt() {
+        QJsonObject state{{"hypr", QJsonObject{{"general:gaps_in", 4}, {"general:border_size", 3},
+                                               {"decoration:shadow:enabled", true}, {"input:repeat_rate", 40}}}};
+        const QString lua = Hypr::renderLua(state);
+        const int gaps = lua.indexOf("if not omasettings_toggle(\"window-no-gaps\") then");
+        const int effects = lua.indexOf("if not omasettings_toggle(\"no-animations\") then");
+        QVERIFY(gaps > 0);
+        QVERIFY(effects > 0);
+        QVERIFY(lua.indexOf("gaps_in = 4,") > gaps);
+        QVERIFY(lua.indexOf("border_size = 3,") > gaps);
+        QVERIFY(lua.indexOf("enabled = true,") > effects);
+        // Options no toggle touches are set as they are, before the guards.
+        QVERIFY(lua.indexOf("repeat_rate = 40,") < qMin(gaps, effects));
+        QVERIFY(lua.contains("io.open(omasettings_toggles .. name .. \".lua\", \"r\")"));
+        QVERIFY(!Hypr::renderLua(QJsonObject{{"hypr", QJsonObject{{"input:repeat_rate", 40}}}}).contains("omasettings_toggle"));
     }
 
     void parsesHyprctlOptions() {
@@ -312,6 +331,98 @@ private slots:
         QVERIFY(text.contains("\n  \"bar\": {\n    \"position\": \"top\""));
         QVERIFY(text.contains("\"lock\": 900"));
         QCOMPARE(store.read("lock.screensaverAfter").toInt(), 150);
+    }
+
+    void shellTomlKeepsEverythingElse() {
+        const QString text = "# my look\n[font]\nbase-size = 14 # bigger\n\n[bar]\nbackground = \"#000\" # dark\nsize-horizontal = 30\n";
+        QCOMPARE(Store::tomlValue(text, "bar", "size-horizontal"), QString("30"));
+        QCOMPARE(Store::tomlValue(text, "font", "base-size"), QString("14"));
+        QCOMPARE(Store::tomlValue(text, "bar", "background"), QString("\"#000\""));
+        QCOMPARE(Store::tomlValue(text, "spacing", "scale"), QString());
+
+        // Changed in place, added to its table, or a table of its own.
+        QString next = Store::withTomlValue(text, "bar", "size-horizontal", "24");
+        QCOMPARE(next, QString(text).replace("size-horizontal = 30", "size-horizontal = 24"));
+        next = Store::withTomlValue(text, "font", "weight", "\"bold\"");
+        QVERIFY(next.contains("[font]\nbase-size = 14 # bigger\nweight = \"bold\"\n\n[bar]"));
+        next = Store::withTomlValue(text, "spacing", "scale", "1.25");
+        QVERIFY(next.startsWith(text));
+        QVERIFY(next.endsWith("\n[spacing]\nscale = 1.25\n"));
+        // An empty value takes the line out, handing it back to the theme.
+        QCOMPARE(Store::withTomlValue(text, "bar", "size-horizontal", ""),
+                 QString(text).remove("size-horizontal = 30\n"));
+        QCOMPARE(Store::withTomlValue("", "bar", "size-horizontal", "28"), QString("[bar]\nsize-horizontal = 28\n"));
+    }
+
+    void barSizesLiveInShellToml() {
+        QTemporaryDir dir;
+        FakeSystem sys;
+        writeText(dir.path() + "/state/omarchy/current/theme/shell.toml", "[bar]\nsize-horizontal = 26\n");
+        writeText(dir.path() + "/config/omarchy/shell.toml", "[font]\nbase-size = 14\n");
+        Store store(pathsIn(dir), sys.exec());
+        QCOMPARE(store.read("bar.height").toInt(), 26); // the theme's
+        QCOMPARE(store.write("bar.height", 32), QString());
+        QCOMPARE(store.read("bar.height").toInt(), 32);
+        QCOMPARE(readText(dir.path() + "/config/omarchy/shell.toml"),
+                 QString("[font]\nbase-size = 14\n\n[bar]\nsize-horizontal = 32\n"));
+        QCOMPARE(store.write("bar.backgroundAlpha", 0.85), QString());
+        QVERIFY(readText(dir.path() + "/config/omarchy/shell.toml").contains("background-alpha = 0.85\n"));
+        QVERIFY(store.write("bar.height", 400).contains("between"));
+    }
+
+    // A widget's option is set on the instance the page shows, by placement.
+    void barWidgetOptionsGoThroughOmarchyBar() {
+        QTemporaryDir dir;
+        FakeSystem sys;
+        Store store(pathsIn(dir), sys.exec());
+        QCOMPARE(store.act("bar.setOption", {"omarchy.indicators", "alwaysShow", "true", "centerBegin", 1}), QString());
+        QVERIFY(sys.calls.contains("omarchy-bar set omarchy.indicators alwaysShow true --json --section centerBegin --index 1"));
+        QCOMPARE(store.act("bar.setOption", {"omarchy.clock", "format", "\"HH:mm\"", "", 0}), QString());
+        QVERIFY(sys.calls.contains("omarchy-bar set omarchy.clock format \"HH:mm\" --json"));
+        const int before = sys.calls.size();
+        QVERIFY(!store.act("bar.setOption", {"omarchy.clock", "format", "not json", "", 0}).isEmpty());
+        QVERIFY(!store.act("bar.setOption", {"../x", "format", "1", "", 0}).isEmpty());
+        QVERIFY(!store.act("bar.setOption", {"omarchy.clock", "--json", "1", "", 0}).isEmpty());
+        QCOMPARE(sys.calls.size(), before);
+    }
+
+    void screenshotFolderIsReadAtTheNextLogin() {
+        QTemporaryDir dir;
+        FakeSystem sys;
+        Store store(pathsIn(dir), sys.exec());
+        const QString file = dir.path() + "/config/uwsm/env.d/60-omasettings";
+        QCOMPARE(store.write("general.screenshotDir", "/home/me/Shots"), QString());
+        QCOMPARE(store.read("general.screenshotDir").toString(), QString("/home/me/Shots"));
+        QVERIFY(readText(file).contains("OMARCHY_SCREENSHOT_DIR=\"/home/me/Shots\"\n"));
+        QCOMPARE(store.write("general.screenrecordDir", "/home/me/Videos"), QString());
+        QVERIFY(readText(file).contains("OMARCHY_SCREENSHOT_DIR="));
+        // Nothing a shell would expand or end the line with.
+        QVERIFY(!store.write("general.screenshotDir", "/home/$(id)").isEmpty());
+        QVERIFY(!store.write("general.screenshotDir", "relative").isEmpty());
+        QCOMPARE(store.write("general.screenshotDir", ""), QString());
+        QCOMPARE(store.write("general.screenrecordDir", ""), QString());
+        QVERIFY(!QFile::exists(file));
+    }
+
+    void hooksListAndUseOmarchysExamples() {
+        QTemporaryDir dir;
+        FakeSystem sys;
+        writeText(dir.path() + "/config/omarchy/hooks/theme-set.d/notify.sample", "echo hi\n");
+        writeText(dir.path() + "/config/omarchy/hooks/theme-set.d/mine", "echo mine\n");
+        Store store(pathsIn(dir), sys.exec());
+        QVariantList items;
+        for (const QVariant &t : store.list("hooks").toList())
+            if (t.toMap().value("type") == "theme-set")
+                items = t.toMap().value("items").toList();
+        QCOMPARE(items.size(), 2);
+        QCOMPARE(store.act("hook.use", {"theme-set", "notify.sample"}), QString());
+        QVERIFY(QFileInfo(dir.path() + "/config/omarchy/hooks/theme-set.d/notify").isExecutable());
+        QCOMPARE(store.act("hook.stopUsing", {"theme-set", "notify.sample"}), QString());
+        QVERIFY(!QFile::exists(dir.path() + "/config/omarchy/hooks/theme-set.d/notify"));
+        QVERIFY(!store.act("hook.remove", {"theme-set", "notify.sample"}).isEmpty());
+        QCOMPARE(store.act("hook.remove", {"theme-set", "mine"}), QString());
+        QVERIFY(!store.act("hook.remove", {"theme-set", "../../hypr/hyprland.lua"}).isEmpty());
+        QVERIFY(!store.act("hook.remove", {"../x", "mine"}).isEmpty());
     }
 
     void brokenShellJsonIsNeverOverwritten() {

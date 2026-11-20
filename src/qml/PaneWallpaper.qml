@@ -137,4 +137,12 @@ SettingsPage {
             }
         }
     }
+
+    SettingsGroup {
+        ToggleRow {
+            setting: "appearance.backgroundIntros"
+            label: qsTr("Play a theme's intro video")
+            sublabel: qsTr("Some themes open with a short video before their wallpaper")
+        }
+    }
 }

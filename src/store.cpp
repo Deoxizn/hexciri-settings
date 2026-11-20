@@ -630,9 +630,25 @@ void Store::build() {
         [this] { return output("omarchy-theme-current", {}); },
         [this](const QString &v) { return runOk("omarchy-theme-set", {v}, 120000); }));
     m_settings.last().choicesList = "themes";
-    add(commandSetting("appearance.corners", "appearance", "Window corners", strings({"theme", "sharp", "rounded"}),
-        [this] { return output("omarchy-hyprland-corners", {}); },
-        [this](const QString &v) { return runOk("omarchy-hyprland-corners", {v}, 15000); }));
+    // Omarchy's three corner choices, or Custom: a radius of one's own
+    // (desktop.rounding), kept in the generated file while the theme's
+    // corners are in use.
+    add(commandSetting("appearance.corners", "appearance", "Window corners", strings({"theme", "sharp", "rounded", "custom"}),
+        [this] {
+            const QString corners = output("omarchy-hyprland-corners", {});
+            const bool own = managedState().value("hypr").toObject().contains("decoration:rounding");
+            return corners == "theme" && own ? QStringLiteral("custom") : corners;
+        },
+        [this](const QString &v) {
+            if (v == "custom") {
+                const int now = hyprGet("decoration:rounding").toInt();
+                return write("desktop.rounding", qBound(0, now > 0 ? now : 8, 20));
+            }
+            if (managedState().value("hypr").toObject().contains("decoration:rounding"))
+                if (const QString error = resetHypr("decoration:rounding"); !error.isEmpty())
+                    return error;
+            return runOk("omarchy-hyprland-corners", {v}, 15000);
+        }));
     add(commandSetting("appearance.transparency", "appearance", "Window transparency",
         strings({"opaque", "transparent", "glassy"}),
         [this] { return output("omarchy-hyprland-window-transparency", {}); },
@@ -900,6 +916,7 @@ void Store::build() {
     }
 
     buildMore();
+    buildOmarchy();
 }
 
 // --- Lists --------------------------------------------------------------------------------
@@ -910,7 +927,8 @@ QStringList Store::listNames() const {
             "powerProfiles", "vpn", "plugins", "pluginUpdates", "bar", "apps", "fileTypes", "webapps", "dock",
             "wifiBand", "power", "crashMutes", "shortcuts", "loginItems", "windowRules", "firewall", "printers",
             "storage", "homeUsage", "snapshots", "managed", "menuSearch",
-            "security", "system", "branding", "bootScreens", "menu", "hardware", "reminders", "fontCatalog", "menuCustom", "software", "defaultApps", "appimages", "appimageUpdates", "sync", "syncPreview", "configFiles"};
+            "security", "system", "branding", "bootScreens", "menu", "hardware", "reminders", "fontCatalog", "menuCustom", "software", "defaultApps", "appimages", "appimageUpdates", "sync", "syncPreview", "configFiles",
+            "hooks", "keyboardModels", "keyboardVariants", "weather", "editors"};
 }
 
 static QVariantList pactlDevices(const QByteArray &json, const QString &defaultName, bool skipMonitors) {
@@ -1237,6 +1255,8 @@ QVariant Store::list(const QString &name) {
         return listMore(name);
     if (QStringList{"security", "system", "branding", "bootScreens", "hardware", "reminders", "fontCatalog"}.contains(name))
         return listSystem(name);
+    if (QStringList{"hooks", "keyboardModels", "keyboardVariants", "weather", "editors"}.contains(name))
+        return listOmarchy(name);
     if (name == "sync")
         return listSync();
     if (name == "syncPreview")
@@ -1620,6 +1640,8 @@ QString Store::act(const QString &action, const QVariantList &args) {
         return actVpn(action, args);
     if (action.startsWith("plugin.") && action != "plugin.clone")
         return actPlugin(action, args);
+    if (action == "bar.setOption" || action == "weather.location" || action == "folder.choose" || action.startsWith("hook."))
+        return actOmarchy(action, args);
     if (action.startsWith("bar."))
         return actBar(action, args);
     if (action == "wifi.rescan") {

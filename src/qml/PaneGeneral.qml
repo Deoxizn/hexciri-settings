@@ -58,6 +58,12 @@ SettingsPage {
             glyph: "\u{F003B}"
             onOpen: win.openSub("GeneralApps", qsTr("Default Apps"))
         }
+        NavRow {
+            label: qsTr("Hooks")
+            sublabel: qsTr("Your own scripts that run after an update, a theme change, and more")
+            glyph: "\u{F0BA3}"
+            onOpen: win.openSub("GeneralHooks", qsTr("Hooks"))
+        }
     }
 
     SettingsGroup {

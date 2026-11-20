@@ -117,7 +117,9 @@ QString Store::pluginDir(const QString &id) const {
 QHash<QString, QJsonObject> Store::manifests() const {
     QHash<QString, QJsonObject> out;
     for (const QString &root : {m_paths.omarchy + "/shell/plugins", m_paths.config + "/omarchy/plugins"}) {
-        QDirIterator it(root, {"manifest.json"}, QDir::Files, QDirIterator::Subdirectories);
+        // Bar widgets built into the bar plugin keep theirs as
+        // <Name>.manifest.json beside their QML (bar/widgets).
+        QDirIterator it(root, {"manifest.json", "*.manifest.json"}, QDir::Files, QDirIterator::Subdirectories);
         while (it.hasNext()) {
             const QString path = it.next();
             // Plugins keep their manifest at their top or one level down
@@ -210,6 +212,7 @@ QVariant Store::listBar() {
     for (const QVariant &p : listPlugins().toList())
         plugins.insert(p.toMap().value("id").toString(), p.toMap());
 
+    const QHash<QString, QJsonObject> found = manifests();
     const QJsonObject layout = shellGet("bar.layout", QJsonObject()).toObject();
     QVariantMap sections;
     QStringList placed;
@@ -224,6 +227,15 @@ QVariant Store::listBar() {
             w["index"] = i;
             w["name"] = plugins.value(id).value("name", id);
             w["description"] = plugins.value(id).value("description");
+            // What can be set on it: its manifest's schema or own form, and
+            // what this one on the bar has set.
+            const QJsonObject bar = found.value(id).value("barWidget").toObject();
+            w["schema"] = bar.value("schema").toArray().toVariantList();
+            w["settingsForm"] = bar.value("settingsForm").toString();
+            w["allowMultiple"] = bar.value("allowMultiple").toBool();
+            QVariantMap options = entries[i].isObject() ? entries[i].toObject().toVariantMap() : QVariantMap();
+            options.remove("id");
+            w["options"] = options;
             widgets << w;
         }
         sections[section] = widgets;

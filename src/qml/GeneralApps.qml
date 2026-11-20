@@ -108,4 +108,38 @@ SettingsPage {
             }
         }
     }
+
+    // Where Omarchy's screenshot and recording tools save.
+    SettingsGroup {
+        title: qsTr("Folders")
+        footer: qsTr("Takes effect the next time you log in.")
+        Repeater {
+            model: [
+                { setting: "general.screenshotDir", label: qsTr("Screenshots"), fallback: "~/Pictures" },
+                { setting: "general.screenrecordDir", label: qsTr("Screen recordings"), fallback: "~/Videos" }
+            ]
+            delegate: SettingRow {
+                id: folderRow
+                required property var modelData
+                readonly property string value: backend.values[modelData.setting] || ""
+                label: modelData.label
+                sublabel: value.length > 0 ? value : qsTr("%1, as Omarchy picks").arg(modelData.fallback)
+                glyph: "\u{F024B}"
+                busy: backend.busy.indexOf(modelData.setting) >= 0 || backend.busy.indexOf("folder.choose") >= 0
+                OmaButton {
+                    text: qsTr("Choose…")
+                    anchors.verticalCenter: parent.verticalCenter
+                    onClicked: backend.act("folder.choose", [folderRow.modelData.setting], [], "general")
+                }
+                OmaButton {
+                    visible: folderRow.value.length > 0
+                    glyph: "\u{F0156}"
+                    bordered: false
+                    tooltip: qsTr("Use Omarchy's")
+                    anchors.verticalCenter: parent.verticalCenter
+                    onClicked: backend.set(folderRow.modelData.setting, "")
+                }
+            }
+        }
+    }
 }

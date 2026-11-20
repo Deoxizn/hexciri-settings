@@ -84,6 +84,11 @@ SettingsPage {
                 { value: "floating", text: qsTr("Floating") }
             ]
         }
+        ToggleRow {
+            setting: "desktop.fullscreenDesktop"
+            label: qsTr("Full screen desktop")
+            sublabel: qsTr("Hides the bar and the gaps together, for the most room")
+        }
         ToggleRow { setting: "desktop.gaps"; label: qsTr("Gaps between windows") }
         SliderRow {
             setting: "desktop.gapsInner"
@@ -100,6 +105,22 @@ SettingsPage {
             label: qsTr("Keep a lone window from stretching")
             sublabel: qsTr("A single window on a wide screen stays a comfortable shape instead of filling it")
         }
+        ToggleRow {
+            visible: backend.values["desktop.layout"] === "dwindle"
+            setting: "desktop.preserveSplit"
+            label: qsTr("Keep how windows split when they move")
+            sublabel: qsTr("Otherwise a window that moves may turn a side-by-side split into one above the other")
+        }
+        SliderRow {
+            visible: backend.values["desktop.layout"] === "scrolling"
+            setting: "desktop.columnWidth"
+            label: qsTr("Width of a new column")
+            from: 0.2
+            to: 1
+            stepSize: 0.05
+            format: v => qsTr("%1%").arg(Math.round(v * 100).toLocaleString(Qt.locale(), 'f', 0))
+        }
+        ToggleRow { setting: "desktop.resizeOnBorder"; label: qsTr("Resize windows by dragging their border") }
     }
 
     SettingsGroup {
@@ -115,16 +136,32 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Focus and Pointer")
+        ChoiceRow {
+            setting: "desktop.followMouse"
+            label: qsTr("Which window gets the keyboard")
+            menuWidth: ui.s(300)
+            options: [
+                { value: 1, text: qsTr("The one under the pointer") },
+                { value: 0, text: qsTr("The one you click") },
+                { value: 2, text: qsTr("The one you click; scrolling follows the pointer") },
+                { value: 3, text: qsTr("Only from the keyboard") }
+            ]
+        }
         ToggleRow {
-            setting: "desktop.focusFollowsMouse"
-            label: qsTr("Focus follows the mouse")
-            sublabel: qsTr("Windows take the keyboard when the pointer moves over them, without a click")
+            setting: "desktop.focusOnActivate"
+            label: qsTr("Switch to apps that ask for attention")
+            sublabel: qsTr("Such as a browser opening a link from another app")
         }
         ToggleRow {
             setting: "desktop.cursorWarps"
             label: qsTr("Move the pointer to focused windows")
             sublabel: qsTr("When you switch windows from the keyboard")
         }
+        ToggleRow {
+            setting: "desktop.warpOnWorkspace"
+            label: qsTr("Move the pointer along when switching workspaces")
+        }
+        ToggleRow { setting: "desktop.hideOnKeyPress"; label: qsTr("Hide the pointer while typing") }
         ChoiceRow {
             setting: "desktop.hideCursor"
             label: qsTr("Hide the pointer when idle")

@@ -31,6 +31,8 @@
         <file alias="qml/OmaToggle.qml">qml/OmaToggle.qml</file>
         <file alias="qml/OmaToolTip.qml">qml/OmaToolTip.qml</file>
         <file alias="qml/OmaScrollBar.qml">qml/OmaScrollBar.qml</file>
+        <file alias="qml/BarWidget.qml">qml/BarWidget.qml</file>
+        <file alias="qml/GeneralHooks.qml">qml/GeneralHooks.qml</file>
         <file alias="qml/PaneAppearance.qml">qml/PaneAppearance.qml</file>
         <file alias="qml/PaneBar.qml">qml/PaneBar.qml</file>
         <file alias="qml/PaneBluetooth.qml">qml/PaneBluetooth.qml</file>

@@ -26,11 +26,22 @@ SettingsPage {
             toText: qsTr("Larger")
             format: v => qsTr("%1 px").arg(Math.round(v).toLocaleString(Qt.locale(), 'f', 0))
         }
+        SliderRow {
+            setting: "appearance.spacingScale"
+            label: qsTr("Spacing in the shell")
+            sublabel: qsTr("Room around things in the bar, menus, and panels")
+            from: 0.75
+            to: 1.5
+            stepSize: 0.05
+            fromText: qsTr("Tighter")
+            toText: qsTr("Roomier")
+            format: v => qsTr("%1%").arg(Math.round(v * 100).toLocaleString(Qt.locale(), 'f', 0))
+        }
         ChoiceRow {
             setting: "appearance.font"
             label: qsTr("Monospace font")
             sublabel: qsTr("Used by terminals and the bar")
-            menuWidth: 260
+            menuWidth: ui.s(260)
             options: (backend.lists.fonts || []).map(f => ({ value: f, text: f }))
         }
     }

@@ -9,7 +9,8 @@ SettingsPage {
     tagline: page.current
     glyph: "\u{F03D8}"
     description: qsTr("Choose a theme for the whole desktop, and how windows and text look.")
-    lists: ["themes"]
+    lists: ["themes", "editors"]
+    readonly property var editors: backend.lists.editors || ({})
     resetPane: "appearance"
 
     readonly property var themes: backend.lists.themes || []
@@ -68,8 +69,16 @@ SettingsPage {
             options: [
                 { value: "theme", text: qsTr("As the theme sets them") },
                 { value: "sharp", text: qsTr("Sharp") },
-                { value: "rounded", text: qsTr("Rounded") }
+                { value: "rounded", text: qsTr("Rounded") },
+                { value: "custom", text: qsTr("Custom") }
             ]
+        }
+        SliderRow {
+            visible: backend.values["appearance.corners"] === "custom"
+            setting: "desktop.rounding"
+            label: qsTr("Corner radius")
+            to: 20
+            format: v => qsTr("%1 px").arg(Math.round(v).toLocaleString(Qt.locale(), 'f', 0))
         }
         ChoiceRow {
             setting: "appearance.transparency"
@@ -84,6 +93,27 @@ SettingsPage {
             setting: "appearance.animations"
             label: qsTr("Animations, blur, and shadows")
             sublabel: qsTr("Turn off on computers without a graphics card to keep things quick")
+        }
+        ToggleRow {
+            setting: "desktop.shadow"
+            label: qsTr("Shadows under windows")
+            sublabel: backend.values["appearance.animations"] === false ? qsTr("Off while animations are off") : ""
+            dimmed: backend.values["appearance.animations"] === false || value === undefined
+        }
+    }
+
+    // Omarchy themes these apps too when it can; each can keep its own.
+    SettingsGroup {
+        visible: !!(page.editors.code || page.editors.cursor || page.editors.codium || page.editors.herdr)
+        title: qsTr("Other Apps")
+        footer: qsTr("Turn one off to keep the theme you chose in that app.")
+        ToggleRow { visible: !!page.editors.code; setting: "appearance.themeVscode"; label: qsTr("Theme VS Code") }
+        ToggleRow { visible: !!page.editors.cursor; setting: "appearance.themeCursor"; label: qsTr("Theme Cursor") }
+        ToggleRow { visible: !!page.editors.codium; setting: "appearance.themeCodium"; label: qsTr("Theme VSCodium") }
+        ToggleRow {
+            visible: !!page.editors.herdr
+            setting: "appearance.themeSync"
+            label: qsTr("Send theme changes to your herdr machines")
         }
     }
 

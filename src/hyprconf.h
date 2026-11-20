@@ -16,6 +16,10 @@ namespace Hypr {
 // "gestures": {"workspaceSwipe": true}}.
 QString renderLua(const QJsonObject &state);
 
+// The Omarchy toggle (in ~/.local/state/omarchy/toggles/hypr) an option gives
+// way to while it is on, or "" when none sets it.
+QString yieldsTo(const QString &option);
+
 // A Lua string literal that reads back as exactly `value`.
 QString luaString(const QString &value);
 

@@ -106,7 +106,7 @@ omasettings export ~/Documents        # import <file> applies one
   `omasettings open <pane>/<page>` on a page inside one: general/about,
   general/update, general/language, general/datetime, general/loginitems,
   general/webapps, general/apps, general/troubleshooting,
-  general/settingsapp, appearance/themes, desktop/rules, lock/bootscreen,
+  general/settingsapp, general/hooks, appearance/themes, desktop/rules, lock/bootscreen,
   keyboard/shortcuts, general/sync. If Settings is open, that window switches to it.
 - `omasettings sync status` shows whether Sync is connected to a repository
   and whether it has newer settings; `sync upload` sends this computer's

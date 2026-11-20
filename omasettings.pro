@@ -31,6 +31,7 @@ SOURCES += \
     src/hyprconf.cpp \
     src/monitorlayout.cpp \
     src/nmsecrets.cpp \
+    src/omarchy.cpp \
     src/proc.cpp \
     src/statewatcher.cpp \
     src/store.cpp \

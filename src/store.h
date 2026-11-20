@@ -102,6 +102,10 @@ public:
 
     // Exposed for tests.
     static QString reindentJson(const QByteArray &json);
+    // One key's value in a TOML table, as written (a number, true, "text"),
+    // and the text with it set, or removed when `literal` is empty.
+    static QString tomlValue(const QString &text, const QString &table, const QString &key);
+    static QString withTomlValue(const QString &text, const QString &table, const QString &key, const QString &literal);
     static QVariantList parseWifi(const QByteArray &nmcli);
     static QStringList splitTerse(const QString &line);
     static QVariantList parseKeybindings(const QString &text);
@@ -162,6 +166,15 @@ private:
     QString setMenuSearch(const QVariantList &entries, const QString &groupLabel);
     QString updateState(const std::function<QString(QJsonObject &)> &change);
     QJsonObject exportSettings();
+
+    // omarchy.cpp: Omarchy's own flags, the window look, the shell's look in
+    // shell.toml, bar widgets' options, the weather's place, and hooks.
+    void buildOmarchy();
+    QVariant listOmarchy(const QString &name);
+    QString actOmarchy(const QString &action, const QVariantList &args);
+    QString shellToml(const QString &table, const QString &key) const;
+    QString setShellToml(const QString &table, const QString &key, const QString &literal);
+    QString setSessionVariable(const QString &name, const QString &value);
 
     // system.cpp: branding, default tools, security setup, troubleshooting.
     void buildSystem();

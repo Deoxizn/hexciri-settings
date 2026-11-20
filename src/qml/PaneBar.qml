@@ -25,6 +25,11 @@ SettingsPage {
         centerEnd: qsTr("Center, after the clock"), right: qsTr("Right"), tray: qsTr("Tray drawer")
     })
     readonly property int placedCount: order.reduce((n, s) => n + (sections[s] || []).length, 0)
+    // Widgets with something to set: a schema in their manifest, or one of
+    // Omarchy's that Settings has a form for.
+    readonly property var forms: ["omarchy.clock", "omarchy.weather", "omarchy.spacer", "omarchy.active-window"]
+    function hasOptions(w) { return (w.schema || []).length > 0 || forms.indexOf(w.id) >= 0 }
+    readonly property bool sideways: ["left", "right"].indexOf(backend.values["desktop.barPosition"]) >= 0
     function move(widget, from, to, index) { backend.act("bar.move", [widget.id, from, widget.index, to, index], ["bar"]) }
 
     SettingsGroup {
@@ -51,6 +56,36 @@ SettingsPage {
                 { value: "glassy", text: qsTr("Glassy") },
                 { value: "none", text: qsTr("None") }
             ]
+        }
+        SliderRow {
+            visible: backend.values["appearance.barBackground"] !== "none"
+            setting: "bar.backgroundAlpha"
+            label: qsTr("Bar background opacity")
+            from: 0.2
+            to: 1
+            stepSize: 0.05
+            format: v => qsTr("%1%").arg(Math.round(v * 100).toLocaleString(Qt.locale(), 'f', 0))
+        }
+        SliderRow {
+            visible: !page.sideways
+            setting: "bar.height"
+            label: qsTr("Bar height")
+            from: 18
+            to: 48
+            format: v => qsTr("%1 px").arg(Math.round(v).toLocaleString(Qt.locale(), 'f', 0))
+        }
+        SliderRow {
+            visible: page.sideways
+            setting: "bar.sideWidth"
+            label: qsTr("Bar width on the side of the screen")
+            from: 18
+            to: 56
+            format: v => qsTr("%1 px").arg(Math.round(v).toLocaleString(Qt.locale(), 'f', 0))
+        }
+        ToggleRow {
+            setting: "bar.scaleWithFont"
+            label: qsTr("Bar grows with the text size")
+            sublabel: qsTr("The size above is for the standard text size, and follows Fonts › Text size")
         }
     }
 
@@ -127,6 +162,16 @@ SettingsPage {
                     required property var modelData
                     label: modelData.name
                     sublabel: modelData.description || modelData.id
+                    // Its own options, on a page of their own.
+                    OmaButton {
+                        visible: page.hasOptions(wrow.modelData)
+                        glyph: "\u{F0493}"
+                        bordered: false
+                        tooltip: qsTr("Options")
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: win.openSub("BarWidget", wrow.modelData.name,
+                                               { id: wrow.modelData.id, section: group.modelData, index: wrow.modelData.index })
+                    }
                     OmaButton {
                         glyph: "\u{F0143}"
                         bordered: false
