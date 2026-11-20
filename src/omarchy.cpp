@@ -318,6 +318,32 @@ void Store::buildOmarchy() {
     };
     folder("general.screenshotDir", "Screenshots folder", "OMARCHY_SCREENSHOT_DIR");
     folder("general.screenrecordDir", "Screen recordings folder", "OMARCHY_SCREENRECORD_DIR");
+
+    // ---- Omarchy's default mise tools -----------------------------------------------
+    // A user opts out by having mise skip Omarchy's tools file, which
+    // omarchy-mise-default-tools lists in ~/.config/mise/miserc.toml. Nothing
+    // to show without that file.
+    {
+        Setting s;
+        s.id = "software.miseDefaultTools";
+        s.pane = "software";
+        s.type = "bool";
+        s.label = "Omarchy's default mise tools";
+        s.read = [this] {
+            QString tools = qEnvironmentVariable("OMARCHY_MISE_CONFIG_PATH");
+            if (tools.isEmpty()) tools = "/etc/mise/conf.d/omarchy-tools.toml";
+            if (!QFileInfo::exists(tools)) return QVariant();
+            const QStringList lines = fileText(m_paths.config + "/mise/miserc.toml").split('\n');
+            const bool optedOut = std::any_of(lines.begin(), lines.end(), [&](const QString &l) {
+                return !l.trimmed().startsWith('#') && l.contains(tools);
+            });
+            return QVariant(!optedOut);
+        };
+        s.write = [this](const QVariant &v) {
+            return runOk("omarchy-mise-default-tools", {v.toBool() ? "enable" : "disable"}, 60000);
+        };
+        add(s);
+    }
 }
 
 // A variable the next session starts with, in uwsm's env.d, which every

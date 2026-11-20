@@ -1467,5 +1467,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "dock ventanas espacios distribución mosaico enfoque puntero pantalla completa redimensionar columnas",
   "hooks scripts run after update theme font boot battery": "hooks scripts ejecutar después actualización tema fuente arranque batería",
   "Screenshots folder": "Carpeta de capturas de pantalla",
-  "Screen recordings folder": "Carpeta de grabaciones de pantalla"
+  "Screen recordings folder": "Carpeta de grabaciones de pantalla",
+  "Omarchy's default mise tools": "Herramientas de mise predeterminadas de Omarchy",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "Agentes de programación, gh, Node y uv, cada uno se instala la primera vez que lo ejecutas. Las herramientas que configuraste tú con mise se quedan en cualquier caso."
 }

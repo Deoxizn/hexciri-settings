@@ -253,6 +253,13 @@ SettingsPage {
             model: page.items.filter(i => i.category === "tools")
             delegate: AppRow { required property var modelData; item: modelData }
         }
+        ToggleRow {
+            id: miseRow
+            visible: miseRow.value === true || miseRow.value === false
+            setting: "software.miseDefaultTools"
+            label: qsTr("Omarchy's default mise tools")
+            sublabel: qsTr("Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.")
+        }
     }
 
     SettingsGroup {

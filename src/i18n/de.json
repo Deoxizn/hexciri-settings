@@ -1431,5 +1431,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "dock fenster abstände layout kacheln fokus zeiger vollbild größe ändern spalten",
   "hooks scripts run after update theme font boot battery": "hooks skripte ausführen nach update design schrift start akku",
   "Screenshots folder": "Ordner für Bildschirmfotos",
-  "Screen recordings folder": "Ordner für Bildschirmaufnahmen"
+  "Screen recordings folder": "Ordner für Bildschirmaufnahmen",
+  "Omarchy's default mise tools": "Omarchys Standard-Tools für mise",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "Coding-Agents, gh, Node und uv, jeweils beim ersten Start installiert. Tools, die du selbst mit mise eingerichtet hast, bleiben so oder so."
 }

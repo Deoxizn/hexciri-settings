@@ -404,6 +404,41 @@ private slots:
         QVERIFY(!QFile::exists(file));
     }
 
+    void miseToolsFollowOmarchysOptOut() {
+        QTemporaryDir dir;
+        FakeSystem sys;
+        Store store(pathsIn(dir), sys.exec());
+        const QString tools = dir.path() + "/omarchy-tools.toml";
+        qputenv("OMARCHY_MISE_CONFIG_PATH", tools.toUtf8());
+        // Without Omarchy's tools file there's nothing to turn off.
+        QVERIFY(!store.read("software.miseDefaultTools").isValid());
+        writeText(tools, "[tools]\nnode = \"lts\"\n");
+        QCOMPARE(store.read("software.miseDefaultTools"), QVariant(true));
+        const QString miserc = dir.path() + "/config/mise/miserc.toml";
+        writeText(miserc, ("# ignored_config_paths = [\"" + tools + "\"]\n").toUtf8());
+        QCOMPARE(store.read("software.miseDefaultTools"), QVariant(true));
+        writeText(miserc, ("ignored_config_paths = [\"" + tools + "\"]\n").toUtf8());
+        QCOMPARE(store.read("software.miseDefaultTools"), QVariant(false));
+        QCOMPARE(store.write("software.miseDefaultTools", true), QString());
+        QVERIFY(sys.calls.contains("omarchy-mise-default-tools enable"));
+        qunsetenv("OMARCHY_MISE_CONFIG_PATH");
+    }
+
+    void keyboardModelsAndVariantsComeFromXkb() {
+        if (!QFile::exists("/usr/share/X11/xkb/rules/base.lst"))
+            QSKIP("xkb's rules aren't installed");
+        QTemporaryDir dir;
+        FakeSystem sys;
+        Store store(pathsIn(dir), sys.exec());
+        const QVariantList models = store.list("keyboardModels").toList();
+        QVERIFY(std::any_of(models.begin(), models.end(), [](const QVariant &m) {
+            return m.toMap().value("value") == "pc105" && !m.toMap().value("text").toString().isEmpty();
+        }));
+        // Layouts and variants live in other sections.
+        QVERIFY(std::none_of(models.begin(), models.end(), [](const QVariant &m) { return m.toMap().value("value") == "us"; }));
+        QVERIFY(!store.list("keyboardVariants").toList().isEmpty());
+    }
+
     void hooksListAndUseOmarchysExamples() {
         QTemporaryDir dir;
         FakeSystem sys;
@@ -2339,6 +2374,10 @@ private slots:
         QVERIFY(ids.contains("lock.lockAfter"));
         QVERIFY(ids.contains("bar.batteryPercentage"));
         QVERIFY(lists.contains("bar"));
+
+        ids.clear();
+        StateWatcher::resolve(rules, {"software.miseDefaultTools"}, p.config + "/mise/miserc.toml", ids, lists);
+        QCOMPARE(ids, QStringList{"software.miseDefaultTools"});
 
         // Something else beside a watched file is nothing.
         ids.clear();

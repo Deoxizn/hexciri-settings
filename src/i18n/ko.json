@@ -1395,5 +1395,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "독 창 간격 레이아웃 타일링 포커스 포인터 전체 화면 크기 조절 열",
   "hooks scripts run after update theme font boot battery": "훅 스크립트 실행 후 업데이트 테마 글꼴 부팅 배터리",
   "Screenshots folder": "스크린샷 폴더",
-  "Screen recordings folder": "화면 녹화 폴더"
+  "Screen recordings folder": "화면 녹화 폴더",
+  "Omarchy's default mise tools": "Omarchy 기본 mise 도구",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "코딩 에이전트, gh, Node, uv로, 각각 처음 실행할 때 설치됩니다. 직접 mise로 설정한 도구는 어느 쪽이든 그대로 남습니다."
 }

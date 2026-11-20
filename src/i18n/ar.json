@@ -1575,5 +1575,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "مرسى نوافذ فراغات ترتيب تجانب تركيز مؤشر ملء الشاشة تغيير الحجم أعمدة",
   "hooks scripts run after update theme font boot battery": "خطافات سكربتات تشغيل بعد تحديث سمة خط إقلاع بطارية",
   "Screenshots folder": "مجلد لقطات الشاشة",
-  "Screen recordings folder": "مجلد تسجيلات الشاشة"
+  "Screen recordings folder": "مجلد تسجيلات الشاشة",
+  "Omarchy's default mise tools": "أدوات mise الافتراضية في Omarchy",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "وكلاء البرمجة وgh وNode وuv، ويُثبَّت كل منها عند أول تشغيل له. الأدوات التي أعددتها بنفسك في mise تبقى في الحالتين."
 }

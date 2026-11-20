@@ -1431,5 +1431,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "dock pencereler boşluklar düzen döşeme odak imleç tam ekran yeniden boyutlandır sütunlar",
   "hooks scripts run after update theme font boot battery": "kancalar betikler çalıştır sonra güncelleme tema yazı tipi önyükleme pil",
   "Screenshots folder": "Ekran görüntüleri klasörü",
-  "Screen recordings folder": "Ekran kayıtları klasörü"
+  "Screen recordings folder": "Ekran kayıtları klasörü",
+  "Omarchy's default mise tools": "Omarchy'nin varsayılan mise araçları",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "Kodlama ajanları, gh, Node ve uv; her biri ilk çalıştırdığınızda kurulur. mise ile kendiniz kurduğunuz araçlar her durumda kalır."
 }

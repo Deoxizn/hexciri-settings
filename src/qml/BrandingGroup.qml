@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 
 // The ASCII art Omarchy shows on the screensaver or the About screen, with
@@ -17,17 +18,31 @@ SettingsGroup {
         border.width: 1
         border.color: ui.normalBorder
         clip: true
-        Text {
-            id: artText
-            anchors.centerIn: parent
-            text: group.art
-            color: ui.accent
-            font.family: ui.iconFont
-            // Small enough that the widest line fits.
-            font.pixelSize: Math.max(5, Math.min(ui.small, Math.floor((parent.width - ui.s(24)) / Math.max(1, group.longest) / 0.6)))
-            lineHeight: 1.0
-            textFormat: Text.PlainText
-            LayoutMirroring.enabled: false
+        // Art taller than the box scrolls inside it rather than losing its
+        // top and bottom.
+        Flickable {
+            id: artView
+            anchors.fill: parent
+            anchors.margins: ui.s(12)
+            contentWidth: width
+            contentHeight: Math.max(height, artText.implicitHeight)
+            interactive: contentHeight > height
+            boundsBehavior: Flickable.StopAtBounds
+            clip: true
+            ScrollBar.vertical: OmaScrollBar {}
+            Text {
+                id: artText
+                anchors.horizontalCenter: parent.horizontalCenter
+                y: Math.max(0, (artView.height - implicitHeight) / 2)
+                text: group.art
+                color: ui.accent
+                font.family: ui.iconFont
+                // Small enough that the widest line fits.
+                font.pixelSize: Math.max(5, Math.min(ui.small, Math.floor(artView.width / Math.max(1, group.longest) / 0.6)))
+                lineHeight: 1.0
+                textFormat: Text.PlainText
+                LayoutMirroring.enabled: false
+            }
         }
     }
     readonly property int longest: art.split("\n").reduce((n, l) => Math.max(n, l.length), 0)

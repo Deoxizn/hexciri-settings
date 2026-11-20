@@ -1395,5 +1395,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "ドック ウィンドウ 間隔 ギャップ レイアウト タイル フォーカス ポインタ 全画面 フルスクリーン サイズ変更 列",
   "hooks scripts run after update theme font boot battery": "フック スクリプト 実行 後 アップデート 更新 テーマ フォント 起動 バッテリー",
   "Screenshots folder": "スクリーンショットのフォルダ",
-  "Screen recordings folder": "画面収録のフォルダ"
+  "Screen recordings folder": "画面収録のフォルダ",
+  "Omarchy's default mise tools": "Omarchy の既定の mise ツール",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "コーディングエージェント、gh、Node、uv。それぞれ初めて実行したときにインストールされます。自分で mise に設定したツールはどちらでも残ります。"
 }

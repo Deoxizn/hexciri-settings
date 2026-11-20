@@ -1503,5 +1503,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "док окна зазоры раскладка мозаика фокус указатель полный экран размер колонки dock windows gaps layout tiling focus pointer full screen resize columns",
   "hooks scripts run after update theme font boot battery": "хуки скрипты запуск после обновление тема шрифт загрузка батарея hooks scripts run after update theme font boot battery",
   "Screenshots folder": "Папка для снимков экрана",
-  "Screen recordings folder": "Папка для записей экрана"
+  "Screen recordings folder": "Папка для записей экрана",
+  "Omarchy's default mise tools": "Стандартные инструменты mise от Omarchy",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "Агенты для программирования, gh, Node и uv — каждый ставится при первом запуске. Инструменты, которые вы сами настроили в mise, остаются в любом случае."
 }

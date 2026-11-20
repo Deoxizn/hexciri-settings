@@ -1395,5 +1395,7 @@
   "dock windows gaps layout tiling focus pointer full screen resize columns": "程序坞 窗口 间距 布局 平铺 焦点 指针 全屏 调整大小 列",
   "hooks scripts run after update theme font boot battery": "钩子 脚本 运行 之后 更新 主题 字体 启动 电池",
   "Screenshots folder": "截图文件夹",
-  "Screen recordings folder": "录屏文件夹"
+  "Screen recordings folder": "录屏文件夹",
+  "Omarchy's default mise tools": "Omarchy 的默认 mise 工具",
+  "Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.": "编程智能体、gh、Node 和 uv，各自在首次运行时安装。你自己用 mise 设置的工具无论如何都会保留。"
 }

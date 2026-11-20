@@ -55,6 +55,7 @@ QList<WatchRule> StateWatcher::rules(const Paths &p) {
         {config + "/mimeapps.list", false, {"general.browser"}, {"fileTypes"}},
         {config + "/hypr/hyprsunset.conf", false, {"display.night*"}, {}},
         {config + "/uwsm/env.d", true, {"general.screenshotDir", "general.screenrecordDir"}, {}},
+        {config + "/mise/miserc.toml", false, {"software.miseDefaultTools"}, {}},
         {config + "/git/config", false, {"security.git*"}, {}},
         {p.home + "/.gitconfig", false, {"security.git*"}, {}},
     };
