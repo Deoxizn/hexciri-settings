@@ -299,7 +299,7 @@
   "Drag empty space": "空いている場所をドラッグ",
   "Moves the bar to the edge of the screen you let go nearest. Pressing and holding works too.": "離した位置に最も近い画面の端へバーを移動します。長押しでも動かせます。",
   "Click the workspace you're on": "表示中のワークスペースをクリック",
-  "Switches its windows between tiling, scrolling and floating. Scrolling over the workspaces moves between them.": "そのウィンドウをタイル、スクロール、フローティングの順に切り替えます。ワークスペースの上でスクロールすると移動できます。",
+  "Switches its windows between tiling, scrolling and floating. Scrolling over the workspaces moves between them.": "そのウィンドウをタイル型、スクロール型、フロート型の順に切り替えます。ワークスペースの上でスクロールすると移動できます。",
   "Switch layout": "レイアウトを切り替え",
   "Switches the workspace this window is on": "このウィンドウがあるワークスペースを切り替えます",
   "Drop here": "ここにドロップ",

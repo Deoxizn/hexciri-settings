@@ -46,6 +46,8 @@ SettingsPage {
         target = null
     }
     function dragMoved(globalPos) {
+        // The button can still be held after Escape let the widget go.
+        if (!dragged) return
         dragAt = globalPos
         target = findTarget(globalPos)
     }
@@ -74,6 +76,9 @@ SettingsPage {
     }
     // Where a widget let go at `g` would land, or null for nowhere new.
     function findTarget(g) {
+        // Off the page, sections scrolled out of sight are still laid out
+        // there; nothing is under the pointer that it can see.
+        if (!under(page, g)) return null
         let found = null
         // The picture of the bar: before or after the chip it is over, or at
         // the end of the strip past the last chip.
@@ -85,10 +90,12 @@ SettingsPage {
                 const after = chip.mapFromGlobal(g.x, g.y).x > chip.width / 2
                 found = { section: chip.modelData.section, gap: chip.modelData.index + (after ? 1 : 0) }
             }
+            // Past the last chip is the end of the strip's last section, so
+            // the clock in the middle keeps its place; an empty strip takes
+            // it in its home section.
             if (!found) {
-                let section = strip.home
-                for (const s of strip.holds)
-                    if ((sections[s] || []).length > 0) section = s
+                const empty = strip.holds.every(s => (sections[s] || []).length === 0)
+                const section = empty ? strip.home : strip.holds[strip.holds.length - 1]
                 found = { section: section, gap: (sections[section] || []).length }
             }
         }
