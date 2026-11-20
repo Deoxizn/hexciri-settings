@@ -12,14 +12,13 @@ SettingsPage {
     title: qsTr("Bar")
     tagline: qsTr("%n widgets", "", page.placedCount)
     glyph: "\u{F06EB}"
-    description: qsTr("Choose what the bar shows and arrange it. Drag a widget to move it. Changes appear on the bar right away.")
+    description: qsTr("Choose what the bar shows and arrange it. Changes appear on the bar right away.")
     lists: ["bar", "hardware"]
-    settings: ["desktop.layout"]
 
     readonly property var bar: backend.lists.bar || ({})
     readonly property var sections: bar.sections || ({})
     readonly property var available: bar.available || []
-    readonly property bool working: ["bar.move", "bar.drop", "bar.add", "bar.remove"].some(a => backend.busy.indexOf(a) >= 0)
+    readonly property bool working: ["bar.move", "bar.add", "bar.remove"].some(a => backend.busy.indexOf(a) >= 0)
     readonly property var order: ["left", "centerBegin", "center", "centerEnd", "right", "tray"]
     readonly property var sectionNames: ({
         left: qsTr("Left"), centerBegin: qsTr("Center, before the clock"), center: qsTr("Center"),
@@ -32,138 +31,6 @@ SettingsPage {
     function hasOptions(w) { return (w.schema || []).length > 0 || forms.indexOf(w.id) >= 0 }
     readonly property bool sideways: ["left", "right"].indexOf(backend.values["desktop.barPosition"]) >= 0
     function move(widget, from, to, index) { backend.act("bar.move", [widget.id, from, widget.index, to, index], ["bar"]) }
-
-    // ---- Dragging a widget to a new place -----------------------------------
-    // The widget picked up ({id, name, section, index}), where it would land
-    // now ({section, gap}, the gap between widgets counted from 0), and where
-    // the pointer is on screen.
-    property var dragged: null
-    property var target: null
-    property point dragAt
-
-    function beginDrag(widget, section) {
-        dragged = { id: widget.id, name: widget.name, section: section, index: widget.index }
-        target = null
-    }
-    function dragMoved(globalPos) {
-        dragAt = globalPos
-        target = findTarget(globalPos)
-    }
-    function endDrag(drop) {
-        const d = dragged, t = target
-        dragged = null
-        target = null
-        if (drop && d && t)
-            backend.act("bar.drop", [d.id, d.section, d.index, t.section, t.gap], ["bar"])
-    }
-    // Escape lets go without moving anything; true when there was a drag.
-    function cancelDrag() {
-        if (!dragged) return false
-        endDrag(false)
-        return true
-    }
-    function isDragged(widget, section) {
-        return dragged !== null && dragged.section === section && dragged.index === widget.index && dragged.id === widget.id
-    }
-    function isTarget(section, gap) { return target !== null && target.section === section && target.gap === gap }
-
-    function under(item, g) {
-        if (!item || !item.visible) return false
-        const p = item.mapFromGlobal(g.x, g.y)
-        return p.x >= 0 && p.y >= 0 && p.x < item.width && p.y < item.height
-    }
-    // Where a widget let go at `g` would land, or null for nowhere new.
-    function findTarget(g) {
-        let found = null
-        // The picture of the bar: before or after the chip it is over, or at
-        // the end of the strip past the last chip.
-        for (const strip of [leftStrip, centerStrip, rightStrip]) {
-            if (found || !under(strip, g)) continue
-            for (let i = 0; i < strip.chips.count && !found; ++i) {
-                const chip = strip.chips.itemAt(i)
-                if (!under(chip, g)) continue
-                const after = chip.mapFromGlobal(g.x, g.y).x > chip.width / 2
-                found = { section: chip.modelData.section, gap: chip.modelData.index + (after ? 1 : 0) }
-            }
-            if (!found) {
-                let section = strip.home
-                for (const s of strip.holds)
-                    if ((sections[s] || []).length > 0) section = s
-                found = { section: section, gap: (sections[section] || []).length }
-            }
-        }
-        // The lists: the section it is over, after every row whose middle is
-        // above the pointer.
-        for (let i = 0; i < groups.count && !found; ++i) {
-            const group = groups.itemAt(i)
-            if (!under(group, g)) continue
-            let gap = 0
-            for (let j = 0; j < group.widgetRows.count; ++j) {
-                const row = group.widgetRows.itemAt(j)
-                if (row && row.mapFromGlobal(g.x, g.y).y > row.height / 2)
-                    gap = Math.max(gap, row.modelData.index + 1)
-            }
-            found = { section: group.modelData, gap: gap }
-        }
-        // Either side of itself is where it is already.
-        if (found && dragged && found.section === dragged.section
-                && (found.gap === dragged.index || found.gap === dragged.index + 1))
-            return null
-        return found
-    }
-
-    // Near the top or bottom of the page, the page scrolls to bring more of
-    // the lists into reach.
-    Timer {
-        interval: 16
-        repeat: true
-        running: page.dragged !== null
-        onTriggered: {
-            const y = page.mapFromGlobal(page.dragAt.x, page.dragAt.y).y
-            const edge = ui.s(48)
-            const speed = y < edge ? -Math.min(1, (edge - y) / edge)
-                        : y > page.height - edge ? Math.min(1, (y - page.height + edge) / edge) : 0
-            if (speed === 0) return
-            const to = Math.max(0, Math.min(page.flick.contentY + speed * ui.s(14), page.maxY))
-            if (to === page.flick.contentY) return
-            page.flick.contentY = to
-            page.target = page.findTarget(page.dragAt)
-        }
-    }
-
-    // The widget's name, following the pointer while it is carried.
-    Rectangle {
-        parent: win.contentItem
-        z: 100
-        visible: page.dragged !== null
-        readonly property point at: page.dragged ? parent.mapFromGlobal(page.dragAt.x, page.dragAt.y) : Qt.point(0, 0)
-        x: at.x + ui.s(14)
-        y: at.y + ui.s(10)
-        width: ghostText.implicitWidth + ui.s(16)
-        height: ghostText.implicitHeight + ui.s(8)
-        radius: theme.radius
-        color: ui.selectedFill
-        border.width: 1
-        border.color: ui.accent
-        Text {
-            id: ghostText
-            anchors.centerIn: parent
-            text: page.dragged ? page.dragged.name : ""
-            color: ui.fg
-            font.family: ui.font
-            font.pixelSize: ui.caption
-            textFormat: Text.PlainText
-        }
-    }
-
-    // A line where a carried widget would go.
-    component DropLine: Rectangle {
-        property bool shown: false
-        visible: shown
-        z: 2
-        color: ui.accent
-        radius: Math.min(width, height) / 2
-    }
 
     SettingsGroup {
         separated: true
@@ -222,204 +89,79 @@ SettingsPage {
         }
     }
 
-    // What the mouse does on the bar. Omarchy's bar has these built in, so
-    // they are explained here, each with a button that does the same.
-    SettingsGroup {
-        title: qsTr("Mouse on the bar")
-        footer: qsTr("These are built into Omarchy's bar.")
-        SettingRow {
-            label: qsTr("Double-click empty space")
-            sublabel: qsTr("Switches the background between none, glassy and opaque")
-            OmaButton {
-                text: qsTr("Next background")
-                spinning: backend.busy.indexOf("bar.cycleBackground") >= 0
-                anchors.verticalCenter: parent.verticalCenter
-                onClicked: backend.act("bar.cycleBackground", [], [], "bar")
-            }
-        }
-        SettingRow {
-            id: edges
-            label: qsTr("Drag empty space")
-            sublabel: qsTr("Moves the bar to the edge of the screen you let go nearest. Pressing and holding works too.")
-            readonly property string at: backend.values["desktop.barPosition"] || "top"
-            Repeater {
-                model: [
-                    { value: "top", glyph: "\u{F005D}", text: qsTr("Top") },
-                    { value: "bottom", glyph: "\u{F0045}", text: qsTr("Bottom") },
-                    { value: "left", glyph: "\u{F004D}", text: qsTr("Left") },
-                    { value: "right", glyph: "\u{F0054}", text: qsTr("Right") }
-                ]
-                delegate: OmaButton {
-                    required property var modelData
-                    glyph: modelData.glyph
-                    tooltip: modelData.text
-                    selected: edges.at === modelData.value
-                    anchors.verticalCenter: parent ? parent.verticalCenter : undefined
-                    Accessible.name: modelData.text
-                    onClicked: if (!selected) backend.set("desktop.barPosition", modelData.value)
-                }
-            }
-        }
-        SettingRow {
-            label: qsTr("Click the workspace you're on")
-            sublabel: qsTr("Switches its windows between tiling, scrolling and floating. Scrolling over the workspaces moves between them.")
-            OmaButton {
-                text: qsTr("Switch layout")
-                tooltip: qsTr("Switches the workspace this window is on")
-                spinning: backend.busy.indexOf("workspace.cycleLayout") >= 0
-                anchors.verticalCenter: parent.verticalCenter
-                onClicked: backend.act("workspace.cycleLayout", [])
-            }
-        }
-        ChoiceRow {
-            setting: "desktop.layout"
-            label: qsTr("Arrange new workspaces by")
-            options: [
-                { value: "dwindle", text: qsTr("Tiling") },
-                { value: "scrolling", text: qsTr("Scrolling") },
-                { value: "floating", text: qsTr("Floating") }
-            ]
-        }
-    }
-
-    // A small picture of the bar as it is laid out now; its widgets can be
-    // dragged too. The bar itself is never mirrored, so neither is its
-    // picture.
+    // A small picture of the bar as it is laid out now. The bar itself is
+    // never mirrored, so neither is its picture.
     Rectangle {
         Layout.fillWidth: true
         LayoutMirroring.enabled: false
         LayoutMirroring.childrenInherit: true
-        implicitHeight: Math.max(preview.implicitHeight, ui.s(22)) + ui.s(12)
+        implicitHeight: preview.implicitHeight + ui.s(12)
         radius: theme.radius
         color: ui.normalFill
         border.width: 1
-        border.color: page.dragged ? ui.accent : ui.normalBorder
+        border.color: ui.normalBorder
 
         RowLayout {
             id: preview
             anchors.fill: parent
             anchors.margins: ui.s(6)
             spacing: ui.s(6)
-            // One strip of the bar. `holds` are the sections it shows, in
-            // order; `home` takes a drop when they are all empty.
-            component Strip: Item {
-                // Ids outside an inline component aren't seen inside it.
-                required property Item host
-                property alias chips: chipRepeater
-                property var holds: []
-                property string home
-                readonly property var widgets: holds.reduce((all, s) =>
-                    all.concat((host.sections[s] || []).map(w => Object.assign({ section: s }, w))), [])
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.preferredWidth: 1
-                implicitHeight: flow.implicitHeight
-                Flow {
-                    id: flow
-                    width: parent.width
-                    spacing: ui.s(4)
-                    Repeater {
-                        id: chipRepeater
-                        model: parent.parent.widgets
-                        delegate: Rectangle {
-                            id: chipBox
-                            required property var modelData
-                            readonly property bool last: modelData.index === (host.sections[modelData.section] || []).length - 1
-                            // A long name is cut short rather than run past the picture.
-                            width: Math.min(chip.implicitWidth + ui.s(8), flow.width)
-                            height: chip.implicitHeight + ui.s(4)
-                            radius: theme.radius
-                            color: ui.hoverFill
-                            opacity: host.isDragged(modelData, modelData.section) ? 0.45 : 1
-                            Text {
-                                id: chip
-                                anchors.centerIn: parent
-                                width: Math.min(implicitWidth, parent.width - ui.s(8))
-                                elide: Text.ElideRight
-                                text: chipBox.modelData.name
-                                color: ui.fg
-                                font.family: ui.font
-                                font.pixelSize: ui.caption
-                                textFormat: Text.PlainText
-                            }
-                            DropLine {
-                                shown: host.isTarget(chipBox.modelData.section, chipBox.modelData.index)
-                                width: ui.s(2); height: parent.height; x: -ui.s(3)
-                            }
-                            DropLine {
-                                shown: chipBox.last && host.isTarget(chipBox.modelData.section, chipBox.modelData.index + 1)
-                                width: ui.s(2); height: parent.height; x: parent.width + ui.s(1)
-                            }
-                            BarDragGrip {
-                                anchors.fill: parent
-                                bar: host
-                                widget: chipBox.modelData
-                                section: chipBox.modelData.section
-                            }
+            component Chips: Flow {
+                property var names: []
+                spacing: ui.s(4)
+                Repeater {
+                    model: parent.names
+                    delegate: Rectangle {
+                        required property string modelData
+                        width: chip.implicitWidth + ui.s(8)
+                        height: chip.implicitHeight + ui.s(4)
+                        radius: theme.radius
+                        color: ui.hoverFill
+                        Text {
+                            id: chip
+                            anchors.centerIn: parent
+                            text: parent.modelData
+                            color: ui.fg
+                            font.family: ui.font
+                            font.pixelSize: ui.caption
+                            textFormat: Text.PlainText
                         }
-                    }
-                    // Where a drop goes on a strip with nothing on it yet.
-                    DropLine {
-                        shown: parent.parent.widgets.length === 0 && host.target !== null
-                               && parent.parent.holds.indexOf(host.target.section) >= 0
-                        width: ui.s(2)
-                        height: ui.s(18)
                     }
                 }
             }
-            Strip { id: leftStrip; host: page; holds: ["left"]; home: "left" }
-            Strip { id: centerStrip; host: page; holds: ["centerBegin", "center", "centerEnd"]; home: "center" }
-            Strip { id: rightStrip; host: page; holds: ["right"]; home: "right" }
+            Chips { Layout.fillWidth: true; Layout.preferredWidth: 1; names: (page.sections.left || []).map(w => w.name) }
+            Chips {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                names: ["centerBegin", "center", "centerEnd"].reduce((all, s) => all.concat((page.sections[s] || []).map(w => w.name)), [])
+            }
+            Chips {
+                Layout.fillWidth: true
+                Layout.preferredWidth: 1
+                names: (page.sections.right || []).map(w => w.name)
+            }
         }
     }
 
     Repeater {
-        id: groups
         model: page.order
         delegate: SettingsGroup {
             id: group
             required property string modelData
             readonly property var widgets: page.sections[modelData] || []
-            property alias widgetRows: rowRepeater
             Layout.fillWidth: true
             title: page.sectionNames[modelData]
             footer: modelData === "tray" ? qsTr("Widgets here open from the tray's drawer instead of sitting on the bar.")
                   : modelData === "center" ? qsTr("Put widgets beside the clock in the sections before and after it, or the clock moves off center.")
-                  : ""
+                  : widgets.length === 0 ? qsTr("Nothing here yet.") : ""
 
             Repeater {
-                id: rowRepeater
                 model: group.widgets
                 delegate: SettingRow {
                     id: wrow
                     required property var modelData
-                    readonly property bool last: modelData.index === group.widgets.length - 1
                     label: modelData.name
                     sublabel: modelData.description || modelData.id
-                    glyph: "\u{F01DD}"
-                    tint: ui.muted
-                    dimmed: page.isDragged(modelData, group.modelData)
-                    tappable: false
-                    // The whole row picks the widget up; the buttons on it
-                    // still take their clicks.
-                    BarDragGrip {
-                        parent: wrow
-                        anchors.fill: parent
-                        z: -1
-                        bar: page
-                        widget: wrow.modelData
-                        section: group.modelData
-                    }
-                    DropLine {
-                        parent: wrow
-                        shown: page.isTarget(group.modelData, wrow.modelData.index)
-                        width: parent.width; height: ui.s(2); y: -ui.s(2)
-                    }
-                    DropLine {
-                        parent: wrow
-                        shown: wrow.last && page.isTarget(group.modelData, wrow.modelData.index + 1)
-                        width: parent.width; height: ui.s(2); y: parent.height
-                    }
                     // Its own options, on a page of their own.
                     OmaButton {
                         visible: page.hasOptions(wrow.modelData)
@@ -468,26 +210,6 @@ SettingsPage {
                         anchors.verticalCenter: parent.verticalCenter
                         onClicked: backend.act("bar.remove", [wrow.modelData.id], ["bar", "plugins"])
                     }
-                }
-            }
-
-            // A section with nothing in it yet, and a place to drop into it.
-            // It is there before a drag too, so nothing moves when one starts.
-            Rectangle {
-                visible: group.widgets.length === 0
-                width: parent ? parent.width : 0
-                height: ui.rowHeight
-                radius: theme.radius
-                color: page.isTarget(group.modelData, 0) ? ui.hoverFill : "transparent"
-                border.width: 1
-                border.color: page.isTarget(group.modelData, 0) ? ui.accent : ui.normalBorder
-                Text {
-                    anchors.centerIn: parent
-                    text: page.dragged ? qsTr("Drop here") : qsTr("Nothing here yet.")
-                    color: ui.muted
-                    font.family: ui.font
-                    font.pixelSize: ui.caption
-                    textFormat: Text.PlainText
                 }
             }
         }

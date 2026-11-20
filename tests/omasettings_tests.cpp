@@ -888,33 +888,6 @@ private slots:
         QVERIFY(store.act("bar.move", {"omarchy.audio", "right", 0, "middle", 0}).contains("section"));
     }
 
-    void barDropMovesToTheGap() {
-        QTemporaryDir dir;
-        FakeSystem sys;
-        Store store(pathsIn(dir), sys.exec());
-        QCOMPARE(store.act("bar.drop", {"omarchy.audio", "right", 2, "right", 4}), QString());
-        QVERIFY(sys.calls.contains("omarchy-bar move omarchy.audio --from-section right --from-index 2 --section right --index 3"));
-        QCOMPARE(store.act("bar.drop", {"omarchy.audio", "right", 2, "right", 0}), QString());
-        QVERIFY(sys.calls.contains("omarchy-bar move omarchy.audio --from-section right --from-index 2 --section right --index 0"));
-        QCOMPARE(store.act("bar.drop", {"omarchy.audio", "right", 2, "left", 0}), QString());
-        QVERIFY(sys.calls.contains("omarchy-bar move omarchy.audio --from-section right --from-index 2 --section left --index 0"));
-        const int before = sys.calls.size();
-        QCOMPARE(store.act("bar.drop", {"omarchy.audio", "right", 2, "right", 2}), QString());
-        QCOMPARE(store.act("bar.drop", {"omarchy.audio", "right", 2, "right", 3}), QString());
-        QCOMPARE(sys.calls.size(), before);
-        QVERIFY(store.act("bar.drop", {"omarchy.audio", "right", 0, "middle", 0}).contains("section"));
-    }
-
-    void barGesturesUseOmarchysCommands() {
-        QTemporaryDir dir;
-        FakeSystem sys;
-        Store store(pathsIn(dir), sys.exec());
-        QCOMPARE(store.act("bar.cycleBackground", {}), QString());
-        QVERIFY(sys.calls.contains("omarchy-bar background cycle"));
-        QCOMPARE(store.act("workspace.cycleLayout", {}), QString());
-        QVERIFY(sys.calls.contains("omarchy-hyprland-workspace-layout-toggle"));
-    }
-
     // ---- Shortcuts, login items, window rules, Night Shift, and the rest -------
     void keysAreWrittenOneWay() {
         QCOMPARE(Store::normalizeKeys("shift + super + r"), QString("SUPER + SHIFT + R"));

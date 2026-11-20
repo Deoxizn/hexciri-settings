@@ -362,7 +362,6 @@ ApplicationWindow {
         context: Qt.ApplicationShortcut
         onActivated: {
             if (win.helpVisible) win.helpVisible = false
-            else if (pageLoader.item && pageLoader.item.cancelDrag && pageLoader.item.cancelDrag()) return
             else if (win.query.length > 0) { search.text = ""; sidebar.forceActiveFocus() }
             else if (win.sub.length > 0) win.back()
         }

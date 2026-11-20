@@ -1642,7 +1642,7 @@ QString Store::act(const QString &action, const QVariantList &args) {
         return actPlugin(action, args);
     if (action == "bar.setOption" || action == "weather.location" || action == "folder.choose" || action.startsWith("hook."))
         return actOmarchy(action, args);
-    if (action.startsWith("bar.") || action == "workspace.cycleLayout")
+    if (action.startsWith("bar."))
         return actBar(action, args);
     if (action == "wifi.rescan") {
         run("nmcli", {"device", "wifi", "rescan"}, 15000);

@@ -262,42 +262,12 @@ void Store::waitForShellWrite(const QDateTime &before) {
 }
 
 QString Store::actBar(const QString &action, const QVariantList &args) {
-    const QDateTime before = QFileInfo(m_paths.config + "/omarchy/shell.json").lastModified();
-    // What double-clicking empty space on the bar does.
-    if (action == "bar.cycleBackground") {
-        const QString error = runOk("omarchy-bar", {"background", "cycle"}, 15000);
-        if (error.isEmpty())
-            waitForShellWrite(before);
-        return error;
-    }
-    // What clicking the workspace you're on does; it saves the layout under
-    // workspace-layouts, which is watched.
-    if (action == "workspace.cycleLayout")
-        return runOk("omarchy-hyprland-workspace-layout-toggle", {}, 15000);
-
     const QString id = args.value(0).toString();
     if (!validId(id))
         return tr("Unknown widget %1").arg(id);
+    const QDateTime before = QFileInfo(m_paths.config + "/omarchy/shell.json").lastModified();
     QString error;
-    if (action == "bar.drop") {
-        // args: id, from section, from index, to section, and the gap it was
-        // let go in (0 is before the first widget, n after the last).
-        const QString from = args.value(1).toString(), to = args.value(3).toString();
-        if (!barSections.contains(from) || !barSections.contains(to))
-            return tr("Unknown bar section");
-        const int fromIndex = args.value(2).toInt();
-        int index = qMax(0, args.value(4).toInt());
-        if (from == to) {
-            // Either side of itself is where it already is.
-            if (index == fromIndex || index == fromIndex + 1)
-                return {};
-            // The gaps after it close up by one once it is taken out.
-            if (index > fromIndex)
-                --index;
-        }
-        error = runOk("omarchy-bar", {"move", id, "--from-section", from, "--from-index", QString::number(fromIndex),
-                                      "--section", to, "--index", QString::number(index)}, 15000);
-    } else if (action == "bar.move") {
+    if (action == "bar.move") {
         // args: id, from section, from index, to section, to index
         const QString from = args.value(1).toString(), to = args.value(3).toString();
         if (!barSections.contains(from) || !barSections.contains(to))
