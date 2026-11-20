@@ -16,6 +16,7 @@ Item {
     property bool busy: false
     property bool dimmed: false
     property bool clickable: false
+    property bool tappable: true
     property bool selected: false
     property alias controlSpacing: controls.spacing
     default property alias controls: controls.data
@@ -157,5 +158,7 @@ Item {
         visible: hover.hovered && labelText.truncated
         text: row.label
     }
-    TapHandler { onTapped: row.activated() }
+    // Off for a row that does something else with a press, such as picking
+    // it up to drag: the handler would take the press first.
+    TapHandler { enabled: row.tappable; onTapped: row.activated() }
 }
