@@ -12,7 +12,7 @@ SettingsPage {
     tagline: qsTr("%n enabled", "", page.plugins.filter(p => p.enabled).length)
     glyph: "\u{F0431}"
     description: qsTr("Plugins add widgets to the bar and features to the shell.")
-    lists: ["plugins"]
+    lists: ["plugins", "bar"]
 
     readonly property var plugins: backend.lists.plugins || []
     readonly property var updates: backend.lists.pluginUpdates || ({})
@@ -33,6 +33,18 @@ SettingsPage {
         return (kinds || []).map(k => names[k] || k).join(", ")
     }
 
+    // A plugin's widget on the bar, when it has options of its own: the
+    // same page the Bar pane opens.
+    readonly property var forms: ["omarchy.clock", "omarchy.weather", "omarchy.spacer", "omarchy.active-window"]
+    function widgetOf(plugin) {
+        const sections = (backend.lists.bar || {}).sections || {}
+        for (const s in sections)
+            for (const w of sections[s])
+                if (w.id === plugin.id && ((w.schema || []).length > 0 || forms.indexOf(w.id) >= 0))
+                    return Object.assign({ section: s }, w)
+        return null
+    }
+
     component PluginRow: SettingRow {
         id: prow
         property var plugin
@@ -40,7 +52,17 @@ SettingsPage {
         sublabel: [plugin.description, page.kindNames(plugin.kinds)].filter(s => !!s).join(" · ")
         dimmed: !plugin.enabled
         busy: page.busyWith(plugin.id)
+        readonly property var widget: plugin.enabled ? page.widgetOf(plugin) : null
 
+        OmaButton {
+            visible: !!prow.widget
+            glyph: "\u{F0493}"
+            bordered: false
+            tooltip: qsTr("Options")
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: win.openSub("BarWidget", prow.plugin.name,
+                                   { id: prow.widget.id, section: prow.widget.section, index: prow.widget.index })
+        }
         OmaButton {
             visible: page.updates[prow.plugin.id] === "available"
             text: qsTr("Update")
