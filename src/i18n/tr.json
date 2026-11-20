@@ -327,7 +327,7 @@
   "Drag empty space": "Boş alanı sürükleme",
   "Moves the bar to the edge of the screen you let go nearest. Pressing and holding works too.": "Çubuğu, bıraktığınız yere en yakın ekran kenarına taşır. Basılı tutmak da işe yarar.",
   "Click the workspace you're on": "Bulunduğunuz çalışma alanına tıklama",
-  "Switches its windows between tiling, scrolling and floating. Scrolling over the workspaces moves between them.": "Pencerelerini döşeme, kaydırma ve yüzen arasında değiştirir. Çalışma alanları üzerinde kaydırmak aralarında geçiş yapar.",
+  "Switches its windows between tiling, scrolling and floating. Scrolling over the workspaces moves between them.": "Pencerelerini döşeme, kaydırma ve serbest arasında değiştirir. Çalışma alanları üzerinde kaydırmak aralarında geçiş yapar.",
   "Switch layout": "Düzeni değiştir",
   "Switches the workspace this window is on": "Bu pencerenin bulunduğu çalışma alanını değiştirir",
   "Drop here": "Buraya bırakın",
