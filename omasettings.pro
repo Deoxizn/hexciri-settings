@@ -13,6 +13,7 @@ HEADERS += \
     src/version.h \
     src/proc.h \
     src/sidebuttons.h \
+    src/statewatcher.h \
     src/store.h \
     src/theme.h \
     src/translator.h
@@ -31,6 +32,7 @@ SOURCES += \
     src/monitorlayout.cpp \
     src/nmsecrets.cpp \
     src/proc.cpp \
+    src/statewatcher.cpp \
     src/store.cpp \
     src/theme.cpp \
     src/translator.cpp

@@ -53,6 +53,7 @@ public:
     explicit Store(Paths paths = Paths::system(), Exec exec = runProcess, SecretWriter secrets = writeNmSecret);
 
     const QList<Setting> &settings() const { return m_settings; }
+    const Paths &paths() const { return m_paths; }
     const Setting *setting(const QString &id) const;
 
     QVariant read(const QString &id) const;

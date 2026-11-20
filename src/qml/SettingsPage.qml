@@ -59,15 +59,32 @@ ScrollView {
     clip: true
     Component.onCompleted: reload()
 
+    // Changes made elsewhere arrive on their own (Backend watches the files
+    // and events behind each setting), so coming back to the window reads
+    // everything again only now and then, as a backstop.
+    property double reloadedAt: Date.now()
     Connections {
         target: win
-        function onActiveChanged() { if (win.active) page.reload() }
+        function onActiveChanged() {
+            if (win.active && Date.now() - page.reloadedAt > 10000) {
+                page.reloadedAt = Date.now()
+                page.reload()
+            }
+        }
     }
     Timer {
         interval: Math.max(1000, page.pollMs)
         running: page.pollMs > 0 && win.active
         repeat: true
         onTriggered: page.reload()
+    }
+    // What nothing announces (Night Light, brightness, radios), read again
+    // every few seconds while the window is in front.
+    Timer {
+        interval: 3000
+        running: page.pane.length > 0 && win.active
+        repeat: true
+        onTriggered: backend.refreshLive(page.pane)
     }
 
     ColumnLayout {

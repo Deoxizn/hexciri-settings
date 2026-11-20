@@ -135,6 +135,7 @@ int main(int argc, char *argv[]) {
     store->writeThemedIcon();
     store->ensureIconHook();
     Backend backend(store);
+    backend.watch();
 
     QQmlApplicationEngine engine;
     QObject::connect(&translator, &Translator::changed, &engine, &QQmlEngine::retranslate);

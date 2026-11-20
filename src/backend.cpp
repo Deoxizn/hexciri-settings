@@ -1,6 +1,7 @@
 #include "backend.h"
 
 #include "monitorlayout.h"
+#include "statewatcher.h"
 
 #include <QJsonObject>
 #include <QPointer>
@@ -112,14 +113,24 @@ void Backend::dismissMessage() {
 }
 
 void Backend::refresh(const QString &id) {
+    if (m_reading.contains(id)) {
+        m_readAgain.insert(id);
+        return;
+    }
+    m_reading.insert(id);
     QPointer<Backend> self(this);
     auto store = m_store;
     m_reads.start([self, store, id] {
         const QVariant value = store->read(id);
         QMetaObject::invokeMethod(self.data(), [self, id, value] {
+            if (!self)
+                return;
+            self->m_reading.remove(id);
             // A queued change wins over a read that started before it.
-            if (self && !self->m_writing.value(id))
+            if (!self->m_writing.value(id))
                 self->setValue(id, value);
+            if (self->m_readAgain.remove(id))
+                self->refresh(id);
         }, Qt::QueuedConnection);
     });
 }
@@ -130,10 +141,41 @@ void Backend::refreshPane(const QString &pane) {
             refresh(s.id);
 }
 
+const QStringList &Backend::liveIds() {
+    static const QStringList ids = {"display.nightLight", "display.brightness", "keyboard.backlight",
+                                    "wifi.enabled", "bluetooth.enabled", "power.profile"};
+    return ids;
+}
+
+void Backend::refreshLive(const QString &pane) {
+    for (const QString &id : liveIds()) {
+        const Setting *s = m_store->setting(id);
+        if (s && s->pane == pane)
+            refresh(id);
+    }
+}
+
+void Backend::watch(bool events) {
+    if (m_watcher)
+        return;
+    m_watcher = new StateWatcher(m_store->paths(), m_store->settings(), this);
+    connect(m_watcher, &StateWatcher::changed, this, [this](const QStringList &ids, const QStringList &lists) {
+        for (const QString &id : ids)
+            refresh(id);
+        // Only what a page has shown; the rest loads when one opens.
+        for (const QString &list : lists)
+            if (m_lists.contains(list))
+                load(list);
+    });
+    m_watcher->start(events);
+}
+
 void Backend::load(const QString &list) {
     const QString key = "list:" + list;
-    if (m_busy.contains(key))
+    if (m_busy.contains(key)) {
+        m_loadAgain.insert(list);
         return;
+    }
     setBusy(key, true);
     QPointer<Backend> self(this);
     auto store = m_store;
@@ -142,9 +184,15 @@ void Backend::load(const QString &list) {
         QMetaObject::invokeMethod(self.data(), [self, list, key, data] {
             if (!self)
                 return;
-            self->m_lists.insert(list, data);
-            emit self->listsChanged();
+            // The same data again changes nothing, so the rows showing it
+            // keep their focus, open menus, and place.
+            if (!self->m_lists.contains(list) || self->m_lists.value(list) != data) {
+                self->m_lists.insert(list, data);
+                emit self->listsChanged();
+            }
             self->setBusy(key, false);
+            if (self->m_loadAgain.remove(list))
+                self->load(list);
         }, Qt::QueuedConnection);
     });
 }

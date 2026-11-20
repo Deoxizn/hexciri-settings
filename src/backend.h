@@ -12,6 +12,8 @@
 
 #include "store.h"
 
+class StateWatcher;
+
 // The window's view of the Store. Reads run on a small thread pool and writes
 // run one at a time in order, so a slow command (a theme switch, a polkit
 // prompt) never freezes the window, and two changes never race each other.
@@ -41,6 +43,9 @@ public:
     Q_INVOKABLE QVariantMap meta(const QString &id) const;
 
     Q_INVOKABLE void refreshPane(const QString &pane);
+    // Reads again the settings on a pane that nothing announces a change to
+    // (Night Light, brightness, radios), for a page to call every few seconds.
+    Q_INVOKABLE void refreshLive(const QString &pane);
     Q_INVOKABLE void refresh(const QString &id);
     Q_INVOKABLE void load(const QString &list);
     Q_INVOKABLE void set(const QString &id, const QVariant &value);
@@ -56,6 +61,14 @@ public:
     // Where every display goes when one is dragged in the arrangement:
     // rects are [{x, y, width, height}], the result [{x, y}] (Layout::place).
     Q_INVOKABLE QVariantList placeMonitor(const QVariantList &rects, int moved, int x, int y, int snap) const;
+
+    // Follows changes made outside Settings (a keybinding, the Omarchy menu,
+    // a terminal) and shows them on every page; `events` also listens to
+    // Hyprland and PulseAudio.
+    void watch(bool events = true);
+    StateWatcher *watcher() const { return m_watcher; }
+    // Settings with no file or event behind them, read again by refreshLive.
+    static const QStringList &liveIds();
 
     // Waits for every queued change, and uploads to Sync what is still
     // waiting to go; used before quitting.
@@ -93,6 +106,10 @@ private:
     QHash<QString, QVariant> m_pending; // newest queued value per setting
     QMutex m_pendingLock;
     QHash<QString, int> m_writing;      // queued writes per setting
+    // Reads and loads under way, and those asked for again meanwhile, which
+    // run once more when the first finishes so a change between is not lost.
+    QSet<QString> m_reading, m_readAgain, m_loadAgain;
+    StateWatcher *m_watcher = nullptr;
     QString m_message;
     QList<Change> m_undo, m_redo;
     QString m_lastId;

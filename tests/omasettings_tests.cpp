@@ -18,6 +18,7 @@
 #include "backend.h"
 #include "hyprconf.h"
 #include "monitorlayout.h"
+#include "statewatcher.h"
 #include "store.h"
 #include "theme.h"
 #include "translator.h"
@@ -2200,6 +2201,104 @@ private slots:
         // Nothing was known before, so undo hands the option back.
         QVERIFY(!before.isValid());
         QVERIFY(!store->managedState().value("hypr").toObject().contains("general:border_size"));
+    }
+
+    // ---- Following changes made elsewhere ---------------------------------------------------
+    void watchedPathsNameTheirSettings() {
+        QTemporaryDir dir;
+        const Paths p = pathsIn(dir);
+        const QList<WatchRule> rules = StateWatcher::rules(p);
+        const QStringList all{"notifications.doNotDisturb", "appearance.animations", "appearance.corners",
+                              "desktop.gaps", "lock.lockAfter", "bar.batteryPercentage", "sound.outputVolume",
+                              "keyboard.repeatRate", "desktop.borderSize"};
+        QStringList ids, lists;
+        StateWatcher::resolve(rules, all, p.state + "/omarchy/notifications/quiet.json", ids, lists);
+        QCOMPARE(ids, QStringList{"notifications.doNotDisturb"});
+
+        // A toggle's file appearing in its directory.
+        ids.clear();
+        StateWatcher::resolve(rules, all, p.state + "/omarchy/toggles/hypr/no-animations.lua", ids, lists);
+        QVERIFY(ids.contains("appearance.animations"));
+        QVERIFY(ids.contains("desktop.gaps"));
+        QVERIFY(!ids.contains("notifications.doNotDisturb"));
+
+        ids.clear();
+        lists.clear();
+        StateWatcher::resolve(rules, all, p.config + "/omarchy/shell.json", ids, lists);
+        QVERIFY(ids.contains("lock.lockAfter"));
+        QVERIFY(ids.contains("bar.batteryPercentage"));
+        QVERIFY(lists.contains("bar"));
+
+        // Something else beside a watched file is nothing.
+        ids.clear();
+        StateWatcher::resolve(rules, all, p.config + "/omarchy/other.json", ids, lists);
+        QVERIFY(ids.isEmpty());
+    }
+
+    void hyprlandAndPulseEventsNameTheirSettings() {
+        const QStringList all{"keyboard.repeatRate", "desktop.borderSize", "sound.outputVolume", "display.mirror",
+                              "notifications.doNotDisturb"};
+        QStringList ids, lists;
+        StateWatcher::resolveHyprEvent("configreloaded>>", all, {"desktop.borderSize"}, ids, lists);
+        QVERIFY(ids.contains("keyboard.repeatRate"));
+        QVERIFY(ids.contains("desktop.borderSize"));
+        QVERIFY(!ids.contains("sound.outputVolume"));
+        QVERIFY(lists.contains("monitors"));
+
+        ids.clear();
+        lists.clear();
+        StateWatcher::resolveHyprEvent("workspace>>3", all, {}, ids, lists);
+        QVERIFY(ids.isEmpty() && lists.isEmpty());
+        StateWatcher::resolveHyprEvent("monitorremoved>>HDMI-A-1", all, {}, ids, lists);
+        QCOMPARE(lists, QStringList{"monitors"});
+
+        ids.clear();
+        lists.clear();
+        StateWatcher::resolvePulseEvent("Event 'change' on sink-input #12", all, ids, lists);
+        QVERIFY(ids.isEmpty());
+        StateWatcher::resolvePulseEvent("Event 'change' on sink #56", all, ids, lists);
+        QCOMPARE(ids, QStringList{"sound.outputVolume"});
+        QVERIFY(lists.contains("sinks"));
+    }
+
+    // Do Not Disturb turned on with a keybinding shows while the window is open.
+    void backendShowsChangesMadeElsewhere() {
+        QTemporaryDir dir;
+        const Paths p = pathsIn(dir);
+        QDir().mkpath(p.state + "/omarchy/notifications");
+        writeText(p.state + "/omarchy/notifications/quiet.json", "{\"dnd\":false}");
+        auto sys = std::make_shared<FakeSystem>();
+        sys->answer("omarchy-shell notifications isDnd", "off");
+        Backend backend(std::make_shared<Store>(p, sys->exec()));
+        backend.watch(false);
+        backend.refresh("notifications.doNotDisturb");
+        QTRY_COMPARE(backend.values().value("notifications.doNotDisturb"), QVariant(false));
+
+        sys->answer("omarchy-shell notifications isDnd", "on");
+        // The shell writes beside the file and renames it over.
+        writeText(p.state + "/omarchy/notifications/quiet.json.tmp", "{\"dnd\":true}");
+        QVERIFY(QFile::remove(p.state + "/omarchy/notifications/quiet.json"));
+        QVERIFY(QFile::rename(p.state + "/omarchy/notifications/quiet.json.tmp",
+                              p.state + "/omarchy/notifications/quiet.json"));
+        QTRY_COMPARE(backend.values().value("notifications.doNotDisturb"), QVariant(true));
+
+        // And written in place.
+        sys->answer("omarchy-shell notifications isDnd", "off");
+        writeText(p.state + "/omarchy/notifications/quiet.json", "{\"dnd\":false}   ");
+        QTRY_COMPARE(backend.values().value("notifications.doNotDisturb"), QVariant(false));
+    }
+
+    void sameListAgainChangesNothing() {
+        QTemporaryDir dir;
+        auto sys = std::make_shared<FakeSystem>();
+        Backend backend(std::make_shared<Store>(pathsIn(dir), sys->exec()));
+        QSignalSpy spy(&backend, &Backend::listsChanged);
+        backend.load("configFiles");
+        QTRY_VERIFY(backend.busy().isEmpty());
+        QCOMPARE(spy.count(), 1);
+        backend.load("configFiles");
+        QTRY_VERIFY(backend.busy().isEmpty());
+        QCOMPARE(spy.count(), 1);
     }
 
     void backendReportsFailures() {

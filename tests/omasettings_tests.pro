@@ -5,7 +5,7 @@ TEMPLATE = app
 
 INCLUDEPATH += ../src
 
-HEADERS += ../src/backend.h ../src/store.h ../src/hyprconf.h ../src/monitorlayout.h ../src/nmsecrets.h ../src/proc.h ../src/theme.h ../src/translator.h
-SOURCES += omasettings_tests.cpp ../src/backend.cpp ../src/store.cpp ../src/extras.cpp ../src/features.cpp ../src/system.cpp ../src/software.cpp ../src/appimages.cpp ../src/sync.cpp ../src/hyprconf.cpp ../src/monitorlayout.cpp ../src/nmsecrets.cpp ../src/proc.cpp \
+HEADERS += ../src/backend.h ../src/store.h ../src/statewatcher.h ../src/hyprconf.h ../src/monitorlayout.h ../src/nmsecrets.h ../src/proc.h ../src/theme.h ../src/translator.h
+SOURCES += omasettings_tests.cpp ../src/backend.cpp ../src/store.cpp ../src/statewatcher.cpp ../src/extras.cpp ../src/features.cpp ../src/system.cpp ../src/software.cpp ../src/appimages.cpp ../src/sync.cpp ../src/hyprconf.cpp ../src/monitorlayout.cpp ../src/nmsecrets.cpp ../src/proc.cpp \
     ../src/theme.cpp ../src/translator.cpp
 DEFINES += SRCDIR=\\\"$$PWD\\\"
