@@ -23,6 +23,9 @@ Popup {
     modal: true
     focus: true
     padding: ui.s(18)
+    // Kept inside the window: a long dialog scrolls its content between a
+    // title and buttons that stay put.
+    margins: ui.s(24)
     width: Math.min(parent ? parent.width - ui.s(48) : 400, Math.round(400 * ui.scale))
     closePolicy: Popup.CloseOnEscape
 
@@ -40,6 +43,7 @@ Popup {
         LayoutMirroring.childrenInherit: true
 
         Text {
+            id: titleText
             Layout.fillWidth: true
             text: dialog.title
             horizontalAlignment: Text.AlignLeft
@@ -50,12 +54,43 @@ Popup {
             wrapMode: Text.Wrap
             textFormat: Text.PlainText
         }
-        ColumnLayout {
-            id: body
+        Flickable {
+            id: bodyFlick
+            readonly property real room: (dialog.parent ? dialog.parent.height : 600) - dialog.margins * 2
+                - dialog.topPadding - dialog.bottomPadding - titleText.implicitHeight - buttons.implicitHeight - ui.s(14) * 2
             Layout.fillWidth: true
-            spacing: ui.s(10)
+            Layout.preferredHeight: Math.min(body.implicitHeight, Math.max(ui.s(80), room))
+            contentWidth: width
+            contentHeight: body.implicitHeight
+            clip: contentHeight > height
+            interactive: contentHeight > height
+            boundsBehavior: Flickable.StopAtBounds
+            ScrollBar.vertical: OmaScrollBar {}
+
+            ColumnLayout {
+                id: body
+                width: bodyFlick.width - (bodyFlick.interactive ? ui.s(14) : 0)
+                spacing: ui.s(10)
+            }
+        }
+        // Tabbing to a field below the fold brings it into view.
+        Connections {
+            target: dialog.opened ? win : null
+            function onActiveFocusItemChanged() {
+                const item = win.activeFocusItem
+                if (!item || !bodyFlick.interactive) return
+                let inside = false
+                for (let p = item; p; p = p.parent) if (p === body) { inside = true; break }
+                if (!inside) return
+                const top = item.mapToItem(body, 0, 0).y
+                const bottom = top + item.height
+                if (top < bodyFlick.contentY) bodyFlick.contentY = Math.max(0, top - ui.s(8))
+                else if (bottom > bodyFlick.contentY + bodyFlick.height)
+                    bodyFlick.contentY = Math.min(bodyFlick.contentHeight - bodyFlick.height, bottom - bodyFlick.height + ui.s(8))
+            }
         }
         RowLayout {
+            id: buttons
             Layout.alignment: Qt.AlignRight
             spacing: ui.s(8)
             OmaButton {

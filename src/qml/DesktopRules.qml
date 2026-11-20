@@ -247,6 +247,7 @@ SettingsPage {
             glyph: "\u{F02FC}"
         }
         SettingRow {
+            id: appRow
             label: qsTr("App")
             ChoiceBox {
                 id: appPicker
@@ -263,7 +264,7 @@ SettingsPage {
                 id: appClass
                 // The pattern the field was filled with, kept while unchanged.
                 property string pattern: ""
-                width: Math.round(200 * ui.scale)
+                width: Math.max(ui.s(110), Math.min(Math.round(200 * ui.scale), appRow.controlRoom - appPicker.width - ui.s(8)))
                 placeholderText: qsTr("App class")
             }
         }

@@ -17,8 +17,15 @@ SettingsPage {
     readonly property var networks: backend.lists.wifi || []
     readonly property var band: backend.lists.wifiBand || ({})
     readonly property var current: on ? networks.find(n => n.active) : undefined
-    readonly property var known: networks.filter(n => n.known)
-    readonly property var others: networks.filter(n => !n.known && !n.active)
+    // Strongest first by bars, and by name within the same bars, so a
+    // network's signal wavering a little between scans doesn't reorder the
+    // list under the pointer.
+    function steady(list) {
+        const bars = n => Math.ceil((n.signal || 0) / 25)
+        return list.slice().sort((a, b) => bars(b) - bars(a) || String(a.ssid).localeCompare(String(b.ssid)))
+    }
+    readonly property var known: steady(networks.filter(n => n.known))
+    readonly property var others: steady(networks.filter(n => !n.known && !n.active))
     readonly property bool scanning: backend.busy.indexOf("list:wifiScan") >= 0
     readonly property bool working: backend.busy.indexOf("wifi.connect") >= 0 || backend.busy.indexOf("list:wifi") >= 0 || scanning
     // The list shows what was last seen straight away; a scan runs beside

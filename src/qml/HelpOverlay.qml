@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 
 // Every keyboard shortcut, shown with ? or the ? button. A click outside the
@@ -16,6 +17,8 @@ Rectangle {
         { keys: ["↑", "↓"], action: qsTr("Move between panes in the sidebar") },
         { keys: ["Ctrl+↑", "Ctrl+↓"], action: qsTr("Previous or next pane from anywhere") },
         { keys: ["Tab"], action: qsTr("Move between controls") },
+        { keys: ["PgUp", "PgDn"], action: qsTr("Scroll the page") },
+        { keys: ["Ctrl+Home", "Ctrl+End"], action: qsTr("Top or bottom of the page") },
         { keys: ["Space"], action: qsTr("Toggle the focused switch or press the focused button") },
         { keys: ["Alt+←", "Alt+→"], action: qsTr("Back and forward (or the mouse's side buttons)") },
         { keys: ["Esc"], action: qsTr("Clear the search, or go back") },
@@ -39,10 +42,20 @@ Rectangle {
 
         TapHandler {}
 
-        ColumnLayout {
-            id: content
+        // Scrolls when the list is taller than the window.
+        Flickable {
+            id: helpFlick
             anchors.fill: parent
             anchors.margins: ui.s(22)
+            contentWidth: width
+            contentHeight: content.implicitHeight
+            interactive: contentHeight > height
+            boundsBehavior: Flickable.StopAtBounds
+            ScrollBar.vertical: OmaScrollBar {}
+
+        ColumnLayout {
+            id: content
+            width: helpFlick.width - (helpFlick.interactive ? ui.s(14) : 0)
             spacing: ui.s(14)
 
             RowLayout {
@@ -125,6 +138,7 @@ Rectangle {
                     }
                 }
             }
+        }
         }
     }
 }

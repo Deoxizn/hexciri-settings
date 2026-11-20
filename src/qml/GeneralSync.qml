@@ -85,11 +85,12 @@ SettingsPage {
             onClicked: backend.act("sync.create", [""], ["sync"])
         }
         SettingRow {
+            id: connectRow
             label: qsTr("Or connect one you have")
             glyph: "\u{F0337}"
             OmaField {
                 id: repoUrl
-                width: Math.round(260 * ui.scale)
+                width: Math.max(ui.s(120), Math.min(Math.round(260 * ui.scale), connectRow.controlRoom - connectButton.width - ui.s(8)))
                 placeholderText: "https://github.com/you/omarchy-sync"
                 onAccepted: connectButton.clicked()
             }
@@ -288,17 +289,13 @@ SettingsPage {
             wrapMode: Text.Wrap
             textFormat: Text.PlainText
         }
-        Flickable {
+        // The dialog scrolls the changes when they are more than fit.
+        ColumnLayout {
             visible: !applyDialog.loading && applyDialog.groups.length > 0
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(changes.implicitHeight, (win.height || 600) * 0.5)
-            contentHeight: changes.implicitHeight
-            clip: true
-            boundsBehavior: Flickable.StopAtBounds
-            ScrollBar.vertical: ScrollBar {}
             ColumnLayout {
                 id: changes
-                width: parent.width
+                Layout.fillWidth: true
                 spacing: ui.s(10)
                 Repeater {
                     model: applyDialog.groups

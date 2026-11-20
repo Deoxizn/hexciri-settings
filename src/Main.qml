@@ -214,13 +214,20 @@ ApplicationWindow {
     property var backStack: []
     property var forwardStack: []
 
-    function go(paneId, subPage, subPageTitle, record) {
+    // Where the page was scrolled, so going back returns there.
+    function here() {
+        const y = pageLoader.item && pageLoader.item.flick ? pageLoader.item.flick.contentY : 0
+        return { pane: pane, sub: sub, subTitle: subTitle, y: y }
+    }
+    property real pendingY: 0
+    function go(paneId, subPage, subPageTitle, record, y) {
         if (paneId === pane && (subPage || "") === sub)
             return
         if (record !== false) {
-            backStack = backStack.concat([{ pane: pane, sub: sub, subTitle: subTitle }])
+            backStack = backStack.concat([here()])
             forwardStack = []
         }
+        pendingY = y || 0
         pane = paneId
         sub = subPage || ""
         subTitle = subPageTitle || ""
@@ -240,16 +247,16 @@ ApplicationWindow {
     function back() {
         if (backStack.length === 0) return
         const to = backStack[backStack.length - 1]
-        forwardStack = forwardStack.concat([{ pane: pane, sub: sub, subTitle: subTitle }])
+        forwardStack = forwardStack.concat([here()])
         backStack = backStack.slice(0, -1)
-        go(to.pane, to.sub, to.subTitle, false)
+        go(to.pane, to.sub, to.subTitle, false, to.y)
     }
     function forward() {
         if (forwardStack.length === 0) return
         const to = forwardStack[forwardStack.length - 1]
-        backStack = backStack.concat([{ pane: pane, sub: sub, subTitle: subTitle }])
+        backStack = backStack.concat([here()])
         forwardStack = forwardStack.slice(0, -1)
-        go(to.pane, to.sub, to.subTitle, false)
+        go(to.pane, to.sub, to.subTitle, false, to.y)
     }
 
     // A page's short name in links: its component name without the pane's
@@ -426,6 +433,19 @@ ApplicationWindow {
                         }
                         keyNavigationEnabled: false
                         boundsBehavior: Flickable.StopAtBounds
+                        // 23 panes are more than a window's height shows, so
+                        // the list says it scrolls, and keeps the pane in view.
+                        ScrollBar.vertical: OmaScrollBar {}
+                        onCurrentIndexChanged: if (currentIndex >= 0) Qt.callLater(() => positionViewAtIndex(currentIndex, ListView.Contain))
+                        Keys.onPressed: event => {
+                            const page = Math.max(1, Math.floor(height / ui.s(30)) - 1)
+                            if (event.key === Qt.Key_Home) win.open(win.visiblePanes[0])
+                            else if (event.key === Qt.Key_End) win.open(win.visiblePanes[win.visiblePanes.length - 1])
+                            else if (event.key === Qt.Key_PageDown) step(page)
+                            else if (event.key === Qt.Key_PageUp) step(-page)
+                            else return
+                            event.accepted = true
+                        }
 
                         function step(delta) {
                             const n = win.visiblePanes.length
@@ -446,14 +466,15 @@ ApplicationWindow {
                             readonly property bool nested: win.isNested(modelData)
                             // A hairline between groups, as in the shell's menus.
                             readonly property bool gap: index > 0 && win.visiblePanes[index - 1].group !== modelData.group
-                            width: ListView.view.width
-                            height: ui.s(30) + (gap ? ui.s(13) : 0)
+                            // Clear of the scroll bar when the list has one.
+                            width: ListView.view.width - (sidebar.contentHeight > sidebar.height ? ui.s(12) : 0)
+                            height: ui.s(30) + (gap ? ui.s(9) : 0)
 
                             Rectangle {
                                 visible: item.gap
                                 anchors.left: parent.left
                                 anchors.right: parent.right
-                                y: ui.s(6)
+                                y: ui.s(4)
                                 height: 1
                                 color: ui.separator
                             }
@@ -505,6 +526,18 @@ ApplicationWindow {
                                 HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
                                 TapHandler { onTapped: { win.open(item.modelData); sidebar.forceActiveFocus() } }
                             }
+                        }
+                    }
+
+                    // A fade over the last rows while there are more below.
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.topMargin: -ui.s(10) - height
+                        height: ui.s(28)
+                        visible: !sidebar.atYEnd
+                        gradient: Gradient {
+                            GradientStop { position: 0; color: ui.alpha(ui.bg, 0) }
+                            GradientStop { position: 1; color: ui.bg }
                         }
                     }
 
@@ -614,6 +647,7 @@ ApplicationWindow {
                                    : "Pane" + win.pane.charAt(0).toUpperCase() + win.pane.slice(1)
                         return "qrc:/qml/" + page + ".qml"
                     }
+                    onLoaded: if (item && item.restoreY !== undefined && win.pendingY > 0) item.restoreY = win.pendingY
                 }
 
                 // Errors are said in the window, never swallowed.

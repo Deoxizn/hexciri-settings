@@ -1411,5 +1411,9 @@
   "Uploaded from this computer from now on": "Отныне выгружается и с этого компьютера",
   "The repository changed since you looked; open it again to see what's new": "Репозиторий изменился с тех пор, как вы его смотрели; откройте его снова, чтобы увидеть новое",
   "%1 has a name the app launcher can't use": "У %1 имя, которое не может использовать панель запуска приложений",
-  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "Чтобы заменить AppImage загруженным файлом, нужно подтвердить, что его источник не проверен"
+  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "Чтобы заменить AppImage загруженным файлом, нужно подтвердить, что его источник не проверен",
+  "Type to find": "Введите для поиска",
+  "Scroll the page": "Прокрутить страницу",
+  "Top or bottom of the page": "В начало или в конец страницы",
+  "Loading…": "Загрузка…"
 }

@@ -52,7 +52,7 @@ SettingsPage {
             busy: backend.busy.indexOf("general.hostname") >= 0
             OmaField {
                 id: name
-                width: 220
+                width: ui.s(220)
                 text: backend.values["general.hostname"] || ""
                 onAccepted: if (text !== backend.values["general.hostname"]) backend.set("general.hostname", text)
                 onActiveFocusChanged: if (!activeFocus) text = Qt.binding(() => backend.values["general.hostname"] || "")

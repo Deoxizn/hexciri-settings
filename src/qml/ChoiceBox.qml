@@ -58,7 +58,7 @@ ComboBox {
         required property int index
         width: ListView.view ? ListView.view.width : box.width
         height: ui.controlHeight
-        highlighted: box.highlightedIndex === index
+        highlighted: box.highlightedIndex === index || (ListView.view && ListView.view.found === index)
         contentItem: Text {
             text: option.modelData[box.textRole] !== undefined ? option.modelData[box.textRole] : option.modelData
             color: option.index === box.currentIndex ? ui.accent : ui.fg
@@ -73,23 +73,67 @@ ComboBox {
         }
     }
 
+    // Long lists (time zones) get a field to type into: the list jumps to
+    // the first choice that matches, and Enter picks it.
+    readonly property bool filterable: count > 30
+    function matchFrom(text) {
+        const needle = text.trim()
+        if (needle.length === 0) return -1
+        const first = find(needle, Qt.MatchStartsWith)
+        return first >= 0 ? first : find(needle, Qt.MatchContains)
+    }
+
     popup: Popup {
+        id: menu
         // Grows from the box's far edge back toward the page, since boxes
         // sit at the end of their rows, and stays inside the window.
         x: Qt.application.layoutDirection === Qt.RightToLeft ? 0 : box.width - width
         y: box.height + ui.s(2)
         margins: ui.s(8)
         width: Math.max(box.width, Math.min(box.maxWidth + ui.s(60), Math.round(380 * ui.scale)))
-        implicitHeight: Math.min(list.contentHeight, ui.controlHeight * 10) + 2
+        implicitHeight: menuColumn.implicitHeight + 2
         padding: 1
-        contentItem: ListView {
-            id: list
-            clip: true
-            implicitHeight: contentHeight
-            model: box.popup.visible ? box.delegateModel : null
-            currentIndex: box.highlightedIndex
-            boundsBehavior: Flickable.StopAtBounds
-            ScrollIndicator.vertical: ScrollIndicator {}
+        // Opens at the current choice, not at the top of a long list.
+        onOpened: {
+            filter.text = ""
+            if (box.currentIndex >= 0) list.positionViewAtIndex(box.currentIndex, ListView.Center)
+            if (box.filterable) filter.forceActiveFocus()
+        }
+        contentItem: Column {
+            id: menuColumn
+            OmaField {
+                id: filter
+                visible: box.filterable
+                width: parent.width
+                placeholderText: qsTr("Type to find")
+                onTextChanged: {
+                    const i = box.matchFrom(text)
+                    list.found = i
+                    if (i >= 0) list.positionViewAtIndex(i, ListView.Beginning)
+                }
+                Keys.onReturnPressed: {
+                    const i = list.found >= 0 ? list.found : box.highlightedIndex
+                    if (i < 0) return
+                    box.currentIndex = i
+                    box.activated(i)
+                    menu.close()
+                }
+                Keys.onDownPressed: if (list.found < box.count - 1) { list.found++; list.positionViewAtIndex(list.found, ListView.Contain) }
+                Keys.onUpPressed: if (list.found > 0) { list.found--; list.positionViewAtIndex(list.found, ListView.Contain) }
+                Accessible.name: qsTr("Type to find")
+            }
+            ListView {
+                id: list
+                property int found: -1
+                width: parent.width
+                height: Math.min(contentHeight, ui.controlHeight * 10)
+                clip: true
+                model: box.delegateModel
+                currentIndex: box.highlightedIndex
+                highlightMoveDuration: 0
+                boundsBehavior: Flickable.StopAtBounds
+                ScrollBar.vertical: OmaScrollBar {}
+            }
         }
         background: Rectangle {
             color: ui.bg

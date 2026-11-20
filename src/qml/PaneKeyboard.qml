@@ -79,7 +79,7 @@ SettingsPage {
             label: qsTr("Add a layout")
             ChoiceBox {
                 id: addLayout
-                maxWidth: 240
+                maxWidth: ui.s(240)
                 currentIndex: -1
                 placeholder: qsTr("Choose a layout")
                 // A ComboBox selects its first item whenever its model
@@ -99,7 +99,7 @@ SettingsPage {
         ChoiceRow {
             setting: "keyboard.switchLayout"
             label: qsTr("Switch layouts with")
-            menuWidth: 240
+            menuWidth: ui.s(240)
             options: [
                 { value: "", text: qsTr("No shortcut") },
                 { value: "grp:alt_shift_toggle", text: "Alt + Shift" },
@@ -123,7 +123,7 @@ SettingsPage {
         ChoiceRow {
             setting: "keyboard.capsLock"
             label: qsTr("Caps Lock key")
-            menuWidth: 240
+            menuWidth: ui.s(240)
             options: [
                 { value: "", text: qsTr("Caps Lock") },
                 { value: "caps:escape", text: qsTr("Escape") },
@@ -136,7 +136,7 @@ SettingsPage {
         ChoiceRow {
             setting: "keyboard.compose"
             label: qsTr("Compose key")
-            menuWidth: 240
+            menuWidth: ui.s(240)
             options: [
                 { value: "", text: qsTr("None") },
                 { value: "compose:ralt", text: qsTr("Right Alt") },

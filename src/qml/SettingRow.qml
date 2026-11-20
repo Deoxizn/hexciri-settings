@@ -26,16 +26,23 @@ Item {
     readonly property bool matched: win.query.trim().length > 1
         && label.toLowerCase().indexOf(win.query.trim().toLowerCase()) >= 0
     onMatchedChanged: if (matched) Qt.callLater(() => win.revealRow(row))
+    // A row in a group that opens because it matched shows only then.
+    onVisibleChanged: if (matched && visible) Qt.callLater(() => win.revealRow(row))
     Component.onCompleted: if (matched) Qt.callLater(() => win.revealRow(row))
 
     width: parent ? parent.width : 0
-    implicitHeight: Math.max(ui.rowHeight, content.implicitHeight + ui.s(10))
+    // The height the row's content needs, for a row that asks for more.
+    readonly property real naturalHeight: Math.max(ui.rowHeight, content.implicitHeight + ui.s(10))
+    implicitHeight: naturalHeight
     opacity: dimmed ? 0.45 : 1
 
     // When the row is too narrow for its label beside the controls, the
     // controls move to a line of their own under the label, rather than
     // squeezing the label to a few letters or drawing over it.
     readonly property int textIndent: glyph.length > 0 || iconSource.length > 0 ? ui.s(18) + ui.s(12) : 0
+    // The width the controls have on a line of their own, for a field to
+    // shrink to rather than run past the edge of a narrow window.
+    readonly property real controlRoom: width - ui.s(20) - textIndent
     readonly property bool stacked: (label.length > 0 || sublabel.length > 0) && controls.implicitWidth > 0
         && width - ui.s(20) - textIndent - ui.s(12) - controls.implicitWidth < ui.s(140)
 
@@ -86,11 +93,17 @@ Item {
                 Layout.fillWidth: true
                 spacing: ui.s(2)
                 Text {
+                    id: labelText
+                    visible: row.label.length > 0
                     text: row.label
                     horizontalAlignment: Text.AlignLeft
                     color: ui.fg
                     font.family: ui.font
                     font.pixelSize: ui.body
+                    // Long labels and translations take a second line
+                    // before they are cut short.
+                    wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                    maximumLineCount: 2
                     elide: Text.ElideRight
                     Layout.fillWidth: true
                     textFormat: Text.PlainText
@@ -139,5 +152,10 @@ Item {
     }
 
     HoverHandler { id: hover; cursorShape: row.clickable ? Qt.PointingHandCursor : Qt.ArrowCursor }
+    // The whole label, when even two lines cut it short.
+    OmaToolTip {
+        visible: hover.hovered && labelText.truncated
+        text: row.label
+    }
     TapHandler { onTapped: row.activated() }
 }

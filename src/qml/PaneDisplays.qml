@@ -245,7 +245,7 @@ SettingsPage {
             sublabel: qsTr("Show the same picture as another display")
             ChoiceBox {
                 id: mirrorBox
-                maxWidth: 220
+                maxWidth: ui.s(220)
                 readonly property var target: page.selected ? page.mirrorTarget(page.selected) : undefined
                 model: [{ value: "", text: qsTr("Don't mirror") }].concat(
                            page.enabled.filter(o => page.selected && o.key !== page.selected.key && !o.mirrorOf)
@@ -271,7 +271,7 @@ SettingsPage {
             label: qsTr("Resolution")
             busy: page.applying
             ChoiceBox {
-                maxWidth: 220
+                maxWidth: ui.s(220)
                 model: page.resolutions
                 textRole: "text"; valueRole: "value"
                 enabled: !page.applying
@@ -288,7 +288,7 @@ SettingsPage {
         SettingRow {
             label: qsTr("Refresh rate")
             ChoiceBox {
-                maxWidth: 220
+                maxWidth: ui.s(220)
                 model: page.rates
                 textRole: "text"; valueRole: "value"
                 enabled: !page.applying
@@ -301,7 +301,7 @@ SettingsPage {
             label: qsTr("Scale")
             sublabel: qsTr("Larger makes text and windows bigger")
             ChoiceBox {
-                maxWidth: 220
+                maxWidth: ui.s(220)
                 model: page.scales
                 textRole: "text"; valueRole: "value"
                 enabled: !page.applying
@@ -313,7 +313,7 @@ SettingsPage {
         SettingRow {
             label: qsTr("Rotation")
             ChoiceBox {
-                maxWidth: 220
+                maxWidth: ui.s(220)
                 model: [
                     { value: 0, text: qsTr("Standard") }, { value: 1, text: qsTr("90°") },
                     { value: 2, text: qsTr("180°") }, { value: 3, text: qsTr("270°") }
@@ -345,9 +345,12 @@ SettingsPage {
         title: qsTr("Workspaces")
         footer: qsTr("Chosen workspaces always open on %1; the others open on whichever display you're using.").arg(page.label(page.selected))
         SettingRow {
+            id: workspacesRow
             label: qsTr("Open on this display")
+            // One line of ten when there is room beside the label, two of
+            // five when there isn't.
             Flow {
-                Layout.maximumWidth: ui.s(300)
+                width: Math.min(ui.s(28) * 10 + ui.s(4) * 9, Math.max(ui.s(28) * 5 + ui.s(4) * 4, workspacesRow.controlRoom - ui.s(220)))
                 spacing: ui.s(4)
                 Repeater {
                     model: 10
@@ -389,7 +392,7 @@ SettingsPage {
             label: qsTr("Adaptive sync")
             sublabel: qsTr("Matches the refresh rate to games and video to stop tearing")
             ChoiceBox {
-                maxWidth: 220
+                maxWidth: ui.s(220)
                 model: [
                     { value: 0, text: qsTr("Off") }, { value: 1, text: qsTr("On") },
                     { value: 2, text: qsTr("Full screen only") }
@@ -416,7 +419,7 @@ SettingsPage {
             visible: advanced.open
             label: qsTr("Color mode")
             ChoiceBox {
-                maxWidth: 220
+                maxWidth: ui.s(220)
                 model: [
                     { value: "auto", text: qsTr("Automatic") }, { value: "srgb", text: qsTr("Standard (sRGB)") },
                     { value: "wide", text: qsTr("Wide color") }, { value: "hdr", text: qsTr("HDR") }

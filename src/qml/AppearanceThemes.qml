@@ -28,7 +28,7 @@ SettingsPage {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: 12
+                anchors.margins: ui.s(12)
                 columns: Math.max(2, Math.floor(width / 150))
                 columnSpacing: 10
                 rowSpacing: 12
@@ -41,7 +41,7 @@ SettingsPage {
                         readonly property bool selected: modelData.name === page.current
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
-                        spacing: 6
+                        spacing: ui.s(6)
 
                         Rectangle {
                             Layout.fillWidth: true
@@ -95,11 +95,12 @@ SettingsPage {
         title: qsTr("Add a Theme")
         footer: qsTr("Find themes at omarchy.org/themes. Paste the theme's git address; it is downloaded and applied.")
         SettingRow {
+            id: themeUrlRow
             label: qsTr("From a git URL")
             busy: page.installing
             OmaField {
                 id: themeUrl
-                width: Math.round(280 * ui.scale)
+                width: Math.max(ui.s(120), Math.min(Math.round(280 * ui.scale), themeUrlRow.controlRoom - installTheme.width - ui.s(8)))
                 placeholderText: "https://github.com/…"
                 onAccepted: installTheme.clicked()
             }

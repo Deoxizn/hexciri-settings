@@ -125,10 +125,11 @@ SettingsPage {
         title: qsTr("Add a Plugin")
         footer: qsTr("Only add plugins you trust: they run inside the shell with your permissions.")
         SettingRow {
+            id: urlRow
             label: qsTr("From a git URL")
             OmaField {
                 id: url
-                width: Math.round(280 * ui.scale)
+                width: Math.max(ui.s(120), Math.min(Math.round(280 * ui.scale), urlRow.controlRoom - add.width - ui.s(8)))
                 placeholderText: "https://github.com/…"
                 onAccepted: add.clicked()
             }

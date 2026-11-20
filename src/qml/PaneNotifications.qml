@@ -34,6 +34,7 @@ SettingsPage {
             }
         }
         SettingRow {
+            id: remindRow
             label: qsTr("Remind me in")
             ChoiceBox {
                 id: inMinutes
@@ -46,7 +47,8 @@ SettingsPage {
             }
             OmaField {
                 id: reminderText
-                width: Math.round(200 * ui.scale)
+                width: Math.max(ui.s(100), Math.min(Math.round(200 * ui.scale),
+                                                    remindRow.controlRoom - inMinutes.width - setReminder.width - ui.s(16)))
                 placeholderText: qsTr("What about?")
                 onAccepted: setReminder.clicked()
             }

@@ -1303,5 +1303,9 @@
   "Uploaded from this computer from now on": "今後はこのコンピューターからもアップロードされます",
   "The repository changed since you looked; open it again to see what's new": "確認した後にリポジトリが変更されました。もう一度開いて新しい内容を確認してください",
   "%1 has a name the app launcher can't use": "%1 はアプリランチャーで使えない名前です",
-  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "AppImage をダウンロードで置き換えるには、入手元が未確認であることを確認する必要があります"
+  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "AppImage をダウンロードで置き換えるには、入手元が未確認であることを確認する必要があります",
+  "Type to find": "入力して検索",
+  "Scroll the page": "ページをスクロール",
+  "Top or bottom of the page": "ページの先頭または末尾",
+  "Loading…": "読み込み中…"
 }

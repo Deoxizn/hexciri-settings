@@ -18,6 +18,18 @@ ColumnLayout {
     // Rows above the others that stay in view while the group is closed,
     // like an Add button for a list that folds away.
     property alias leading: lead.data
+    // A row inside that matches the search, so a closed group opens to show
+    // it rather than hiding what was searched for.
+    readonly property bool hasMatch: {
+        if (win.query.trim().length < 2) return false
+        for (const c of list.children) {
+            if (c.matched) return true
+            for (const d of (c.children || []))
+                if (d.matched) return true
+        }
+        return false
+    }
+    readonly property bool expanded: !(collapsible && collapsed) || hasMatch
 
     Layout.fillWidth: true
     spacing: ui.s(6)
@@ -70,7 +82,7 @@ ColumnLayout {
         // Points down when open, and along the reading direction when closed.
         PaneIcon {
             visible: group.collapsible
-            glyph: !group.collapsed ? "\u{F0140}"
+            glyph: group.expanded ? "\u{F0140}"
                    : Qt.application.layoutDirection === Qt.RightToLeft ? "\u{F0141}" : "\u{F0142}"
             tint: header.activeFocus || hover.hovered ? ui.fg : ui.muted
             size: ui.s(16)
@@ -89,13 +101,13 @@ ColumnLayout {
 
     Column {
         id: list
-        visible: !(group.collapsible && group.collapsed)
+        visible: group.expanded
         Layout.fillWidth: true
         spacing: ui.s(2)
     }
 
     Text {
-        visible: group.footer.length > 0 && !(group.collapsible && group.collapsed)
+        visible: group.footer.length > 0 && group.expanded
         text: group.footer
         horizontalAlignment: Text.AlignLeft
         color: ui.muted2

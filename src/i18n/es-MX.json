@@ -1375,5 +1375,9 @@
   "Uploaded from this computer from now on": "Se sube desde esta computadora a partir de ahora",
   "The repository changed since you looked; open it again to see what's new": "El repositorio cambió desde que lo revisaste; ábrelo de nuevo para ver lo nuevo",
   "%1 has a name the app launcher can't use": "%1 tiene un nombre que el lanzador de apps no puede usar",
-  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "Reemplazar un AppImage con una descarga requiere confirmar que su origen no está verificado"
+  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "Reemplazar un AppImage con una descarga requiere confirmar que su origen no está verificado",
+  "Type to find": "Escribe para buscar",
+  "Scroll the page": "Desplazar la página",
+  "Top or bottom of the page": "Inicio o final de la página",
+  "Loading…": "Cargando…"
 }

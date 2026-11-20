@@ -1303,5 +1303,9 @@
   "Uploaded from this computer from now on": "今后也从这台电脑上传",
   "The repository changed since you looked; open it again to see what's new": "你查看之后仓库有了变化；请重新打开查看新内容",
   "%1 has a name the app launcher can't use": "%1 的名称无法用于应用启动器",
-  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "用下载的文件替换 AppImage 需要确认其来源未经核实"
+  "Replacing an AppImage with a download needs confirming that its origin isn't checked": "用下载的文件替换 AppImage 需要确认其来源未经核实",
+  "Type to find": "输入以查找",
+  "Scroll the page": "滚动页面",
+  "Top or bottom of the page": "页面顶部或底部",
+  "Loading…": "正在载入…"
 }

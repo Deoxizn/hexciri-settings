@@ -23,7 +23,7 @@ SettingsPage {
         ChoiceRow {
             setting: "general.timezone"
             label: qsTr("Time zone")
-            menuWidth: 260
+            menuWidth: ui.s(260)
             options: (backend.lists.timezones || []).map(t => ({ value: t, text: t.replace(/_/g, " ") }))
         }
     }

@@ -32,7 +32,9 @@ SettingsPage {
             onActivated: win.openSub("AppearanceThemes", qsTr("Themes"))
             Keys.onReturnPressed: activated()
             Keys.onSpacePressed: activated()
-            implicitHeight: Math.round(90 * ui.scale)
+            // Room for the preview beside the label, and for the label, the
+            // preview, and the button when they stack in a narrow window.
+            implicitHeight: Math.max(Math.round(90 * ui.scale), naturalHeight)
             Rectangle {
                 width: Math.round(120 * ui.scale)
                 height: Math.round(72 * ui.scale)

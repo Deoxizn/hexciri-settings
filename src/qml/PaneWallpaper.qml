@@ -44,7 +44,7 @@ SettingsPage {
         }
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: ui.s(8)
             Text {
                 text: qsTr("From the %1 theme").arg(backend.values["appearance.theme"] || "")
                 visible: (backend.values["appearance.theme"] || "").length > 0
@@ -89,7 +89,7 @@ SettingsPage {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                anchors.margins: 12
+                anchors.margins: ui.s(12)
                 columns: Math.max(1, Math.floor(width / Math.round(130 * ui.scale)))
                 columnSpacing: 10
                 rowSpacing: 10
@@ -126,7 +126,7 @@ SettingsPage {
                             visible: wall.modelData.video
                             text: "\u{F040A}"
                             font.family: ui.iconFont
-                            font.pixelSize: 28
+                            font.pixelSize: ui.s(28)
                             color: ui.muted
                         }
                         HoverHandler { id: hover; cursorShape: Qt.PointingHandCursor }
