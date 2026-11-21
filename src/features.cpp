@@ -173,21 +173,18 @@ static void placeMenuSearch(QStringList &lines) {
     if (!block)
         return;
     const QString groupKey = menuLine(searchGroup, {}).section(':', 0, 0) + ":";
-    const QString openKey = menuLine(searchGroup + ".open", {}).section(':', 0, 0) + ":";
     for (int i = from + 1; i < to; ++i) {
-        const bool group = lines[i].startsWith(groupKey), open = lines[i].startsWith(openKey);
-        if (!group && !open)
+        if (!lines[i].startsWith(groupKey))
             continue;
         const QString json = lines[i].mid(lines[i].indexOf('{'), lines[i].lastIndexOf('}') - lines[i].indexOf('{') + 1);
         QJsonObject entry = QJsonDocument::fromJson(json.toUtf8()).object();
         entry.remove("parent");
         entry.remove("when");
-        // Off, the group is hidden and "Open Settings" with it: only the pages are found.
         if (place == "off")
             entry.insert("when", "false");
-        else if (group && place == "setup")
+        else if (place == "setup")
             entry.insert("parent", "setup");
-        lines[i] = menuLine(group ? searchGroup : searchGroup + ".open", entry);
+        lines[i] = menuLine(searchGroup, entry);
     }
 }
 
@@ -225,7 +222,7 @@ bool Store::menuSearchOn() {
     return readText(m_paths.config + "/omarchy/extensions/omarchy-menu.jsonc").contains(searchBegin.trimmed());
 }
 
-QString Store::setMenuSearch(const QVariantList &entries, const QString &groupLabel, const QString &openLabel) {
+QString Store::setMenuSearch(const QVariantList &entries, const QString &groupLabel) {
     static const QRegularExpression validId("^[a-z0-9-]+(\\.[a-z0-9-]+)?$");
     static const QRegularExpression validTarget("^[a-z0-9-]+(/[a-z0-9-]+)?$");
     QStringList block;
@@ -236,15 +233,12 @@ QString Store::setMenuSearch(const QVariantList &entries, const QString &groupLa
             if (const QString id = v.toMap().value("id").toString(); id.contains('.'))
                 withPages << id.section('.', 0, 0);
         block << searchBegin
-              << menuLine(searchGroup, {{"icon", QString::fromUtf8("\U000F062E")}, {"label", groupLabel.isEmpty() ? "Settings" : groupLabel}})
-              << menuLine(searchGroup + ".open", {{"icon", QString::fromUtf8("\U000F062E")},
-                                                  {"label", openLabel.isEmpty() ? "Open Settings" : openLabel.simplified()},
-                                                  {"searchTerms", QJsonArray{"settings"}}, {"action", "omasettings"}});
+              << menuLine(searchGroup, {{"icon", QString::fromUtf8("\U000F062E")}, {"label", groupLabel.isEmpty() ? "Settings" : groupLabel}});
         for (const QVariant &v : entries) {
             const QVariantMap e = v.toMap();
             const QString id = e.value("id").toString(), target = e.value("target").toString();
             const QString label = e.value("label").toString().trimmed();
-            if (!validId.match(id).hasMatch() || !validTarget.match(target).hasMatch() || label.isEmpty() || id == "open")
+            if (!validId.match(id).hasMatch() || !validTarget.match(target).hasMatch() || label.isEmpty())
                 return tr("Can't add %1 to the menu").arg(label.isEmpty() ? id : label);
             QJsonArray terms;
             for (const QVariant &t : e.value("searchTerms").toList())
@@ -1107,13 +1101,13 @@ QString Store::actMore(const QString &action, const QVariantList &args) {
         });
     }
     if (action == "menu.searchEntries") {
-        // args: the entries (none takes them out), the group's label, and "Open Settings".
+        // args: the entries (none takes them out), and the group's label.
         // From the app they're a list; from the command line, JSON text.
         const QVariant given = args.value(0);
         QVariantList entries = given.toList();
         if (given.typeId() == QMetaType::QString)
             entries = QJsonDocument::fromJson(given.toString().toUtf8()).array().toVariantList();
-        return setMenuSearch(entries, args.value(1).toString(), args.value(2).toString());
+        return setMenuSearch(entries, args.value(1).toString());
     }
     if (action == "rule.update") {
         const int index = a0.toInt();

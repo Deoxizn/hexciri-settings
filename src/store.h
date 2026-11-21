@@ -163,7 +163,7 @@ private:
     QString setMenuPlace(const QString &place);
     // Settings' panes and pages in the Omarchy menu's search (see features.cpp).
     bool menuSearchOn();
-    QString setMenuSearch(const QVariantList &entries, const QString &groupLabel, const QString &openLabel = QString());
+    QString setMenuSearch(const QVariantList &entries, const QString &groupLabel);
     QString updateState(const std::function<QString(QJsonObject &)> &change);
     QJsonObject exportSettings();
 

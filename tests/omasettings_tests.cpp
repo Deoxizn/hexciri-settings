@@ -981,12 +981,11 @@ private slots:
         };
 
         // With Settings not in the menu, the pages are hidden but searchable.
-        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen", "Einstellungen öffnen"}), QString());
+        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen"}), QString());
         QString text = readText(menu);
         QVERIFY(store.list("menuSearch").toMap().value("on").toBool());
         QVERIFY(text.contains("\"mine\": {\"label\":\"Mine\",\"action\":\"true\"}"));
         QVERIFY(text.contains("\"omasettings-search\": {\"icon\":\"\U000F062E\",\"label\":\"Einstellungen\",\"when\":\"false\"}"));
-        QVERIFY(text.contains("\"omasettings-search.open\": {\"action\":\"omasettings\",\"icon\":\"\U000F062E\",\"label\":\"Einstellungen öffnen\",\"searchTerms\":[\"settings\"],\"when\":\"false\"}"));
         QVERIFY(text.contains("\"omasettings-search.general.datetime\": {\"action\":\"omasettings open general/datetime\",\"icon\":\"\",\"label\":\"Datum \\\"& Uhrzeit\\\"\",\"searchTerms\":[\"Date & Time\"]}"));
         QVERIFY(text.contains("\"omasettings-search.vpn\": {\"action\":\"omasettings open vpn\",\"icon\":\"x\",\"label\":\"VPN\",\"searchTerms\":[\"vpn wireguard\"]}"));
         // A pane with pages is a submenu, with the pane itself first.
@@ -1000,7 +999,8 @@ private slots:
         text = readText(menu);
         QCOMPARE(store.read("integration.menuPlace").toString(), QString("top"));
         QVERIFY(text.contains("\"omasettings-search\": {\"icon\":\"\U000F062E\",\"label\":\"Einstellungen\"}"));
-        QVERIFY(text.contains("\"label\":\"Einstellungen öffnen\",\"searchTerms\":[\"settings\"]}"));
+        // The app itself is in Apps, so the submenu holds only the pages.
+        QVERIFY(!text.contains("omasettings-search.open"));
         QVERIFY(text.contains("\"omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings\",\"description\":\"Change how this computer looks and works\",\"action\":\"omasettings\",\"when\":\"false\"},"));
         QVERIFY(parses(text));
 
@@ -1021,12 +1021,11 @@ private slots:
         // The same entries again leave the file alone; new ones replace the block.
         const QDateTime written = QFileInfo(menu).lastModified();
         QTest::qWait(20);
-        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen", "Einstellungen öffnen"}), QString());
+        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen"}), QString());
         QCOMPARE(QFileInfo(menu).lastModified(), written);
         QCOMPARE(store.act("menu.searchEntries", {QVariantList{entries[0]}, "Settings"}), QString());
         QCOMPARE(readText(menu).count("omasettings:search begin"), 1);
         QVERIFY(!readText(menu).contains("general"));
-        QVERIFY(readText(menu).contains("\"label\":\"Open Settings\""));
         QVERIFY(readText(menu).contains("\"parent\":\"setup\""));
 
         // Ids and targets go into a shell command, so only plain ones do.
