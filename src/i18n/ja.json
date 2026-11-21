@@ -421,7 +421,7 @@
   "Filter %n shortcuts": {
     "other": "%n 件のショートカットを絞り込む"
   },
-  "Find Settings' pages in the menu search": "メニュー検索で設定アプリのページを探す",
+  "Show Settings' pages in the menu": "設定アプリのページをメニューに表示",
   "Find themes at omarchy.org/themes. Paste the theme's git address; it is downloaded and applied.": "テーマは omarchy.org/themes で探せます。テーマの git アドレスを貼り付けると、ダウンロードして適用します。",
   "Fingerprint": "指紋",
   "Fingerprint, security keys, and SSH": "指紋、セキュリティキー、SSH",
@@ -1089,7 +1089,8 @@
   "Turning one off frees its keys for something else. For anything this can't do, edit bindings.lua.": "オフにすると、そのキーをほかの用途に使えるようになります。ここでできないことは bindings.lua を編集してください。",
   "Turning the firewall on or off asks for your password.": "ファイアウォールのオン/オフにはパスワードが必要です。",
   "Type Chinese, Japanese, or Korean": "中国語、日本語、韓国語を入力",
-  "Type “vpn” or “date” in the Omarchy menu to open that page here": "Omarchy メニューで「vpn」や「日付」と入力すると、そのページがここで開きます",
+  "List every page under Settings in the Omarchy menu, and find one by typing “vpn” or “date”": "Omarchy メニューの「設定」の下にすべてのページを並べ、「vpn」や「日付」と入力して探せます",
+  "Open Settings": "設定を開く",
   "Typing": "タイピング",
   "Under Setup": "「設定」の下",
   "Undo": "取り消す",

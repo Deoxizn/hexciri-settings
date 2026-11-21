@@ -517,7 +517,7 @@
     "one": "Filtruj 1 skrót",
     "other": "Filtruj %n skrótów"
   },
-  "Find Settings' pages in the menu search": "Znajduj strony Ustawień w wyszukiwaniu menu",
+  "Show Settings' pages in the menu": "Pokazuj strony Ustawień w menu",
   "Find themes at omarchy.org/themes. Paste the theme's git address; it is downloaded and applied.": "Motywy znajdziesz na omarchy.org/themes. Wklej adres git motywu; zostanie pobrany i zastosowany.",
   "Fingerprint": "Odcisk palca",
   "Fingerprint, security keys, and SSH": "Odcisk palca, klucze bezpieczeństwa i SSH",
@@ -1197,7 +1197,8 @@
   "Turning one off frees its keys for something else. For anything this can't do, edit bindings.lua.": "Wyłączenie skrótu zwalnia jego klawisze do innych celów. Wszystko, czego nie da się zrobić tutaj, zmienisz w bindings.lua.",
   "Turning the firewall on or off asks for your password.": "Włączenie lub wyłączenie zapory sieciowej wymaga podania hasła.",
   "Type Chinese, Japanese, or Korean": "Pisz po chińsku, japońsku lub koreańsku",
-  "Type “vpn” or “date” in the Omarchy menu to open that page here": "Wpisz „vpn” lub „data” w menu Omarchy, aby otworzyć tę stronę tutaj",
+  "List every page under Settings in the Omarchy menu, and find one by typing “vpn” or “date”": "Wypisz każdą stronę pod Ustawieniami w menu Omarchy i znajdź ją, wpisując „vpn” lub „data”",
+  "Open Settings": "Otwórz Ustawienia",
   "Typing": "Pisanie",
   "Under Setup": "W sekcji Ustawienia",
   "Undo": "Cofnij",

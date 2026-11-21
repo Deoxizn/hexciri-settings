@@ -128,12 +128,71 @@ QString Store::setNightShift(const QString &key, const QVariant &value) {
 // leaves the rest of the file as it is.
 static const QRegularExpression menuEntryKey(R"re(^\s*"(setup\.)?omasettings"\s*:)re");
 
-QString Store::menuPlace() {
-    const QStringList lines = readText(m_paths.config + "/omarchy/extensions/omarchy-menu.jsonc").split('\n');
+// Settings' panes and pages as Omarchy menu entries, in one marked block:
+// browsable under Settings' own entry, wherever that is, and found by the
+// menu's search for "vpn" or "date". With Settings not in the menu they sit
+// under a hidden group instead (when false): browsing never shows them, but
+// the search finds an action whose own guard passes, whatever its parents'.
+// The app supplies the entries, since its titles and keywords are in QML
+// and in the user's language.
+static const QString searchBegin = "  // omasettings:search begin (written by Settings; switch it off in Settings › Omarchy Menu)";
+static const QString searchEnd = "  // omasettings:search end";
+static const QString searchGroup = "omasettings-search";
+
+static QString menuLine(const QString &id, const QJsonObject &entry) {
+    return "  " + QString::fromUtf8(QJsonDocument(QJsonArray{id}).toJson(QJsonDocument::Compact)).mid(1).chopped(1)
+           + ": " + QString::fromUtf8(QJsonDocument(entry).toJson(QJsonDocument::Compact)) + ",";
+}
+
+// Settings' entry at `place`; hidden while the block's group stands in for it.
+static QString placeLine(const QString &place, bool hidden) {
+    QString line = place == "top"
+        ? QStringLiteral("  \"omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings\",\"description\":\"Change how this computer looks and works\",\"action\":\"omasettings\"},")
+        : QStringLiteral("  \"setup.omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings app\",\"action\":\"omasettings\"},");
+    if (hidden)
+        line.insert(line.size() - 2, ",\"when\":\"false\"");
+    return line;
+}
+
+static QString placeIn(const QStringList &lines) {
     for (const QString &line : lines)
         if (const auto m = menuEntryKey.match(line); m.hasMatch())
             return m.captured(1).isEmpty() ? "top" : "setup";
     return "off";
+}
+
+// Puts the block's group where Settings' entry is, and hides that entry while
+// the group takes its place (or shows it again once the block is gone).
+static void placeMenuSearch(QStringList &lines) {
+    const QString place = placeIn(lines);
+    const int from = lines.indexOf(searchBegin), to = lines.indexOf(searchEnd);
+    const bool block = from >= 0 && to > from;
+    for (QString &line : lines)
+        if (menuEntryKey.match(line).hasMatch())
+            line = placeLine(place, block);
+    if (!block)
+        return;
+    const QString groupKey = menuLine(searchGroup, {}).section(':', 0, 0) + ":";
+    const QString openKey = menuLine(searchGroup + ".open", {}).section(':', 0, 0) + ":";
+    for (int i = from + 1; i < to; ++i) {
+        const bool group = lines[i].startsWith(groupKey), open = lines[i].startsWith(openKey);
+        if (!group && !open)
+            continue;
+        const QString json = lines[i].mid(lines[i].indexOf('{'), lines[i].lastIndexOf('}') - lines[i].indexOf('{') + 1);
+        QJsonObject entry = QJsonDocument::fromJson(json.toUtf8()).object();
+        entry.remove("parent");
+        entry.remove("when");
+        // Off, the group is hidden and "Open Settings" with it: only the pages are found.
+        if (place == "off")
+            entry.insert("when", "false");
+        else if (group && place == "setup")
+            entry.insert("parent", "setup");
+        lines[i] = menuLine(group ? searchGroup : searchGroup + ".open", entry);
+    }
+}
+
+QString Store::menuPlace() {
+    return placeIn(readText(m_paths.config + "/omarchy/extensions/omarchy-menu.jsonc").split('\n'));
 }
 
 QString Store::setMenuPlace(const QString &place) {
@@ -144,92 +203,101 @@ QString Store::setMenuPlace(const QString &place) {
     return rewriteMenu([&](QStringList &lines) {
         lines.erase(std::remove_if(lines.begin(), lines.end(),
                                    [](const QString &l) { return menuEntryKey.match(l).hasMatch(); }), lines.end());
-        if (place == "off")
-            return QString();
-        int brace = -1;
-        for (int i = 0; i < lines.size() && brace < 0; ++i)
-            if (lines[i].trimmed().startsWith('{'))
-                brace = i;
-        if (brace < 0)
-            return tr("Your menu file isn't a JSON object; fix it by hand first");
-        if (lines[brace].trimmed() == "{}") {
-            lines[brace] = "{";
-            lines.insert(brace + 1, "}");
+        if (place != "off") {
+            int brace = -1;
+            for (int i = 0; i < lines.size() && brace < 0; ++i)
+                if (lines[i].trimmed().startsWith('{'))
+                    brace = i;
+            if (brace < 0)
+                return tr("Your menu file isn't a JSON object; fix it by hand first");
+            if (lines[brace].trimmed() == "{}") {
+                lines[brace] = "{";
+                lines.insert(brace + 1, "}");
+            }
+            lines.insert(brace + 1, placeLine(place, false));
         }
-        lines.insert(brace + 1, place == "top"
-            ? QStringLiteral("  \"omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings\",\"description\":\"Change how this computer looks and works\",\"action\":\"omasettings\"},")
-            : QStringLiteral("  \"setup.omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings app\",\"action\":\"omasettings\"},"));
+        placeMenuSearch(lines);
         return QString();
     });
 }
-
-// Settings' panes and pages as Omarchy menu entries, so searching the menu
-// for "vpn" opens the VPN pane. They sit in one marked block under a group
-// that's hidden (when false): browsing never shows them, but the menu's
-// search finds an action whose own guard passes, whatever its parents'.
-// The app supplies the entries, since its titles and keywords are in QML
-// and in the user's language.
-static const QString searchBegin = "  // omasettings:search begin (written by Settings; switch it off in Settings › Omarchy Menu)";
-static const QString searchEnd = "  // omasettings:search end";
-static const QString searchGroup = "omasettings-search";
 
 bool Store::menuSearchOn() {
     return readText(m_paths.config + "/omarchy/extensions/omarchy-menu.jsonc").contains(searchBegin.trimmed());
 }
 
-QString Store::setMenuSearch(const QVariantList &entries, const QString &groupLabel) {
+QString Store::setMenuSearch(const QVariantList &entries, const QString &groupLabel, const QString &openLabel) {
     static const QRegularExpression validId("^[a-z0-9-]+(\\.[a-z0-9-]+)?$");
     static const QRegularExpression validTarget("^[a-z0-9-]+(/[a-z0-9-]+)?$");
-    auto line = [](const QString &id, const QJsonObject &entry) {
-        return "  " + QString::fromUtf8(QJsonDocument(QJsonArray{id}).toJson(QJsonDocument::Compact)).mid(1).chopped(1)
-               + ": " + QString::fromUtf8(QJsonDocument(entry).toJson(QJsonDocument::Compact)) + ",";
-    };
     QStringList block;
     if (!entries.isEmpty()) {
+        // A pane with pages is a submenu: the pane itself first, then its pages.
+        QSet<QString> withPages;
+        for (const QVariant &v : entries)
+            if (const QString id = v.toMap().value("id").toString(); id.contains('.'))
+                withPages << id.section('.', 0, 0);
         block << searchBegin
-              << line(searchGroup, {{"icon", QString::fromUtf8("\U000F062E")}, {"label", groupLabel.isEmpty() ? "Settings" : groupLabel},
-                                    {"when", "false"}});
+              << menuLine(searchGroup, {{"icon", QString::fromUtf8("\U000F062E")}, {"label", groupLabel.isEmpty() ? "Settings" : groupLabel}})
+              << menuLine(searchGroup + ".open", {{"icon", QString::fromUtf8("\U000F062E")},
+                                                  {"label", openLabel.isEmpty() ? "Open Settings" : openLabel.simplified()},
+                                                  {"searchTerms", QJsonArray{"settings"}}, {"action", "omasettings"}});
         for (const QVariant &v : entries) {
             const QVariantMap e = v.toMap();
             const QString id = e.value("id").toString(), target = e.value("target").toString();
             const QString label = e.value("label").toString().trimmed();
-            if (!validId.match(id).hasMatch() || !validTarget.match(target).hasMatch() || label.isEmpty())
+            if (!validId.match(id).hasMatch() || !validTarget.match(target).hasMatch() || label.isEmpty() || id == "open")
                 return tr("Can't add %1 to the menu").arg(label.isEmpty() ? id : label);
             QJsonArray terms;
             for (const QVariant &t : e.value("searchTerms").toList())
                 if (const QString term = t.toString().simplified(); !term.isEmpty())
                     terms << term;
-            block << line(searchGroup + "." + id, {{"icon", e.value("icon").toString()}, {"label", label.simplified()},
-                                                    {"searchTerms", terms}, {"action", "omasettings open " + target}});
+            const QJsonObject entry{{"icon", e.value("icon").toString()}, {"label", label.simplified()}, {"searchTerms", terms}};
+            if (withPages.contains(id)) {
+                block << menuLine(searchGroup + "." + id, entry)
+                      << menuLine(searchGroup + "." + id + "-pane", {{"parent", searchGroup + "." + id}, {"icon", entry.value("icon")},
+                                                                    {"label", entry.value("label")}, {"action", "omasettings open " + target}});
+            } else {
+                QJsonObject action = entry;
+                action.insert("action", "omasettings open " + target);
+                block << menuLine(searchGroup + "." + id, action);
+            }
         }
         block << searchEnd;
     }
 
-    // Unchanged entries leave the file alone: every write reloads the menu.
-    const QStringList current = readText(m_paths.config + "/omarchy/extensions/omarchy-menu.jsonc").split('\n');
-    const int from = current.indexOf(searchBegin), to = current.indexOf(searchEnd);
-    if (from >= 0 && to > from ? current.mid(from, to - from + 1) == block : block.isEmpty())
-        return {};
-    return rewriteMenu([&](QStringList &lines) {
+    auto change = [&](QStringList &lines) {
+        // New entries go where the old ones were, else first in the file.
+        int at = -1;
         const int b = lines.indexOf(searchBegin), e = lines.indexOf(searchEnd);
-        if (b >= 0 && e > b)
+        if (b >= 0 && e > b) {
             lines.erase(lines.begin() + b, lines.begin() + e + 1);
-        if (block.isEmpty())
-            return QString();
-        int brace = -1;
-        for (int i = 0; i < lines.size() && brace < 0; ++i)
-            if (lines[i].trimmed().startsWith('{'))
-                brace = i;
-        if (brace < 0)
-            return tr("Your menu file isn't a JSON object; fix it by hand first");
-        if (lines[brace].trimmed() == "{}") {
-            lines[brace] = "{";
-            lines.insert(brace + 1, "}");
+            at = b;
         }
-        for (int i = 0; i < block.size(); ++i)
-            lines.insert(brace + 1 + i, block[i]);
+        if (!block.isEmpty()) {
+            if (at < 0) {
+                int brace = -1;
+                for (int i = 0; i < lines.size() && brace < 0; ++i)
+                    if (lines[i].trimmed().startsWith('{'))
+                        brace = i;
+                if (brace < 0)
+                    return tr("Your menu file isn't a JSON object; fix it by hand first");
+                if (lines[brace].trimmed() == "{}") {
+                    lines[brace] = "{";
+                    lines.insert(brace + 1, "}");
+                }
+                at = brace + 1;
+            }
+            for (int i = 0; i < block.size(); ++i)
+                lines.insert(at + i, block[i]);
+        }
+        placeMenuSearch(lines);
         return QString();
-    });
+    };
+    // Unchanged entries leave the file alone: every write reloads the menu.
+    const QString text = readText(m_paths.config + "/omarchy/extensions/omarchy-menu.jsonc");
+    QStringList next = text.split('\n');
+    if (change(next).isEmpty() && next.join('\n') == text)
+        return {};
+    return rewriteMenu(change);
 }
 
 void Store::buildMore() {
@@ -1039,13 +1107,13 @@ QString Store::actMore(const QString &action, const QVariantList &args) {
         });
     }
     if (action == "menu.searchEntries") {
-        // args: the entries (none takes them out), and the group's label.
+        // args: the entries (none takes them out), the group's label, and "Open Settings".
         // From the app they're a list; from the command line, JSON text.
         const QVariant given = args.value(0);
         QVariantList entries = given.toList();
         if (given.typeId() == QMetaType::QString)
             entries = QJsonDocument::fromJson(given.toString().toUtf8()).array().toVariantList();
-        return setMenuSearch(entries, args.value(1).toString());
+        return setMenuSearch(entries, args.value(1).toString(), args.value(2).toString());
     }
     if (action == "rule.update") {
         const int index = a0.toInt();

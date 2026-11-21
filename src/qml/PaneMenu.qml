@@ -193,14 +193,14 @@ SettingsPage {
                       { value: "top", text: qsTr("At the top") }]
         }
         SettingRow {
-            label: qsTr("Find Settings' pages in the menu search")
-            sublabel: qsTr("Type “vpn” or “date” in the Omarchy menu to open that page here")
+            label: qsTr("Show Settings' pages in the menu")
+            sublabel: qsTr("List every page under Settings in the Omarchy menu, and find one by typing “vpn” or “date”")
             glyph: "\u{F0349}"
             busy: backend.busy.indexOf("menu.searchEntries") >= 0
             OmaToggle {
                 checked: win.menuSearchOn
                 onToggled: win.setMenuSearch(!win.menuSearchOn)
-                Accessible.name: qsTr("Find Settings' pages in the menu search")
+                Accessible.name: qsTr("Show Settings' pages in the menu")
             }
         }
     }

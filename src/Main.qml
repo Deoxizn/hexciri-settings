@@ -296,9 +296,9 @@ ApplicationWindow {
         function onOpenRequested(target) { win.openTarget(target) }
     }
 
-    // Every pane and page as an entry for the Omarchy menu's search (off
-    // until switched on in Omarchy Menu): its title and keywords in the
-    // language in use, and in English too, so either finds it.
+    // Every pane and page as an entry under Settings in the Omarchy menu, and
+    // for its search (off until switched on in Omarchy Menu): its title and
+    // keywords in the language in use, and in English too, so either finds it.
     function menuSearchEntries() {
         const terms = (title, keywords) => {
             const out = []
@@ -318,7 +318,7 @@ ApplicationWindow {
     }
     readonly property bool menuSearchOn: !!(backend.lists.menuSearch || {}).on
     function setMenuSearch(on) {
-        backend.act("menu.searchEntries", [on ? menuSearchEntries() : [], qsTr("Settings")], ["menuSearch"])
+        backend.act("menu.searchEntries", [on ? menuSearchEntries() : [], qsTr("Settings"), qsTr("Open Settings")], ["menuSearch", "menuCustom"])
     }
     // While it's on, the entries follow the language and what this computer
     // has (Battery or Power); writing the same entries again changes nothing.

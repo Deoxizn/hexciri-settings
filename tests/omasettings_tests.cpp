@@ -970,32 +970,64 @@ private slots:
         const QVariantList entries{
             QVariantMap{{"id", "vpn"}, {"target", "vpn"}, {"icon", "x"}, {"label", "VPN"},
                         {"searchTerms", QVariantList{"vpn wireguard", "  "}}},
+            QVariantMap{{"id", "general"}, {"target", "general"}, {"icon", "g"}, {"label", "Allgemein"}},
             QVariantMap{{"id", "general.datetime"}, {"target", "general/datetime"}, {"label", "Datum \"& Uhrzeit\""},
                         {"searchTerms", QVariantList{"Date & Time"}}},
         };
-        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen"}), QString());
-        QCOMPARE(store.write("integration.menuPlace", "setup"), QString());
-        const QString text = readText(menu);
+        auto parses = [](const QString &text) {
+            QJsonParseError error;
+            QJsonDocument::fromJson(text.split('\n').filter(QRegularExpression("^(?!\\s*//)")).join('\n').replace(",\n}", "\n}").toUtf8(), &error);
+            return error.error == QJsonParseError::NoError;
+        };
+
+        // With Settings not in the menu, the pages are hidden but searchable.
+        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen", "Einstellungen öffnen"}), QString());
+        QString text = readText(menu);
         QVERIFY(store.list("menuSearch").toMap().value("on").toBool());
-        // The rest of the file is as it was, and the file is still a menu.
         QVERIFY(text.contains("\"mine\": {\"label\":\"Mine\",\"action\":\"true\"}"));
-        QVERIFY(text.contains("\"setup.omasettings\""));
-        QVERIFY(text.contains("\"omasettings-search\": {\"icon\":"));
-        QVERIFY(text.contains("\"label\":\"Einstellungen\",\"when\":\"false\""));
+        QVERIFY(text.contains("\"omasettings-search\": {\"icon\":\"\U000F062E\",\"label\":\"Einstellungen\",\"when\":\"false\"}"));
+        QVERIFY(text.contains("\"omasettings-search.open\": {\"action\":\"omasettings\",\"icon\":\"\U000F062E\",\"label\":\"Einstellungen öffnen\",\"searchTerms\":[\"settings\"],\"when\":\"false\"}"));
         QVERIFY(text.contains("\"omasettings-search.general.datetime\": {\"action\":\"omasettings open general/datetime\",\"icon\":\"\",\"label\":\"Datum \\\"& Uhrzeit\\\"\",\"searchTerms\":[\"Date & Time\"]}"));
-        QVERIFY(text.contains("\"searchTerms\":[\"vpn wireguard\"]"));
-        QJsonParseError error;
-        QJsonDocument::fromJson(text.split('\n').filter(QRegularExpression("^(?!\\s*//)")).join('\n').replace(",\n}", "\n}").toUtf8(), &error);
-        QCOMPARE(error.error, QJsonParseError::NoError);
+        QVERIFY(text.contains("\"omasettings-search.vpn\": {\"action\":\"omasettings open vpn\",\"icon\":\"x\",\"label\":\"VPN\",\"searchTerms\":[\"vpn wireguard\"]}"));
+        // A pane with pages is a submenu, with the pane itself first.
+        QVERIFY(text.contains("\"omasettings-search.general\": {\"icon\":\"g\",\"label\":\"Allgemein\",\"searchTerms\":[]}"));
+        QVERIFY(text.contains("\"omasettings-search.general-pane\": {\"action\":\"omasettings open general\",\"icon\":\"g\",\"label\":\"Allgemein\",\"parent\":\"omasettings-search.general\"}"));
+        QVERIFY(parses(text));
+
+        // At the top, the group is Settings' entry: browsable, and the
+        // plain launcher is hidden while it stands in for it.
+        QCOMPARE(store.write("integration.menuPlace", "top"), QString());
+        text = readText(menu);
+        QCOMPARE(store.read("integration.menuPlace").toString(), QString("top"));
+        QVERIFY(text.contains("\"omasettings-search\": {\"icon\":\"\U000F062E\",\"label\":\"Einstellungen\"}"));
+        QVERIFY(text.contains("\"label\":\"Einstellungen öffnen\",\"searchTerms\":[\"settings\"]}"));
+        QVERIFY(text.contains("\"omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings\",\"description\":\"Change how this computer looks and works\",\"action\":\"omasettings\",\"when\":\"false\"},"));
+        QVERIFY(parses(text));
+
+        // Under Setup, it takes Setup › Settings app's place.
+        QCOMPARE(store.write("integration.menuPlace", "setup"), QString());
+        text = readText(menu);
+        QCOMPARE(store.read("integration.menuPlace").toString(), QString("setup"));
+        QVERIFY(text.contains("\"omasettings-search\": {\"icon\":\"\U000F062E\",\"label\":\"Einstellungen\",\"parent\":\"setup\"}"));
+        QVERIFY(text.contains("\"setup.omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings app\",\"action\":\"omasettings\",\"when\":\"false\"},"));
+        QVERIFY(!text.contains("\"omasettings\":"));
+        QVERIFY(parses(text));
+        // Your Items lists neither the pages nor the launcher as hidden.
+        for (const QVariant &v : store.list("menuCustom").toList()) {
+            QVERIFY(!v.toMap().value("id").toString().startsWith("omasettings-search"));
+            QVERIFY(!v.toMap().value("hidden").toBool());
+        }
 
         // The same entries again leave the file alone; new ones replace the block.
         const QDateTime written = QFileInfo(menu).lastModified();
         QTest::qWait(20);
-        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen"}), QString());
+        QCOMPARE(store.act("menu.searchEntries", {entries, "Einstellungen", "Einstellungen öffnen"}), QString());
         QCOMPARE(QFileInfo(menu).lastModified(), written);
         QCOMPARE(store.act("menu.searchEntries", {QVariantList{entries[0]}, "Settings"}), QString());
         QCOMPARE(readText(menu).count("omasettings:search begin"), 1);
-        QVERIFY(!readText(menu).contains("general.datetime"));
+        QVERIFY(!readText(menu).contains("general"));
+        QVERIFY(readText(menu).contains("\"label\":\"Open Settings\""));
+        QVERIFY(readText(menu).contains("\"parent\":\"setup\""));
 
         // Ids and targets go into a shell command, so only plain ones do.
         QVERIFY(!store.act("menu.searchEntries", {QVariantList{QVariantMap{{"id", "x"}, {"target", "vpn; rm -rf ~"}, {"label", "X"}}}, ""}).isEmpty());
@@ -1004,7 +1036,8 @@ private slots:
         // None takes the block out, from the app or the command line.
         QCOMPARE(store.act("menu.searchEntries", {"[]"}), QString());
         QVERIFY(!readText(menu).contains("omasettings-search"));
-        QVERIFY(readText(menu).contains("\"setup.omasettings\""));
+        // and Settings' entry launches the app again.
+        QVERIFY(readText(menu).contains("\"setup.omasettings\": {\"icon\":\"\U000F062E\",\"label\":\"Settings app\",\"action\":\"omasettings\"},"));
         QVERIFY(!store.list("menuSearch").toMap().value("on").toBool());
     }
 

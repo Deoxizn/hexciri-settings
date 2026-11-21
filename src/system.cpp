@@ -903,7 +903,9 @@ QVariant Store::listMenuCustom() {
     QStringList ids;
     for (int i = 0; i < lines.size(); ++i) {
         const auto m = key.match(lines[i]);
-        if (m.hasMatch() && depths[i] == 1 && !defaultItems.contains(m.captured(1)) && !ids.contains(m.captured(1)))
+        // Settings' own pages are switched in This App, not listed one by one.
+        if (m.hasMatch() && depths[i] == 1 && !defaultItems.contains(m.captured(1)) && !ids.contains(m.captured(1))
+            && !m.captured(1).startsWith("omasettings-search"))
             ids << m.captured(1);
     }
     QVariantList out;
@@ -912,7 +914,8 @@ QVariant Store::listMenuCustom() {
         out << QVariantMap{{"id", id}, {"label", e.value("label").toString(id)}, {"icon", e.value("icon").toString()},
                            {"action", e.value("action").toString()}, {"description", e.value("description").toString()},
                            {"parent", id.contains('.') ? id.section('.', 0, -2) : QString()},
-                           {"hidden", e.value("when").toString() == "false"},
+                           // Settings' entry is only hidden while its pages' submenu stands in for it.
+                           {"hidden", e.value("when").toString() == "false" && id != "setup.omasettings" && id != "omasettings"},
                            // The Settings menu entry is the switch in Changes & Backup.
                            {"managed", id == "setup.omasettings" || id == "omasettings"}};
     }
