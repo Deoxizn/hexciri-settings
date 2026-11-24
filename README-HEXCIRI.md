@@ -10,7 +10,7 @@ for system stuff. No bespoke app framework, no pane rewrites.
   `~/.config/hexciri`, `~/.local/share/hexciri-settings`, CLI calls
   `hexciri theme set`, `hexciri bar`, `hexciri plugin`, `hexciri-pkg-add`,
   `hexciri-launch-floating-terminal-with-presentation`).
-- Manifest id `ipkalid.settings` → `deoxizn.settings`. (`hexciri.*` ids are
+- Manifest id `ipkalid.settings` → `pizza.dirty.settings`. (`hexciri.*` ids are
   reserved by `hexciri-plugin-validate` and would fail validation.)
 - `kinds: ["service"]`, entry point `plugin/Service.qml`. No bar widget:
   enabling builds the app and adds it to the app launcher; launch it from
@@ -40,12 +40,12 @@ is current — no manual build command:
 
 ```bash
 hexciri plugin add https://github.com/Deoxizn/hexciri-settings --enable --yes
-bash ~/.config/hexciri/plugins/deoxizn.settings/plugin/install --quiet
+bash ~/.config/hexciri/plugins/pizza.dirty.settings/plugin/install --quiet
 ```
 
 `hexciri update` retries a failed build automatically on the next run; the
 build log is `~/.cache/hexciri-settings-build/build.log`. Updates after that
-come through `hexciri plugin update deoxizn.settings` (or the Plugins &
+come through `hexciri plugin update pizza.dirty.settings` (or the Plugins &
 Themes row in the arch-updates bar panel); Service.qml rebuilds on update.
 
 ## Tests

@@ -3,7 +3,7 @@
 # entry and icon, its entry in the Omarchy menu, and its theme hook. Your
 # settings stay as they are; Settings only ever changed your own config
 # files. A copy of this script is kept at ~/.local/share/hexciri-settings/uninstall
-# so it still works after `hexciri plugin remove deoxizn.settings`.
+# so it still works after `hexciri plugin remove pizza.dirty.settings`.
 
 set -euo pipefail
 

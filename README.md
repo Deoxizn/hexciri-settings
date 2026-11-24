@@ -79,7 +79,7 @@ hexciri plugin add https://github.com/Deoxizn/hexciri-settings --enable
 Enabling it builds the app (a minute or so) and installs it for you alone,
 under `~/.local`, so no password is needed. A notification says when it's
 ready, and Settings is then in the app launcher (Super + Space). After
-`hexciri plugin update ipkalid.settings`, it is rebuilt the same way. If a
+`hexciri plugin update pizza.dirty.settings`, it is rebuilt the same way. If a
 build tool is missing, a notification offers to add it in a terminal.
 
 ### Requirements
@@ -106,7 +106,7 @@ To remove the app as well as the plugin:
 
 ```sh
 ~/.local/share/hexciri-settings/uninstall
-hexciri plugin remove ipkalid.settings
+hexciri plugin remove pizza.dirty.settings
 ```
 
 ## How it changes things
