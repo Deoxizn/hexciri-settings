@@ -23,17 +23,17 @@ static QTextStream &err() {
 }
 
 static const char *usage =
-    "Usage: omasettings [open [pane[/page]]]\n"
-    "       omasettings list [pane] [--json]\n"
-    "       omasettings get <id> [--json]\n"
-    "       omasettings set <id> <value> [--json]\n"
-    "       omasettings reset <id> [--json]\n"
-    "       omasettings data <list> [--json]\n"
-    "       omasettings act <action> [args...]   (an argument starting with { is JSON)\n"
-    "       omasettings export <file>  |  omasettings import <file>\n"
-    "       omasettings sync [status|check|upload [--force]|apply|connect <url>|create [name]|disconnect]\n"
-    "       omasettings skill install [--dir <path>]\n"
-    "       omasettings icon [--print --color <#rrggbb> [--rounding <px>]]\n"
+    "Usage: hexciri-settings [open [pane[/page]]]\n"
+    "       hexciri-settings list [pane] [--json]\n"
+    "       hexciri-settings get <id> [--json]\n"
+    "       hexciri-settings set <id> <value> [--json]\n"
+    "       hexciri-settings reset <id> [--json]\n"
+    "       hexciri-settings data <list> [--json]\n"
+    "       hexciri-settings act <action> [args...]   (an argument starting with { is JSON)\n"
+    "       hexciri-settings export <file>  |  hexciri-settings import <file>\n"
+    "       hexciri-settings sync [status|check|upload [--force]|apply|connect <url>|create [name]|disconnect]\n"
+    "       hexciri-settings skill install [--dir <path>]\n"
+    "       hexciri-settings icon [--print --color <#rrggbb> [--rounding <px>]]\n"
     "\n"
     "Panes: wifi bluetooth vpn general notifications power storage software plugins\n"
     "       appearance wallpaper fonts desktop bar menu displays sound keyboard\n"
@@ -55,7 +55,7 @@ static QString plain(const QVariant &v) {
 static int fail(bool json, const QString &message) {
     if (json)
         out() << QJsonDocument(QJsonObject{{"ok", false}, {"error", message}}).toJson(QJsonDocument::Compact) << "\n";
-    err() << "omasettings: " << message << "\n";
+    err() << "hexciri-settings: " << message << "\n";
     return 1;
 }
 
@@ -69,31 +69,31 @@ static QJsonObject describe(const Setting &s, const QVariant &value) {
     if (!s.choices.isEmpty())
         o.insert("choices", QJsonArray::fromVariantList(s.choices));
     if (!s.choicesList.isEmpty())
-        o.insert("choicesFrom", "omasettings data " + s.choicesList);
+        o.insert("choicesFrom", "hexciri-settings data " + s.choicesList);
     return o;
 }
 
 static const char *skill = R"(---
-name: omasettings
-description: Read and change Omarchy desktop settings (Wi-Fi, sound, displays, keyboard, mouse and trackpad, appearance, theme, lock screen, default apps) through the omasettings CLI instead of editing config files. Use when asked to change a desktop setting on Omarchy.
+name: hexciri-settings
+description: Read and change Hexciri desktop settings (Wi-Fi, sound, displays, keyboard, mouse and trackpad, appearance, theme, lock screen, default apps) through the hexciri-settings CLI instead of editing config files. Use when asked to change a desktop setting on Hexciri.
 ---
 
-# Omarchy settings
+# Hexciri settings
 
-`omasettings` is the Settings app's command line. Every setting the window
+`hexciri-settings` is the Settings app's command line. Every setting the window
 shows can be read and changed here, with the same safety checks: Hyprland
 changes go to one generated file and are rolled back if Hyprland rejects them.
 
 ```sh
-omasettings list --json               # every setting, its type, range, choices, value
-omasettings list keyboard --json      # one pane
-omasettings get keyboard.repeatRate
-omasettings set keyboard.repeatRate 45 --json
-omasettings data monitors --json      # live data: wifi, bluetooth, sinks, monitors, themes, ...
-omasettings act shortcut.add "SUPER + E" Files launch org.gnome.Nautilus.desktop
-omasettings act autostart.add syncthing Syncthing
-omasettings act rule.add '{"class":"^(mpv)$","float":true,"workspace":"3"}'
-omasettings export ~/Documents        # import <file> applies one
+hexciri-settings list --json               # every setting, its type, range, choices, value
+hexciri-settings list keyboard --json      # one pane
+hexciri-settings get keyboard.repeatRate
+hexciri-settings set keyboard.repeatRate 45 --json
+hexciri-settings data monitors --json      # live data: wifi, bluetooth, sinks, monitors, themes, ...
+hexciri-settings act shortcut.add "SUPER + E" Files launch org.gnome.Nautilus.desktop
+hexciri-settings act autostart.add syncthing Syncthing
+hexciri-settings act rule.add '{"class":"^(mpv)$","float":true,"workspace":"3"}'
+hexciri-settings export ~/Documents        # import <file> applies one
 ```
 
 - Commands exit 0 on success and 1 on failure, with the reason on stderr.
@@ -102,13 +102,13 @@ omasettings export ~/Documents        # import <file> applies one
 - Run `list` first rather than guessing ids.
 - Some changes ask for a password through the desktop's polkit prompt (time
   zone, computer name); tell the user to watch for it.
-- `omasettings open <pane>` opens the window on a pane for the user, and
-  `omasettings open <pane>/<page>` on a page inside one: general/about,
+- `hexciri-settings open <pane>` opens the window on a pane for the user, and
+  `hexciri-settings open <pane>/<page>` on a page inside one: general/about,
   general/update, general/language, general/datetime, general/loginitems,
   general/webapps, general/apps, general/troubleshooting,
   general/settingsapp, general/hooks, appearance/themes, desktop/rules, lock/bootscreen,
   keyboard/shortcuts, general/sync. If Settings is open, that window switches to it.
-- `omasettings sync status` shows whether Sync is connected to a repository
+- `hexciri-settings sync status` shows whether Sync is connected to a repository
   and whether it has newer settings; `sync upload` sends this computer's
   settings and apps there, and `sync apply` brings this computer to match
   it (it only adds apps, and opens a terminal to install them). Ask the user
@@ -116,7 +116,7 @@ omasettings export ~/Documents        # import <file> applies one
 )";
 
 static int installSkill(const QStringList &args) {
-    QString dir = QDir::homePath() + "/.claude/skills/omasettings";
+    QString dir = QDir::homePath() + "/.claude/skills/hexciri-settings";
     const int at = args.indexOf("--dir");
     if (at >= 0 && at + 1 < args.size())
         dir = args.value(at + 1);
@@ -124,7 +124,7 @@ static int installSkill(const QStringList &args) {
     QSaveFile file(dir + "/SKILL.md");
     const QByteArray data(skill);
     if (!file.open(QIODevice::WriteOnly) || file.write(data) != data.size() || !file.commit()) {
-        err() << "omasettings: could not write " << file.fileName() << "\n";
+        err() << "hexciri-settings: could not write " << file.fileName() << "\n";
         return 1;
     }
     out() << "Installed " << dir << "/SKILL.md\n";
@@ -141,7 +141,7 @@ int runCli(const QStringList &all, Store &store) {
         return 0;
     }
     if (command == "--version") {
-        out() << "omasettings " OMASETTINGS_VERSION "\n";
+        out() << "hexciri-settings " HEXCIRI_SETTINGS_VERSION "\n";
         return 0;
     }
     if (command == "icon") {
@@ -161,7 +161,7 @@ int runCli(const QStringList &all, Store &store) {
     }
     if (command == "skill") {
         if (args.value(1) != "install")
-            return fail(false, "usage: omasettings skill install [--dir <path>]");
+            return fail(false, "usage: hexciri-settings skill install [--dir <path>]");
         return installSkill(args);
     }
 
@@ -187,7 +187,7 @@ int runCli(const QStringList &all, Store &store) {
         const QString id = args.value(1);
         const Setting *s = store.setting(id);
         if (!s)
-            return fail(json, "unknown setting " + id + " (see omasettings list)");
+            return fail(json, "unknown setting " + id + " (see hexciri-settings list)");
         if (s->hyprOption.isEmpty())
             return fail(json, id + " is not kept by Settings, so there is nothing to reset; use set");
         const QString error = store.resetHypr(s->hyprOption);
@@ -200,10 +200,10 @@ int runCli(const QStringList &all, Store &store) {
         const QString id = args.value(1);
         const Setting *s = store.setting(id);
         if (!s)
-            return fail(json, "unknown setting " + id + " (see omasettings list)");
+            return fail(json, "unknown setting " + id + " (see hexciri-settings list)");
         if (command == "set") {
             if (args.size() < 3)
-                return fail(json, "usage: omasettings set <id> <value>");
+                return fail(json, "usage: hexciri-settings set <id> <value>");
             const QString error = store.write(id, args.value(2));
             if (!error.isEmpty())
                 return fail(json, error);
@@ -229,7 +229,7 @@ int runCli(const QStringList &all, Store &store) {
                 actArgs << a;
         }
         if (command != "act" && actArgs.isEmpty())
-            return fail(json, "usage: omasettings " + command + " <file>");
+            return fail(json, "usage: hexciri-settings " + command + " <file>");
         const QString error = store.act(action, actArgs);
         if (!error.isEmpty())
             return fail(json, error);
@@ -249,14 +249,14 @@ int runCli(const QStringList &all, Store &store) {
         }
         static const QStringList subs{"check", "upload", "apply", "connect", "create", "disconnect"};
         if (!subs.contains(sub))
-            return fail(json, "usage: omasettings sync [status|check|upload [--force]|apply|connect <url>|create [name]|disconnect]");
+            return fail(json, "usage: hexciri-settings sync [status|check|upload [--force]|apply|connect <url>|create [name]|disconnect]");
         QVariantList actArgs;
         if (sub == "upload")
             actArgs << (args.contains("--force") ? "force" : "");
         else if (sub == "connect" || sub == "create")
             actArgs << args.value(2);
         if (sub == "connect" && args.value(2).isEmpty())
-            return fail(json, "usage: omasettings sync connect <url>");
+            return fail(json, "usage: hexciri-settings sync connect <url>");
         const QString error = store.act("sync." + sub, actArgs);
         if (!error.isEmpty())
             return fail(json, error);

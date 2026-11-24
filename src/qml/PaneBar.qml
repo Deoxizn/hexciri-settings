@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
-// What sits on the bar and where. Moves go through `omarchy bar move` and
-// adding and removing through `omarchy plugin enable/disable`, so the shell
+// What sits on the bar and where. Moves go through `hexciri bar move` and
+// adding and removing through `hexciri plugin enable/disable`, so the shell
 // stays the one that writes its layout.
 SettingsPage {
     id: page
@@ -26,8 +26,8 @@ SettingsPage {
     })
     readonly property int placedCount: order.reduce((n, s) => n + (sections[s] || []).length, 0)
     // Widgets with something to set: a schema in their manifest, or one of
-    // Omarchy's that Settings has a form for.
-    readonly property var forms: ["omarchy.clock", "omarchy.weather", "omarchy.spacer", "omarchy.active-window"]
+    // Hexciri's that Settings has a form for.
+    readonly property var forms: ["hexciri.clock", "hexciri.weather", "hexciri.spacer", "hexciri.active-window"]
     function hasOptions(w) { return (w.schema || []).length > 0 || forms.indexOf(w.id) >= 0 }
     readonly property bool sideways: ["left", "right"].indexOf(backend.values["desktop.barPosition"]) >= 0
     function move(widget, from, to, index) { backend.act("bar.move", [widget.id, from, widget.index, to, index], ["bar"]) }

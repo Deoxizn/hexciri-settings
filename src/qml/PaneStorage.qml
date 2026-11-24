@@ -72,7 +72,7 @@ SettingsPage {
             sublabel: qsTr("How fast your disk reads and writes")
             glyph: "\u{F04C5}"
             text: qsTr("Test…")
-            onClicked: backend.act("summon", ["omarchy.disk-speedtest"])
+            onClicked: backend.act("summon", ["hexciri.disk-speedtest"])
         }
     }
 

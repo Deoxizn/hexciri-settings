@@ -35,16 +35,16 @@ while (( $# > 0 )); do
   esac
 done
 
-BIN="$TARGET_HOME/.local/bin/omasettings"
+BIN="$TARGET_HOME/.local/bin/hexciri-settings"
 APPS="$TARGET_HOME/.local/share/applications"
 ICONS="$TARGET_HOME/.local/share/icons/hicolor/scalable/apps"
-STATE="$TARGET_HOME/.local/share/omasettings"
-BUILD="${XDG_CACHE_HOME:-$TARGET_HOME/.cache}/omasettings-build"
+STATE="$TARGET_HOME/.local/share/hexciri-settings"
+BUILD="${XDG_CACHE_HOME:-$TARGET_HOME/.cache}/hexciri-settings-build"
 
 TOOLS=(gcc make qt6-base qt6-declarative qt6-wayland qt6-imageformats squashfs-tools)
 
 # What is being installed: the git commit when the plugin is a checkout, so
-# `omarchy plugin update` triggers a rebuild, or the manifest's version.
+# `hexciri plugin update` triggers a rebuild, or the manifest's version.
 source_version() {
   git -C "$SRC" rev-parse HEAD 2>/dev/null || jq -r '.version' "$SRC/manifest.json"
 }
@@ -56,7 +56,7 @@ missing_tools() {
 status() {
   # Someone who installed the Arch package keeps it; the plugin doesn't
   # put a second copy ahead of it on the PATH.
-  if pacman -Qqo /usr/bin/omasettings >/dev/null 2>&1; then
+  if pacman -Qqo /usr/bin/hexciri-settings >/dev/null 2>&1; then
     echo package
   elif [[ -x $BIN && -f $STATE/installed && $(cat "$STATE/installed") == "$(source_version)" ]]; then
     echo current
@@ -97,7 +97,7 @@ if [[ -n $missing ]]; then
   echo "Settings needs these packages to build:"
   echo "  $missing"
   # shellcheck disable=SC2086
-  omarchy-pkg-add $missing
+  hexciri-pkg-add $missing
 fi
 
 echo "Building Settings…"
@@ -106,8 +106,17 @@ echo "Building Settings…"
 rm -rf "$BUILD"
 mkdir -p "$BUILD"
 cd "$BUILD"
-qmake6 "$SRC/omasettings.pro" >/dev/null
-make -j"$(nproc)" >"$BUILD/build.log" 2>&1 || {
+# qmake6 must exist and the .pro must be in SRC; either missing used to
+# die silently under set -e (qmake output went to /dev/null, build.log
+# never existed), so the install warn pointed at an empty log.
+command -v qmake6 >/dev/null 2>&1 || { echo "Settings build failed: qmake6 not found (package qt6-base)" >&2; exit 1; }
+[[ -f "$SRC/hexciri-settings.pro" ]] || { echo "Settings build failed: $SRC/hexciri-settings.pro not found (SRC=$SRC)" >&2; exit 1; }
+qmake6 "$SRC/hexciri-settings.pro" >"$BUILD/build.log" 2>&1 || {
+  tail -n 30 "$BUILD/build.log" >&2
+  echo "qmake failed; the full log is $BUILD/build.log" >&2
+  exit 1
+}
+make -j"$(nproc)" >>"$BUILD/build.log" 2>&1 || {
   tail -n 30 "$BUILD/build.log" >&2
   echo "The build failed; the full log is $BUILD/build.log" >&2
   exit 1
@@ -143,18 +152,18 @@ if [[ $BIN == *$'\n'* ]]; then
   exit 1
 fi
 
-put 755 "$BUILD/omasettings" "$BIN"
+put 755 "$BUILD/hexciri-settings" "$BIN"
 # Written line by line rather than with sed, so nothing in the path can be
 # read as part of a sed command.
 exec_arg=$(desktop_exec_arg "$BIN")
 while IFS= read -r line || [[ -n $line ]]; do
-  [[ $line == Exec=omasettings* ]] && line="Exec=$exec_arg${line#Exec=omasettings}"
+  [[ $line == Exec=hexciri-settings* ]] && line="Exec=$exec_arg${line#Exec=hexciri-settings}"
   printf '%s\n' "$line"
-done <"$SRC/pkgbuild/omasettings.desktop" >"$BUILD/omasettings.desktop"
-put 644 "$BUILD/omasettings.desktop" "$APPS/omasettings.desktop"
+done <"$SRC/pkgbuild/hexciri-settings.desktop" >"$BUILD/hexciri-settings.desktop"
+put 644 "$BUILD/hexciri-settings.desktop" "$APPS/hexciri-settings.desktop"
 # Settings draws its icon in the theme's colors when it starts; until then
 # the packaged one stands in.
-[[ -f $ICONS/omasettings.svg ]] || put 644 "$SRC/pkgbuild/omasettings.svg" "$ICONS/omasettings.svg"
+[[ -f $ICONS/hexciri-settings.svg ]] || put 644 "$SRC/pkgbuild/hexciri-settings.svg" "$ICONS/hexciri-settings.svg"
 put 755 "$SRC/plugin/uninstall" "$STATE/uninstall"
 mkdir -p "$STATE"
 source_version >"$STATE/installed"

@@ -1,4 +1,4 @@
-// omasettings: System Settings for Omarchy. One window that changes what you
+// hexciri-settings: System Settings for Hexciri. One window that changes what you
 // would otherwise change by hand in config files.
 
 #include <QCoreApplication>
@@ -28,8 +28,8 @@
 #include "translator.h"
 
 // One Settings window per user. A second launch (from the menu, the
-// launcher, or `omasettings open vpn`) hands what it was asked to show to
-// the window that's open and brings that window forward. OMASETTINGS_INSTANCE
+// launcher, or `hexciri-settings open vpn`) hands what it was asked to show to
+// the window that's open and brings that window forward. HEXCIRI_SETTINGS_INSTANCE
 // names a separate one, for running a copy beside the real window.
 // The socket lives in a folder only this user can enter: a bare name would
 // land in /tmp, where another account could take it first and be handed
@@ -38,7 +38,7 @@ static QString privateSocketDir() {
     const QString runtime = qEnvironmentVariable("XDG_RUNTIME_DIR");
     if (!runtime.isEmpty())
         return runtime;
-    const QString dir = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/omasettings-run";
+    const QString dir = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation) + "/hexciri-settings-run";
     QDir().mkpath(dir);
     const QByteArray native = QFile::encodeName(dir);
     ::chmod(native.constData(), 0700);
@@ -52,8 +52,8 @@ static QString privateSocketDir() {
 static QString instanceSocket() {
     static const QString path = [] {
         const QString dir = privateSocketDir();
-        const QString name = "omasettings" + (qEnvironmentVariableIsEmpty("OMASETTINGS_INSTANCE")
-                                                  ? QString() : "-" + qEnvironmentVariable("OMASETTINGS_INSTANCE"));
+        const QString name = "hexciri-settings" + (qEnvironmentVariableIsEmpty("HEXCIRI_SETTINGS_INSTANCE")
+                                                  ? QString() : "-" + qEnvironmentVariable("HEXCIRI_SETTINGS_INSTANCE"));
         return dir.isEmpty() ? QString() : dir + "/" + name + ".sock";
     }();
     return path;
@@ -71,12 +71,12 @@ static bool handToOpenWindow(const QString &target) {
     socket.disconnectFromServer();
     // Hyprland doesn't let a window raise itself, so this launch does it,
     // by class: so not for a named copy, which the class can't tell apart.
-    if (!qEnvironmentVariableIsEmpty("OMASETTINGS_INSTANCE"))
+    if (!qEnvironmentVariableIsEmpty("HEXCIRI_SETTINGS_INSTANCE"))
         return true;
     QProcess focus;
-    focus.start("hyprctl", {"dispatch", R"(hl.dsp.focus({ window = "class:^(omasettings)$" }))"});
+    focus.start("hyprctl", {"dispatch", R"(hl.dsp.focus({ window = "class:^(hexciri-settings)$" }))"});
     if (focus.waitForFinished(2000) && focus.readAll().contains("error"))
-        QProcess::execute("hyprctl", {"dispatch", "focuswindow", "class:^(omasettings)$"});
+        QProcess::execute("hyprctl", {"dispatch", "focuswindow", "class:^(hexciri-settings)$"});
     return true;
 }
 
@@ -91,8 +91,8 @@ int main(int argc, char *argv[]) {
     // Commands for scripts and agents need no display at all.
     if (isCliCommand(args)) {
         QCoreApplication app(argc, argv);
-        app.setApplicationName("omasettings");
-        app.setApplicationVersion(OMASETTINGS_VERSION);
+        app.setApplicationName("hexciri-settings");
+        app.setApplicationVersion(HEXCIRI_SETTINGS_VERSION);
         Store store;
         const int code = runCli(args, store);
         return code < 0 ? 2 : code;
@@ -100,37 +100,37 @@ int main(int argc, char *argv[]) {
 
     QGuiApplication app(argc, argv);
 
-    // `omasettings open keyboard` opens on a pane, and
-    // `omasettings open general/datetime` on a page inside one.
+    // `hexciri-settings open keyboard` opens on a pane, and
+    // `hexciri-settings open general/datetime` on a page inside one.
     const QString target = args.value(1) == "open" ? args.value(2) : QString();
     if (handToOpenWindow(target))
         return 0;
 
-    app.setApplicationName("omasettings");
+    app.setApplicationName("hexciri-settings");
     app.setApplicationDisplayName("Settings");
-    app.setApplicationVersion(OMASETTINGS_VERSION);
+    app.setApplicationVersion(HEXCIRI_SETTINGS_VERSION);
 
-    // Matches the window to omasettings.desktop, so the compositor (Wayland
+    // Matches the window to hexciri-settings.desktop, so the compositor (Wayland
     // app_id) and the launcher pick up the installed icon.
-    app.setDesktopFileName("omasettings");
-    app.setWindowIcon(QIcon::fromTheme("omasettings"));
+    app.setDesktopFileName("hexciri-settings");
+    app.setWindowIcon(QIcon::fromTheme("hexciri-settings"));
 
     QQuickStyle::setStyle("Material");
 
-    // The Omarchy shell draws everything in the desktop's monospace font, so
+    // The Hexciri shell draws everything in the desktop's monospace font, so
     // the window does too, down to text that sets no font of its own.
     app.setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
 
     // Installed before anything is translated, and every qsTr() binding is
-    // re-evaluated when the Omarchy language changes. OMASETTINGS_LANGUAGE_FILE
+    // re-evaluated when the Hexciri language changes. HEXCIRI_SETTINGS_LANGUAGE_FILE
     // points it at another language file, to check a translation without
     // changing the desktop's language.
-    Translator translator(qEnvironmentVariable("OMASETTINGS_LANGUAGE_FILE"));
+    Translator translator(qEnvironmentVariable("HEXCIRI_SETTINGS_LANGUAGE_FILE"));
     app.installTranslator(&translator);
 
     Theme theme;
     auto store = std::make_shared<Store>();
-    // The app icon follows the theme, like Omarchy's own menu entries: draw
+    // The app icon follows the theme, like Hexciri's own menu entries: draw
     // it now, and make sure theme switches redraw it while we are closed.
     store->writeThemedIcon();
     store->ensureIconHook();

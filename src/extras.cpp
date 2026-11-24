@@ -20,7 +20,7 @@
 static QString tr(const char *text) { return QCoreApplication::translate("Store", text); }
 
 static bool validId(const QString &id) {
-    // The same rule omarchy plugin update applies to plugin ids.
+    // The same rule hexciri plugin update applies to plugin ids.
     static const QRegularExpression valid("^[A-Za-z0-9][A-Za-z0-9._-]*$");
     return valid.match(id).hasMatch() && !id.contains("..");
 }
@@ -67,9 +67,9 @@ QString Store::actVpn(const QString &action, const QVariantList &args) {
         const QString kind = a0;
         if (kind != "wireguard" && kind != "openvpn")
             return tr("Unknown VPN type %1").arg(kind);
-        // The desktop's file chooser, through the portal, as Omarchy picks
+        // The desktop's file chooser, through the portal, as Hexciri picks
         // files everywhere else.
-        const ProcResult picked = run("omarchy-file-select",
+        const ProcResult picked = run("hexciri-file-select",
                                       {"--title", tr("Choose a VPN configuration"),
                                        "--extensions", kind == "wireguard" ? "conf" : "ovpn conf"}, 600000);
         const QString path = picked.text().section('\n', 0, 0);
@@ -110,13 +110,13 @@ QString Store::actVpn(const QString &action, const QVariantList &args) {
 // --- Plugins ------------------------------------------------------------------------
 
 QString Store::pluginDir(const QString &id) const {
-    return m_paths.config + "/omarchy/plugins/" + id;
+    return m_paths.config + "/hexciri/plugins/" + id;
 }
 
-// Every manifest.json under Omarchy's plugins and the user's, by plugin id.
+// Every manifest.json under Hexciri's plugins and the user's, by plugin id.
 QHash<QString, QJsonObject> Store::manifests() const {
     QHash<QString, QJsonObject> out;
-    for (const QString &root : {m_paths.omarchy + "/shell/plugins", m_paths.config + "/omarchy/plugins"}) {
+    for (const QString &root : {m_paths.hexciri + "/shell/plugins", m_paths.config + "/hexciri/plugins"}) {
         // Bar widgets built into the bar plugin keep theirs as
         // <Name>.manifest.json beside their QML (bar/widgets).
         QDirIterator it(root, {"manifest.json", "*.manifest.json"}, QDir::Files, QDirIterator::Subdirectories);
@@ -140,7 +140,7 @@ QHash<QString, QJsonObject> Store::manifests() const {
 QVariant Store::listPlugins() {
     const QHash<QString, QJsonObject> found = manifests();
     QVariantList out;
-    for (const QJsonValue &v : QJsonDocument::fromJson(run("omarchy-plugin-list", {"--json"}, 15000).out).array()) {
+    for (const QJsonValue &v : QJsonDocument::fromJson(run("hexciri-plugin-list", {"--json"}, 15000).out).array()) {
         QVariantMap p = v.toObject().toVariantMap();
         const QString id = p.value("id").toString();
         const QJsonObject m = found.value(id);
@@ -158,11 +158,11 @@ QVariant Store::listPlugins() {
 }
 
 // Which git-managed plugins have new commits upstream. Fetching is what
-// omarchy plugin update does first, so this leaves nothing behind it would
+// hexciri plugin update does first, so this leaves nothing behind it would
 // not.
 QVariant Store::listPluginUpdates() {
     QVariantMap out;
-    QDir dir(m_paths.config + "/omarchy/plugins");
+    QDir dir(m_paths.config + "/hexciri/plugins");
     for (const QString &id : dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
         if (!validId(id) || !QFileInfo::exists(pluginDir(id) + "/.git"))
             continue;
@@ -184,20 +184,20 @@ QString Store::actPlugin(const QString &action, const QVariantList &args) {
         static const QRegularExpression url(R"(^(https://[^\s'"]+|git@[A-Za-z0-9.-]+:[^\s'"]+)$)");
         if (!url.match(id).hasMatch())
             return tr("Enter a git URL, like https://github.com/someone/plugin");
-        return runOk("omarchy-plugin-add", {id, "--enable", "--yes"}, 180000);
+        return runOk("hexciri-plugin-add", {id, "--enable", "--yes"}, 180000);
     }
     if (action == "plugin.updateAll")
-        return runOk("omarchy-plugin-update", {"--yes"}, 300000);
+        return runOk("hexciri-plugin-update", {"--yes"}, 300000);
     if (!validId(id))
         return tr("Unknown plugin %1").arg(id);
     if (action == "plugin.enable")
-        return runOk("omarchy-plugin-enable", {id}, 15000);
+        return runOk("hexciri-plugin-enable", {id}, 15000);
     if (action == "plugin.disable")
-        return runOk("omarchy-plugin-disable", {id}, 15000);
+        return runOk("hexciri-plugin-disable", {id}, 15000);
     if (action == "plugin.update")
-        return runOk("omarchy-plugin-update", {id, "--yes"}, 120000);
+        return runOk("hexciri-plugin-update", {id, "--yes"}, 120000);
     if (action == "plugin.remove")
-        return runOk("omarchy-plugin-remove", {id, "--yes"}, 30000);
+        return runOk("hexciri-plugin-remove", {id, "--yes"}, 30000);
     return tr("Unknown action %1").arg(action);
 }
 
@@ -256,7 +256,7 @@ QVariant Store::listBar() {
 // The shell saves shell.json a moment after it changes the layout; wait for
 // that so the pane reads back what is really there.
 void Store::waitForShellWrite(const QDateTime &before) {
-    const QString file = m_paths.config + "/omarchy/shell.json";
+    const QString file = m_paths.config + "/hexciri/shell.json";
     for (int i = 0; i < 20 && QFileInfo(file).lastModified() == before; ++i)
         QThread::msleep(50);
 }
@@ -265,24 +265,24 @@ QString Store::actBar(const QString &action, const QVariantList &args) {
     const QString id = args.value(0).toString();
     if (!validId(id))
         return tr("Unknown widget %1").arg(id);
-    const QDateTime before = QFileInfo(m_paths.config + "/omarchy/shell.json").lastModified();
+    const QDateTime before = QFileInfo(m_paths.config + "/hexciri/shell.json").lastModified();
     QString error;
     if (action == "bar.move") {
         // args: id, from section, from index, to section, to index
         const QString from = args.value(1).toString(), to = args.value(3).toString();
         if (!barSections.contains(from) || !barSections.contains(to))
             return tr("Unknown bar section");
-        error = runOk("omarchy-bar", {"move", id, "--from-section", from, "--from-index", QString::number(args.value(2).toInt()),
+        error = runOk("hexciri-bar", {"move", id, "--from-section", from, "--from-index", QString::number(args.value(2).toInt()),
                                       "--section", to, "--index", QString::number(qMax(0, args.value(4).toInt()))}, 15000);
     } else if (action == "bar.add") {
         const QString section = args.value(1).toString();
         if (!barSections.contains(section))
             return tr("Unknown bar section");
-        error = runOk("omarchy-plugin-enable", {id, "--section", section}, 15000);
+        error = runOk("hexciri-plugin-enable", {id, "--section", section}, 15000);
     } else if (action == "bar.remove") {
         // The shell takes a widget off the bar by disabling it; enabling it
         // again puts it back.
-        error = runOk("omarchy-plugin-disable", {id}, 15000);
+        error = runOk("hexciri-plugin-disable", {id}, 15000);
     } else {
         return tr("Unknown action %1").arg(action);
     }

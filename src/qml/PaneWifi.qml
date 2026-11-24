@@ -156,13 +156,13 @@ SettingsPage {
             sublabel: qsTr("A QR code a phone can scan to join")
             glyph: "\u{F0432}"
             text: qsTr("Show Code")
-            onClicked: backend.act("summon", ["omarchy.wifiqr"])
+            onClicked: backend.act("summon", ["hexciri.wifiqr"])
         }
         ButtonRow {
             label: qsTr("Internet speed")
             glyph: "\u{F04C5}"
             text: qsTr("Test…")
-            onClicked: backend.act("summon", ["omarchy.speedtest"])
+            onClicked: backend.act("summon", ["hexciri.speedtest"])
         }
         ChoiceRow {
             setting: "wifi.band"

@@ -181,12 +181,12 @@ SettingsPage {
                 superKey = parts.indexOf("SUPER") >= 0; ctrl = parts.indexOf("CTRL") >= 0
                 alt = parts.indexOf("ALT") >= 0; shift = parts.indexOf("SHIFT") >= 0; key = parts[parts.length - 1]
                 description.text = qsTr("Settings")
-                if ((backend.lists.apps || []).some(a => a.id === "omasettings")) {
-                    presetApp = "omasettings"
+                if ((backend.lists.apps || []).some(a => a.id === "hexciri-settings")) {
+                    presetApp = "hexciri-settings"
                 } else {
                     // Run from a build, Settings has no launcher entry yet.
                     kind.currentIndex = 1
-                    command.text = "omasettings"
+                    command.text = "hexciri-settings"
                 }
                 app.currentIndex = app.model.findIndex(a => a.id === presetApp)
             }
@@ -325,7 +325,7 @@ SettingsPage {
             id: command
             visible: kind.currentValue !== "launch"
             Layout.fillWidth: true
-            placeholderText: kind.currentValue === "webapp" ? "https://…" : qsTr("Command, e.g. omarchy-launch-browser")
+            placeholderText: kind.currentValue === "webapp" ? "https://…" : qsTr("Command, e.g. hexciri-launch-browser")
         }
         OmaField {
             id: description

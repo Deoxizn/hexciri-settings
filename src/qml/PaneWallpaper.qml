@@ -79,7 +79,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Wallpapers for this theme")
-        footer: qsTr("Add your own pictures to %1 to see them here.").arg("~/.config/omarchy/backgrounds/")
+        footer: qsTr("Add your own pictures to %1 to see them here.").arg("~/.config/hexciri/backgrounds/")
 
         Item {
             width: parent.width

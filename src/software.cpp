@@ -1,5 +1,5 @@
-// The apps and tools Omarchy's Install and Remove menus offer, read from
-// the menu as Omarchy ships it, so they stay reachable when those menus are
+// The apps and tools Hexciri's Install and Remove menus offer, read from
+// the menu as Hexciri ships it, so they stay reachable when those menus are
 // hidden and new ones show up without a change here. What is installed is
 // decided by the menu's own conditions (an install item's "disabled", a
 // remove item's "when"), and installing or removing runs the menu's own
@@ -30,26 +30,26 @@ QString shellQuote(const QString &s) {
     return "'" + QString(s).replace("'", "'\\''") + "'";
 }
 
-// A coding agent as omarchy-default-agent defines it: its definitions
+// A coding agent as hexciri-default-agent defines it: its definitions
 // (everything above its install check) are read from the script, which sets
 // $name and $agent_tool and defines agent_present. When the script no longer
 // has that check, nothing is run and this fails.
 QString agentDefinitions(const QString &name) {
     return QStringLiteral(
                "src=$(awk '/^if \\[\\[ \\$installing == \"false\" \\]\\] && ! agent_present/{found=1; exit} {print} "
-               "END{exit !found}' \"$(command -v omarchy-default-agent)\") && set -- %1 && eval \"$src\"")
+               "END{exit !found}' \"$(command -v hexciri-default-agent)\") && set -- %1 && eval \"$src\"")
         .arg(shellQuote(name));
 }
 
-// Whether the agent is installed, as omarchy-default-agent decides it before
+// Whether the agent is installed, as hexciri-default-agent decides it before
 // offering to install one.
 QString agentPresent(const QString &name) {
     return agentDefinitions(name) + " && agent_present";
 }
 
-// Removing a mise-installed agent the way Omarchy retires a mise copy of
+// Removing a mise-installed agent the way Hexciri retires a mise copy of
 // Hermes: out of the user's global config (where `mise use -g` put it), then
-// every installed version. Omarchy's own lazy declaration stays, as for any
+// every installed version. Hexciri's own lazy declaration stays, as for any
 // tool it declares. A copy the user installed in ~/.local/bin is theirs.
 QString agentRemoval(const QString &name) {
     return QStringLiteral(
@@ -105,12 +105,12 @@ QList<QVariantMap> Store::softwareItems(bool evaluate) {
     }
 
     // The terminal and editor in use are never removed; the browser only
-    // gets a warning, since Omarchy's own menu offers to remove it.
+    // gets a warning, since Hexciri's own menu offers to remove it.
     const QString terminal = read("general.terminal").toString().toLower();
     const QString editor = read("general.editor").toString().toLower();
     const QString browser = evaluate ? read("general.browser").toString().toLower() : QString();
     const QString agent = evaluate ? read("general.agent").toString().toLower() : QString();
-    static const QRegularExpression pkgPresent(R"(^omarchy-pkg-present ([a-z0-9@._+-]+)$)");
+    static const QRegularExpression pkgPresent(R"(^hexciri-pkg-present ([a-z0-9@._+-]+)$)");
 
     QList<QVariantMap> items;
     QStringList checks;
@@ -126,7 +126,7 @@ QList<QVariantMap> Store::softwareItems(bool evaluate) {
         const QString category = isTool ? QStringLiteral("tools") : key.section('.', 0, 0);
         const QString name = key.section('.', -1);
         // Hermes and OpenClaw are installed with their desktop apps (their
-        // agent_installer in omarchy-default-agent), which the menu removes;
+        // agent_installer in hexciri-default-agent), which the menu removes;
         // Settings removes the agents mise installed. Claude and Amp also
         // have desktop apps, but those aren't where their agents come from.
         static const QStringList withApp{"hermes", "openclaw"};
@@ -221,7 +221,7 @@ QVariant Store::listSoftware() {
 }
 
 QVariant Store::listDefaultApps() {
-    // Each choice and the command omarchy-default-browser, -terminal, and
+    // Each choice and the command hexciri-default-browser, -terminal, and
     // -editor look for to decide whether it's installed.
     using Choices = QList<QPair<QString, QString>>;
     static const QList<QPair<QString, Choices>> kinds{
@@ -244,7 +244,7 @@ QVariant Store::listDefaultApps() {
 
 QString Store::softwareCommand(const QString &action, const QString &arg, QStringList &command) {
     if (action == "software.run") {
-        // Only an action from Omarchy's shipped menu, under Install, Remove,
+        // Only an action from Hexciri's shipped menu, under Install, Remove,
         // or the default dictation or agent, which install what they pick.
         if (!arg.startsWith("install.") && !arg.startsWith("remove.") && !arg.startsWith("setup.default.dictation.")
             && !arg.startsWith("setup.default.agent."))
@@ -256,7 +256,7 @@ QString Store::softwareCommand(const QString &action, const QString &arg, QStrin
         return {};
     }
     if (action == "software.drop") {
-        // Apps Omarchy installs but has no removal for: drop the package it
+        // Apps Hexciri installs but has no removal for: drop the package it
         // checks for, never the terminal or editor in use; or a coding agent
         // mise installed.
         for (const QVariantMap &item : softwareItems(false)) {
@@ -269,10 +269,10 @@ QString Store::softwareCommand(const QString &action, const QString &arg, QStrin
             if (!item.value("dropRemove").toBool())
                 return tr("Settings can't remove %1").arg(item.value("label").toString());
             if (item.value("category") == "agent") {
-                command = {"omarchy-launch-floating-terminal-with-presentation", agentRemoval(arg.section('.', 1))};
+                command = {"hexciri-launch-floating-terminal-with-presentation", agentRemoval(arg.section('.', 1))};
                 return {};
             }
-            command = {"omarchy-launch-floating-terminal-with-presentation", "omarchy-pkg-drop " + shellQuote(item.value("package").toString())};
+            command = {"hexciri-launch-floating-terminal-with-presentation", "hexciri-pkg-drop " + shellQuote(item.value("package").toString())};
             return {};
         }
         return tr("Unknown app %1").arg(arg);

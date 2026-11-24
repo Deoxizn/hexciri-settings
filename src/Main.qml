@@ -22,7 +22,7 @@ ApplicationWindow {
     Material.foreground: ui.fg
     Material.roundedScale: theme.radius
 
-    // Colors, type, and spacing, taken from the Omarchy shell's own design
+    // Colors, type, and spacing, taken from the Hexciri shell's own design
     // tokens (shell/Commons/Style.qml) and the current theme, so the window
     // looks like the shell's Wi-Fi and Bluetooth panels.
     QtObject {
@@ -45,7 +45,7 @@ ApplicationWindow {
         readonly property string font: theme.fontFamily
         readonly property string iconFont: "JetBrainsMono Nerd Font"
         // The shell's type scale, anchored at its 12px base and following
-        // the text size picked in Omarchy.
+        // the text size picked in Hexciri.
         readonly property real scale: theme.textSize / 12
         function s(px) { return Math.round(px * scale) }
         readonly property int caption: Math.round(theme.textSize * 0.833)
@@ -92,8 +92,8 @@ ApplicationWindow {
           keywords: qsTr("dock windows gaps layout tiling focus pointer full screen resize columns") },
         { id: "bar", group: 3, title: qsTr("Bar"), glyph: "\u{F06EB}", show: true,
           keywords: qsTr("bar top panel widgets arrange order clock tray position height opacity weather indicators") },
-        { id: "menu", group: 3, title: qsTr("Omarchy Menu"), glyph: "\u{F035C}", show: true,
-          keywords: qsTr("omarchy menu hide items sections launcher entries") },
+        { id: "menu", group: 3, title: qsTr("Hexciri Menu"), glyph: "\u{F035C}", show: true,
+          keywords: qsTr("hexciri menu hide items sections launcher entries") },
         { id: "displays", group: 4, title: qsTr("Displays"), glyph: "\u{F0379}", show: true,
           keywords: qsTr("monitor resolution refresh rate scale night shift brightness rotation") },
         { id: "sound", group: 4, title: qsTr("Sound"), glyph: "\u{F057E}", show: true,
@@ -112,7 +112,13 @@ ApplicationWindow {
           keywords: qsTr("firewall ufw ports block allow incoming security") },
     ]
 
-    function paneById(id) { return panes.find(p => p.id === id) }
+    // Hexciri extra panes (Nyxiri tab hook): registered by
+    // ~/.config/hexciri/settings-panes/*.json, see Store::list("extraPanes").
+    readonly property var extraPanes: backend.lists.extraPanes || []
+    readonly property var allPanes: panes.concat(extraPanes.map(p => ({
+        id: p.id, group: p.group, title: p.title, glyph: p.glyph,
+        show: true, keywords: p.keywords || "", qml: p.qml })))
+    function paneById(id) { return allPanes.find(p => p.id === id) }
 
     // The pages inside panes, so searching finds them too: "agent" lists
     // General › Default Apps under General, and opens it.
@@ -182,7 +188,7 @@ ApplicationWindow {
     readonly property var visiblePanes: {
         const _ = translator.language
         const out = []
-        for (const p of panes) {
+        for (const p of win.allPanes) {
             if (!p.show) continue
             if (needle.length === 0) { out.push(p); continue }
             const subs = subPages.filter(sp => sp.pane === p.id && found(sp.title + " " + sp.keywords + " " + labelsOf(sp.settings)))
@@ -275,7 +281,7 @@ ApplicationWindow {
         const name = sp.page.toLowerCase()
         return name.indexOf(prefix) === 0 && name.length > prefix.length ? name.slice(prefix.length) : name
     }
-    // Opens what `omasettings open <pane>[/<page>]` names, from the command
+    // Opens what `hexciri-settings open <pane>[/<page>]` names, from the command
     // line or from another launch while this window is open. Anything it
     // doesn't know opens the pane, or leaves the window where it is.
     function openTarget(target, record) {
@@ -296,8 +302,8 @@ ApplicationWindow {
         function onOpenRequested(target) { win.openTarget(target) }
     }
 
-    // Every pane and page as an entry under Settings in the Omarchy menu, and
-    // for its search (off until switched on in Omarchy Menu): its title and
+    // Every pane and page as an entry under Settings in the Hexciri menu, and
+    // for its search (off until switched on in Hexciri Menu): its title and
     // keywords in the language in use, and in English too, so either finds it.
     function menuSearchEntries() {
         const terms = (title, keywords) => {
@@ -337,6 +343,7 @@ ApplicationWindow {
     Component.onCompleted: {
         backend.load("capabilities")
         backend.load("menuSearch")
+        backend.load("extraPanes")
         // Where the window opens isn't somewhere to go back to.
         openTarget(initialPane, false)
     }
@@ -652,6 +659,8 @@ ApplicationWindow {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     source: {
+                        const extra = win.extraPanes.find(p => p.id === win.pane)
+                        if (extra) return extra.qml
                         const page = win.sub.length > 0 ? win.sub
                                    : "Pane" + win.pane.charAt(0).toUpperCase() + win.pane.slice(1)
                         return "qrc:/qml/" + page + ".qml"

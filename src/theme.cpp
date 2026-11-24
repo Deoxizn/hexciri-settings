@@ -14,9 +14,9 @@
 
 Theme::Theme(const QString &directory, QObject *parent, const QString &hyprctl)
     : QObject(parent),
-      m_directory(directory.isEmpty() ? QDir::homePath() + "/.local/state/omarchy/current" : directory),
-      // The text size the user picked in Omarchy (omarchy display text size).
-      m_shellConfig(directory.isEmpty() ? QDir::homePath() + "/.config/omarchy/shell.toml" : directory + "/user-shell.toml") {
+      m_directory(directory.isEmpty() ? QDir::homePath() + "/.local/state/hexciri/current" : directory),
+      // The text size the user picked in Hexciri (hexciri display text size).
+      m_shellConfig(directory.isEmpty() ? QDir::homePath() + "/.config/hexciri/shell.toml" : directory + "/user-shell.toml") {
     m_debounce.setSingleShot(true);
     m_debounce.setInterval(80);
     connect(&m_watcher, &QFileSystemWatcher::directoryChanged, this, [this] { m_debounce.start(); });
@@ -25,7 +25,7 @@ Theme::Theme(const QString &directory, QObject *parent, const QString &hyprctl)
 
     // Corners follow Hyprland's effective rounding, which themes and personal
     // overrides can both set, so ask hyprctl rather than reading its config.
-    // Without Hyprland the corners stay sharp, like Omarchy's default.
+    // Without Hyprland the corners stay sharp, like Hexciri's default.
     m_hyprctl = !hyprctl.isEmpty() ? hyprctl
               : directory.isEmpty() && !qEnvironmentVariableIsEmpty("HYPRLAND_INSTANCE_SIGNATURE")
                   ? QStandardPaths::findExecutable("hyprctl") : QString();
@@ -123,7 +123,7 @@ void Theme::reload() {
 
     // A theme switch replaces symlinks and files, so watch the parents too and
     // re-arm after every change. Watching the nearest existing ancestor means
-    // installing Omarchy later works without restarting the app.
+    // installing Hexciri later works without restarting the app.
     QString ancestor = m_directory;
     while (!QFileInfo::exists(ancestor) && ancestor != "/")
         ancestor = QFileInfo(ancestor).absolutePath();

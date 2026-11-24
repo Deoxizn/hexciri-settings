@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // The screen that asks for the disk password when the computer starts
-// (Plymouth). It can take Omarchy's look or any theme's.
+// (Plymouth). It can take Hexciri's look or any theme's.
 SettingsPage {
     id: page
     pane: ""
@@ -58,7 +58,7 @@ SettingsPage {
                         Text {
                             Layout.fillWidth: true
                             horizontalAlignment: Text.AlignHCenter
-                            text: tile.modelData.name === "default" ? qsTr("Omarchy") : tile.modelData.name.replace(/-/g, " ")
+                            text: tile.modelData.name === "default" ? qsTr("Hexciri") : tile.modelData.name.replace(/-/g, " ")
                             color: tile.modelData.current ? ui.fg : ui.muted
                             font.family: ui.font
                             font.pixelSize: ui.small
@@ -74,7 +74,7 @@ SettingsPage {
     OmaDialog {
         id: confirm
         property string target
-        title: qsTr("Use the “%1” boot screen?").arg(target === "default" ? qsTr("Omarchy") : target)
+        title: qsTr("Use the “%1” boot screen?").arg(target === "default" ? qsTr("Hexciri") : target)
         acceptText: qsTr("Use It")
         onAccepted: backend.act("launch", [target === "default" ? "plymouthReset" : "bootScreen:" + target], ["bootScreens"])
         Text {

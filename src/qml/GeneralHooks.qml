@@ -1,7 +1,7 @@
 import QtQuick
 
-// Scripts Omarchy runs when something happens, from
-// ~/.config/omarchy/hooks/<when>.d: your own, and Omarchy's examples, which
+// Scripts Hexciri runs when something happens, from
+// ~/.config/hexciri/hooks/<when>.d: your own, and Hexciri's examples, which
 // run once turned on (a copy without .sample).
 SettingsPage {
     id: page
@@ -10,7 +10,7 @@ SettingsPage {
 
     readonly property var whens: ({
         "post-boot": qsTr("After the computer starts"),
-        "post-update": qsTr("After Omarchy updates"),
+        "post-update": qsTr("After Hexciri updates"),
         "theme-set": qsTr("After the theme changes"),
         "font-set": qsTr("After the font changes"),
         "battery-low": qsTr("When the battery runs low"),
@@ -39,7 +39,7 @@ SettingsPage {
                     id: hrow
                     required property var modelData
                     label: modelData.title
-                    sublabel: modelData.sample ? qsTr("An example from Omarchy") : ""
+                    sublabel: modelData.sample ? qsTr("An example from Hexciri") : ""
                     glyph: "\u{F0BA3}"
                     OmaToggle {
                         visible: hrow.modelData.sample

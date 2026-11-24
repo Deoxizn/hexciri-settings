@@ -68,7 +68,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Crashes")
-        footer: qsTr("When an app crashes, Omarchy tells you and can explain why. Programs you silenced from such a notification are listed here.")
+        footer: qsTr("When an app crashes, Hexciri tells you and can explain why. Programs you silenced from such a notification are listed here.")
         ToggleRow { setting: "notifications.crashReports"; label: qsTr("Tell me when an app crashes") }
         Repeater {
             model: backend.lists.crashMutes || []

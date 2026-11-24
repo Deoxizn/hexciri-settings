@@ -18,7 +18,7 @@ ScrollView {
     // Settings from other panes this page also shows.
     property var settings: []
     property int pollMs: 0
-    // The pane whose settings Restore Defaults puts back to Omarchy's.
+    // The pane whose settings Restore Defaults puts back to Hexciri's.
     property string resetPane: ""
     // The config files this page's settings live in, by their key in the
     // backend's table, the main one first. They are offered at the bottom
@@ -294,8 +294,8 @@ ScrollView {
       SettingsGroup {
         visible: page.resetPane.length > 0
         ButtonRow {
-          label: qsTr("Restore Omarchy's defaults")
-          sublabel: qsTr("Puts this page's settings back the way Omarchy ships them")
+          label: qsTr("Restore Hexciri's defaults")
+          sublabel: qsTr("Puts this page's settings back the way Hexciri ships them")
           glyph: "\u{F099B}"
           text: qsTr("Restore Defaults…")
           onClicked: { backend.load("defaults:" + page.resetPane); restoreDialog.open() }
@@ -308,7 +308,7 @@ ScrollView {
         objectName: "restoreDialog"
         readonly property var changes: backend.lists["defaults:" + page.resetPane] || []
         readonly property bool loading: backend.busy.indexOf("list:defaults:" + page.resetPane) >= 0
-        title: qsTr("Restore Omarchy's defaults?")
+        title: qsTr("Restore Hexciri's defaults?")
         acceptText: qsTr("Restore")
         canAccept: !loading && changes.length > 0
         onAccepted: backend.act("pane.reset", [page.resetPane],
@@ -321,7 +321,7 @@ ScrollView {
         Text {
             Layout.fillWidth: true
             text: restoreDialog.loading ? qsTr("Checking…")
-                  : restoreDialog.changes.length === 0 ? qsTr("Everything here is already as Omarchy ships it.")
+                  : restoreDialog.changes.length === 0 ? qsTr("Everything here is already as Hexciri ships it.")
                   : qsTr("These change back:")
             horizontalAlignment: Text.AlignLeft
             color: ui.muted

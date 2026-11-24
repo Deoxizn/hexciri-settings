@@ -1,9 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
 
-// The Omarchy shell's plugins: turn them on and off, update the ones that
+// The Hexciri shell's plugins: turn them on and off, update the ones that
 // came from git, remove them, or add one from a git URL. Everything goes
-// through `omarchy plugin`, as the shell's own plugin menu does.
+// through `hexciri plugin`, as the shell's own plugin menu does.
 SettingsPage {
     id: page
     configFiles: ["shell"]
@@ -35,7 +35,7 @@ SettingsPage {
 
     // A plugin's widget on the bar, when it has options of its own: the
     // same page the Bar pane opens.
-    readonly property var forms: ["omarchy.clock", "omarchy.weather", "omarchy.spacer", "omarchy.active-window"]
+    readonly property var forms: ["hexciri.clock", "hexciri.weather", "hexciri.spacer", "hexciri.active-window"]
     function widgetOf(plugin) {
         const sections = (backend.lists.bar || {}).sections || {}
         for (const s in sections)
@@ -100,7 +100,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Updates")
-        footer: qsTr("Only plugins installed from git can be updated here; built-in ones update with Omarchy.")
+        footer: qsTr("Only plugins installed from git can be updated here; built-in ones update with Hexciri.")
         ButtonRow {
             label: page.checking ? qsTr("Checking…")
                  : !page.updates.checkedAt ? qsTr("Check your plugins for new versions")
@@ -179,7 +179,7 @@ SettingsPage {
         onAccepted: backend.act("plugin.remove", [plugin.id], ["plugins", "bar"])
         Text {
             Layout.fillWidth: true
-            text: qsTr("Its folder in ~/.config/omarchy/plugins is deleted. To use it again, add it again.")
+            text: qsTr("Its folder in ~/.config/hexciri/plugins is deleted. To use it again, add it again.")
             horizontalAlignment: Text.AlignLeft
             color: ui.muted
             font.family: ui.font

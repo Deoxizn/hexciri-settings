@@ -26,7 +26,7 @@ SettingsPage {
         title: qsTr("Opening Settings")
         ChoiceRow {
             setting: "integration.menuPlace"
-            label: qsTr("Show Settings in the Omarchy menu")
+            label: qsTr("Show Settings in the Hexciri menu")
             glyph: "\u{F062E}"
             options: [{ value: "off", text: qsTr("Not shown") },
                       { value: "setup", text: qsTr("Under Setup") },
@@ -59,8 +59,8 @@ SettingsPage {
     SettingsGroup {
         title: qsTr("Changes Made Here")
         footer: page.changes.length === 0
-                ? qsTr("Nothing yet. Settings that come from Omarchy's own commands (theme, bar, and so on) aren't listed; they live where Omarchy keeps them.")
-                : qsTr("These live in ~/.config/hypr/omasettings.lua. Resetting one hands it back to your own config files.")
+                ? qsTr("Nothing yet. Settings that come from Hexciri's own commands (theme, bar, and so on) aren't listed; they live where Hexciri keeps them.")
+                : qsTr("These live in ~/.config/hypr/hexciri-settings.lua. Resetting one hands it back to your own config files.")
         Repeater {
             model: page.changes
             delegate: SettingRow {

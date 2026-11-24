@@ -2,9 +2,9 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-// The ASCII art Omarchy shows on the screensaver or the About screen, with
+// The ASCII art Hexciri shows on the screensaver or the About screen, with
 // the ways to change it: edit the text, make it from a picture, or go back
-// to Omarchy's.
+// to Hexciri's.
 SettingsGroup {
     id: group
     property string which: "screensaver"
@@ -58,7 +58,7 @@ SettingsGroup {
             onClicked: backend.act("branding.image", [group.which])
         }
         OmaButton {
-            text: qsTr("Restore Omarchy's")
+            text: qsTr("Restore Hexciri's")
             bordered: false
             onClicked: backend.act("branding.reset", [group.which], ["branding"])
         }

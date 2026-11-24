@@ -6,11 +6,11 @@
 // The repository holds a snapshot as plain files, so its history on GitHub
 // reads like a changelog:
 //
-//   sync.json            who uploaded it, when, from which Omarchy
+//   sync.json            who uploaded it, when, from which Hexciri
 //   settings.json        the same document Export writes, without its date
-//   desktop/             the Omarchy menu file, the dock and bar, file types, branding
+//   desktop/             the Hexciri menu file, the dock and bar, file types, branding
 //   hypr/                ~/.config/hypr: keybindings, input, look and feel, ... not monitors
-//   apps/                Omarchy's apps, pacman, AUR, Flatpak, mise, web apps, AppImages
+//   apps/                Hexciri's apps, pacman, AUR, Flatpak, mise, web apps, AppImages
 //   themes.json          themes added by git URL
 //   wallpapers/          wallpapers added to themes
 //   plugins.json         shell plugins by git URL, and whether they're on
@@ -203,7 +203,7 @@ bool sameFile(const QString &a, const QString &b) {
 void backUp(const QString &path) {
     if (!QFileInfo(path).isFile())
         return;
-    const QString copy = path + ".bak.omasettings-" + QDate::currentDate().toString("yyyy-MM-dd");
+    const QString copy = path + ".bak.hexciri-settings-" + QDate::currentDate().toString("yyyy-MM-dd");
     if (!QFileInfo::exists(copy))
         QFile::copy(path, copy);
 }
@@ -224,10 +224,10 @@ const QList<QPair<QString, QStringList>> &categories() {
 }
 
 // Files in ~/.config/hypr that stay behind: the displays, what Settings
-// writes from settings that sync on their own (omasettings.lua, Night
+// writes from settings that sync on their own (hexciri-settings.lua, Night
 // Shift's hyprsunset.conf), backups, and lock files.
 bool hyprLocal(const QString &rel) {
-    static const QRegularExpression skip(R"((^|/)(monitors\.lua|omasettings\.lua|hyprsunset\.conf|\.lock)$|\.bak($|[.-])|\.omasettings\.bak$|~$)");
+    static const QRegularExpression skip(R"((^|/)(monitors\.lua|hexciri-settings\.lua|hyprsunset\.conf|\.lock)$|\.bak($|[.-])|\.hexciri-settings\.bak$|~$)");
     return skip.match(rel).hasMatch();
 }
 
@@ -265,11 +265,11 @@ QJsonObject shellSubset(const QJsonObject &shell) {
 
 // Packages that come with the machine rather than the person: the base
 // system, kernels, firmware, microcode, the boot loader, graphics drivers
-// and GPU compute, laptop power and graphics switching, and Omarchy itself.
+// and GPU compute, laptop power and graphics switching, and Hexciri itself.
 const QRegularExpression &systemPackage() {
     static const QRegularExpression re(
         R"(^(base|base-devel|linux|linux-.+|.+-firmware|.+-firmware-.+|.+-ucode|limine.*|grub|efibootmgr|mkinitcpio.*|sudo|)"
-        R"(pipewire.*|wireplumber|omarchy.*|omasettings.*|nvidia.*|lib32-nvidia.*|mesa.*|lib32-mesa.*|vulkan-.+|)"
+        R"(pipewire.*|wireplumber|hexciri.*|hexciri-settings.*|nvidia.*|lib32-nvidia.*|mesa.*|lib32-mesa.*|vulkan-.+|)"
         R"(lib32-vulkan-.+|xf86-.+|intel-media-driver|libva-.+|broadcom-wl.*|.+-dkms|.+-headers|)"
         R"(rocm.*|hip-runtime.*|cuda.*|opencl-.+|amdgpu.*|supergfxctl|asusctl|tlp.*|thermald|nvidia-.+)$)");
     return re;
@@ -342,8 +342,8 @@ QStringList Store::miseTools(const QString &toml) {
 
 // --- Where it lives ------------------------------------------------------------------
 
-QString Store::syncDir() const { return m_paths.data + "/omasettings/sync"; }
-QString Store::syncStatePath() const { return m_paths.state + "/omasettings/sync.json"; }
+QString Store::syncDir() const { return m_paths.data + "/hexciri-settings/sync"; }
+QString Store::syncStatePath() const { return m_paths.state + "/hexciri-settings/sync.json"; }
 
 // The local copy holds the files Sync carries, which can include keys, so
 // only this account may enter it. git checks files out with the umask, often
@@ -370,7 +370,7 @@ QString Store::dotfileError(const QString &rel) const {
         if (within(clean, secret) || within(secret, clean))
             return tr("%1 holds keys or passwords; it stays on this computer").arg(clean);
     const QString absolute = m_paths.home + "/" + clean;
-    for (const QString &own : {m_paths.data + "/omasettings", m_paths.state + "/omasettings", m_paths.home + "/.cache"})
+    for (const QString &own : {m_paths.data + "/hexciri-settings", m_paths.state + "/hexciri-settings", m_paths.home + "/.cache"})
         if (within(absolute, own) || within(own, absolute))
             return tr("%1 can't be synced").arg(clean);
     return {};
@@ -472,13 +472,13 @@ QString Store::writeSyncSnapshot(const QString &dir, const QStringList &skip, co
 
     if (wanted("desktop")) {
         copyTree(menuFile(), dir + "/desktop/menu.jsonc");
-        const QJsonObject shell = shellSubset(loadJson(m_paths.config + "/omarchy/shell.json").toObject());
+        const QJsonObject shell = shellSubset(loadJson(m_paths.config + "/hexciri/shell.json").toObject());
         if (!shell.isEmpty())
             note(saveJson(dir + "/desktop/shell.json", shell));
         if (QFileInfo(m_paths.config + "/mimeapps.list").isFile())
             copyTree(m_paths.config + "/mimeapps.list", dir + "/desktop/mimeapps.list");
         for (const char *name : {"about.txt", "screensaver.txt"})
-            copyTree(m_paths.config + "/omarchy/branding/" + name, dir + "/desktop/branding/" + name);
+            copyTree(m_paths.config + "/hexciri/branding/" + name, dir + "/desktop/branding/" + name);
     }
 
     if (wanted("hypr")) {
@@ -488,20 +488,20 @@ QString Store::writeSyncSnapshot(const QString &dir, const QStringList &skip, co
     }
 
     if (wanted("apps")) {
-        QStringList omarchy, catalogPackages;
+        QStringList hexciri, catalogPackages;
         for (const QVariantMap &item : softwareItems(true)) {
             const QString package = item.value("package").toString();
             if (!package.isEmpty())
                 catalogPackages << package;
             if (item.value("installed").toBool() && item.value("category") != "tools")
-                omarchy << item.value("key").toString();
+                hexciri << item.value("key").toString();
         }
-        note(saveLines(dir + "/apps/omarchy.txt", omarchy));
+        note(saveLines(dir + "/apps/hexciri.txt", hexciri));
 
         QStringList excluded = catalogPackages;
-        excluded << packageNames(output("omarchy-pkg-defaults", {}, 15000));
-        excluded << packageNames(readText(m_paths.omarchy + "/install/omarchy-other.packages"));
-        excluded << packageNames(output("pactree", {"-u", "omarchy"}, 15000));
+        excluded << packageNames(output("hexciri-pkg-defaults", {}, 15000));
+        excluded << packageNames(readText(m_paths.hexciri + "/install/hexciri-other.packages"));
+        excluded << packageNames(output("pactree", {"-u", "hexciri"}, 15000));
         const QStringList chosen = syncPackages(output("pacman", {"-Qqe"}, 15000).split('\n'), excluded);
         const QStringList foreignList = output("pacman", {"-Qqm"}, 15000).split('\n', Qt::SkipEmptyParts);
         const QSet<QString> foreign(foreignList.begin(), foreignList.end());
@@ -550,14 +550,14 @@ QString Store::writeSyncSnapshot(const QString &dir, const QStringList &skip, co
 
     if (wanted("themes")) {
         QJsonArray themes;
-        const QString root = m_paths.config + "/omarchy/themes";
+        const QString root = m_paths.config + "/hexciri/themes";
         for (const QString &slug : QDir(root).entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name)) {
             const ProcResult r = run("git", {"-C", root + "/" + slug, "remote", "get-url", "origin"});
             if (r.ok() && !r.text().trimmed().isEmpty())
                 themes.append(QJsonObject{{"slug", slug}, {"url", r.text().trimmed()}});
         }
         note(saveJson(dir + "/themes.json", themes));
-        copyTree(m_paths.config + "/omarchy/backgrounds", dir + "/wallpapers");
+        copyTree(m_paths.config + "/hexciri/backgrounds", dir + "/wallpapers");
     }
 
     if (wanted("plugins")) {
@@ -600,7 +600,7 @@ QString Store::syncConnect(const QString &rawUrl) {
     const QString url = rawUrl.trimmed();
     static const QRegularExpression gitUrl(R"(^(https://[^\s'"]+|git@[A-Za-z0-9.-]+:[^\s'"]+)$)");
     if (!gitUrl.match(url).hasMatch())
-        return tr("Enter a git URL, like https://github.com/you/omarchy-sync");
+        return tr("Enter a git URL, like https://github.com/you/hexciri-sync");
 
     // Dotfiles and a git identity don't belong in a public repository.
     const QString repo = githubRepo(url);
@@ -642,13 +642,13 @@ QString Store::syncConnect(const QString &rawUrl) {
 }
 
 QString Store::syncCreate(const QString &rawName) {
-    const QString name = rawName.trimmed().isEmpty() ? QStringLiteral("omarchy-sync") : rawName.trimmed();
+    const QString name = rawName.trimmed().isEmpty() ? QStringLiteral("hexciri-sync") : rawName.trimmed();
     static const QRegularExpression valid("^[A-Za-z0-9_.-]{1,100}$");
     if (!valid.match(name).hasMatch())
         return tr("A repository name has letters, numbers, dots, dashes, and underscores");
     if (QStandardPaths::findExecutable("gh").isEmpty())
         return tr("The GitHub command (gh) isn't installed");
-    const ProcResult r = run("gh", {"repo", "create", name, "--private", "--description", "Omarchy settings, kept by Settings' Sync"}, 60000);
+    const ProcResult r = run("gh", {"repo", "create", name, "--private", "--description", "Hexciri settings, kept by Settings' Sync"}, 60000);
     if (!r.ok())
         return tr("Could not create the repository: %1").arg(r.failure("gh repo create"));
     static const QRegularExpression link(R"((https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+))");
@@ -755,19 +755,19 @@ QString Store::syncUpload(bool force, bool automatic) {
                     parts << category;
     }
     const QString now = QDateTime::currentDateTime().toString(Qt::ISODate);
-    saveJson(syncDir() + "/sync.json", QJsonObject{{"app", "omasettings-sync"}, {"version", 1}, {"host", hostName()},
-                                                   {"updated", now}, {"omarchy", output("omarchy-version", {})},
+    saveJson(syncDir() + "/sync.json", QJsonObject{{"app", "hexciri-settings-sync"}, {"version", 1}, {"host", hostName()},
+                                                   {"updated", now}, {"hexciri", output("hexciri-version", {})},
                                                    {"settings", QCoreApplication::applicationVersion()}});
     saveBytes(syncDir() + "/README.md",
-              QStringLiteral("# Omarchy Sync\n\n"
-                             "Settings, apps, and desktop files kept by [Settings](https://github.com/ipkalid/omarchy-settings) "
-                             "for Omarchy. Open General › Sync on another computer and connect this repository to bring it to match.\n\n"
+              QStringLiteral("# Hexciri Sync\n\n"
+                             "Settings, apps, and desktop files kept by [Settings](https://github.com/Deoxizn/hexciri) "
+                             "for Hexciri. Open General › Sync on another computer and connect this repository to bring it to match.\n\n"
                              "Last uploaded from **%1** on %2.\n\n"
                              "| Path | What it is |\n| --- | --- |\n"
                              "| settings.json | Settings, shortcuts, login items, window rules |\n"
-                             "| desktop/ | Omarchy menu, dock and bar, file types, branding |\n"
+                             "| desktop/ | Hexciri menu, dock and bar, file types, branding |\n"
                              "| hypr/ | ~/.config/hypr: keybindings, input, look and feel, autostart (not monitors) |\n"
-                             "| apps/ | Omarchy apps, pacman, AUR, Flatpak, mise, web apps, AppImages |\n"
+                             "| apps/ | Hexciri apps, pacman, AUR, Flatpak, mise, web apps, AppImages |\n"
                              "| themes.json, wallpapers/ | Themes added by URL, wallpapers you added |\n"
                              "| plugins.json | Shell plugins and whether they're on |\n"
                              "| git.json | Name and email on git commits |\n"
@@ -779,7 +779,7 @@ QString Store::syncUpload(bool force, bool automatic) {
 
     QStringList commit{"commit", "--quiet", "-m", hostName() + ": " + (parts.isEmpty() ? QStringLiteral("update") : parts.join(", "))};
     if (git({"config", "user.email"}).text().trimmed().isEmpty())
-        commit = QStringList{"-c", "user.name=Settings on " + hostName(), "-c", "user.email=omasettings@localhost"} + commit;
+        commit = QStringList{"-c", "user.name=Settings on " + hostName(), "-c", "user.email=hexciri-settings@localhost"} + commit;
     if (const ProcResult r = git(commit); !r.ok())
         return failWith(r.failure("git commit"));
     if (const ProcResult r = git({"push", "--quiet", "origin", "HEAD:" + branch}, 120000, true); !r.ok()) {
@@ -872,13 +872,13 @@ QVariantMap Store::syncPlan() {
         if (QFileInfo(dir + "/desktop/menu.jsonc").isFile() && !sameFile(dir + "/desktop/menu.jsonc", menuFile()))
             desktop << "menu";
         const QJsonObject theirs = loadJson(dir + "/desktop/shell.json").toObject();
-        if (!theirs.isEmpty() && theirs != shellSubset(loadJson(m_paths.config + "/omarchy/shell.json").toObject()))
+        if (!theirs.isEmpty() && theirs != shellSubset(loadJson(m_paths.config + "/hexciri/shell.json").toObject()))
             desktop << "shell";
         if (QFileInfo(dir + "/desktop/mimeapps.list").isFile() && !sameFile(dir + "/desktop/mimeapps.list", m_paths.config + "/mimeapps.list"))
             desktop << "mime";
         for (const char *name : {"about.txt", "screensaver.txt"})
             if (QFileInfo(dir + "/desktop/branding/" + name).isFile()
-                && !sameFile(dir + "/desktop/branding/" + name, m_paths.config + "/omarchy/branding/" + name)) {
+                && !sameFile(dir + "/desktop/branding/" + name, m_paths.config + "/hexciri/branding/" + name)) {
                 desktop << "branding";
                 break;
             }
@@ -894,18 +894,18 @@ QVariantMap Store::syncPlan() {
     }
 
     if (wanted("apps")) {
-        const QStringList theirOmarchy = loadLines(dir + "/apps/omarchy.txt");
-        QVariantList omarchy;
-        if (!theirOmarchy.isEmpty()) {
+        const QStringList theirHexciri = loadLines(dir + "/apps/hexciri.txt");
+        QVariantList hexciri;
+        if (!theirHexciri.isEmpty()) {
             for (const QVariantMap &item : softwareItems(true)) {
-                if (!theirOmarchy.contains(item.value("key").toString()) || item.value("installed").toBool()
+                if (!theirHexciri.contains(item.value("key").toString()) || item.value("installed").toBool()
                     || !item.value("available").toBool())
                     continue;
-                omarchy << QVariantMap{{"key", item.value("key")}, {"label", item.value("label")},
+                hexciri << QVariantMap{{"key", item.value("key")}, {"label", item.value("label")},
                                        {"installId", item.value("installId")}};
             }
         }
-        plan["omarchy"] = omarchy;
+        plan["hexciri"] = hexciri;
 
         const QStringList installedList = output("pacman", {"-Qq"}, 15000).split('\n', Qt::SkipEmptyParts);
         const QSet<QString> installed(installedList.begin(), installedList.end());
@@ -965,12 +965,12 @@ QVariantMap Store::syncPlan() {
     if (wanted("themes")) {
         QVariantList themes;
         for (const QJsonValue &v : loadJson(dir + "/themes.json").toArray())
-            if (!QFileInfo(m_paths.config + "/omarchy/themes/" + v.toObject().value("slug").toString()).isDir())
+            if (!QFileInfo(m_paths.config + "/hexciri/themes/" + v.toObject().value("slug").toString()).isDir())
                 themes << v.toObject().toVariantMap();
         plan["themes"] = themes;
         QStringList wallpapers;
         for (const QString &rel : filesUnder(dir + "/wallpapers"))
-            if (!QFileInfo::exists(m_paths.config + "/omarchy/backgrounds/" + rel))
+            if (!QFileInfo::exists(m_paths.config + "/hexciri/backgrounds/" + rel))
                 wallpapers << rel;
         plan["wallpapers"] = wallpapers;
     }
@@ -1052,7 +1052,7 @@ static QVariantList planGroups(const QVariantMap &plan) {
     group("settings", settings);
 
     auto desktopName = [](const QString &key) {
-        return key == "menu" ? tr("Omarchy menu") : key == "shell" ? tr("Dock and bar")
+        return key == "menu" ? tr("Hexciri menu") : key == "shell" ? tr("Dock and bar")
              : key == "mime" ? tr("Apps that open each file type") : key == "branding" ? tr("Branding text") : key;
     };
     QVariantList desktop;
@@ -1062,8 +1062,8 @@ static QVariantList planGroups(const QVariantMap &plan) {
     group("hypr", rows(plan.value("hypr").toStringList(), tr("Replaced; the old one is kept beside it")));
 
     QVariantList apps;
-    for (const QVariant &v : plan.value("omarchy").toList())
-        apps << QVariantMap{{"label", v.toMap().value("label")}, {"detail", "Omarchy"}};
+    for (const QVariant &v : plan.value("hexciri").toList())
+        apps << QVariantMap{{"label", v.toMap().value("label")}, {"detail", "Hexciri"}};
     apps += rows(plan.value("pacman").toStringList(), "pacman");
     apps += rows(plan.value("aur").toStringList(), "AUR");
     apps += rows(plan.value("flatpak").toStringList(), "Flatpak");
@@ -1210,27 +1210,27 @@ QString Store::syncInstallScript(const QVariantMap &plan) {
 
     const QStringList pacman = plan.value("pacman").toStringList();
     const QStringList aur = plan.value("aur").toStringList();
-    const QVariantList omarchy = plan.value("omarchy").toList();
+    const QVariantList hexciri = plan.value("hexciri").toList();
     const QStringList flatpaks = plan.value("flatpak").toStringList();
     const QStringList mise = plan.value("mise").toStringList();
     const QVariantList images = plan.value("appimages").toList();
-    if (pacman.isEmpty() && aur.isEmpty() && omarchy.isEmpty() && flatpaks.isEmpty() && mise.isEmpty() && images.isEmpty())
+    if (pacman.isEmpty() && aur.isEmpty() && hexciri.isEmpty() && flatpaks.isEmpty() && mise.isEmpty() && images.isEmpty())
         return {};
 
-    if (!pacman.isEmpty() || !aur.isEmpty() || !omarchy.isEmpty() || !flatpaks.isEmpty())
-        body << "source omarchy-sudo-keepalive";
+    if (!pacman.isEmpty() || !aur.isEmpty() || !hexciri.isEmpty() || !flatpaks.isEmpty())
+        body << "source hexciri-sudo-keepalive";
     if (!pacman.isEmpty()) {
         body << "step " + shellQuote(tr("Packages"));
-        body << QStringLiteral("omarchy-pkg-add %1 || for p in %1; do omarchy-pkg-add \"$p\" || failed+=(\"$p\"); done").arg(quoteAll(pacman));
+        body << QStringLiteral("hexciri-pkg-add %1 || for p in %1; do hexciri-pkg-add \"$p\" || failed+=(\"$p\"); done").arg(quoteAll(pacman));
     }
     if (!aur.isEmpty()) {
         body << "step " + shellQuote(tr("Packages from the AUR"));
-        body << QStringLiteral("for p in %1; do omarchy-pkg-aur-add \"$p\" || failed+=(\"$p\"); done").arg(quoteAll(aur));
+        body << QStringLiteral("for p in %1; do hexciri-pkg-aur-add \"$p\" || failed+=(\"$p\"); done").arg(quoteAll(aur));
     }
-    if (!omarchy.isEmpty()) {
-        body << "step " + shellQuote(tr("Omarchy apps"));
+    if (!hexciri.isEmpty()) {
+        body << "step " + shellQuote(tr("Hexciri apps"));
         const QJsonObject menu = defaultMenuItems();
-        for (const QVariant &v : omarchy) {
+        for (const QVariant &v : hexciri) {
             const QVariantMap item = v.toMap();
             const QString action = menu.value(item.value("installId").toString()).toObject().value("action").toString();
             if (action.isEmpty())
@@ -1279,17 +1279,17 @@ QString Store::syncInstallScript(const QVariantMap &plan) {
         }
     }
 
-    // Omarchy's installers open their own terminal; here they run in this
+    // Hexciri's installers open their own terminal; here they run in this
     // one, and the menu's install-and-open helpers only install.
     const QString script = QStringLiteral(
         "#!/bin/bash\n"
         "# Written by Settings' Sync: installs what the synced repository lists and this computer lacks.\n"
         "shim=$(mktemp -d)\n"
-        "printf '#!/bin/bash\\nbash -c \"$*\"\\n' > \"$shim/omarchy-launch-floating-terminal-with-presentation\"\n"
-        "chmod +x \"$shim/omarchy-launch-floating-terminal-with-presentation\"\n"
+        "printf '#!/bin/bash\\nbash -c \"$*\"\\n' > \"$shim/hexciri-launch-floating-terminal-with-presentation\"\n"
+        "chmod +x \"$shim/hexciri-launch-floating-terminal-with-presentation\"\n"
         "export PATH=\"$shim:$PATH\"\n"
-        "omarchy-install-and-launch() { omarchy-pkg-add $2; }\n"
-        "omarchy-install-app() { omarchy-pkg-add $2; }\n"
+        "hexciri-install-and-launch() { hexciri-pkg-add $2; }\n"
+        "hexciri-install-app() { hexciri-pkg-add $2; }\n"
         "failed=()\n"
         "step() { echo; echo \"== $1\"; }\n"
         "%1\n"
@@ -1299,11 +1299,11 @@ QString Store::syncInstallScript(const QVariantMap &plan) {
         "%4 act sync.installed \"${#failed[@]}\" \"${failed[*]}\" >/dev/null 2>&1\n"
         "(( ${#failed[@]} == 0 ))\n")
         .arg(body.join('\n'), shellQuote(tr("Not installed:")), shellQuote(tr("Everything is installed.")), shellQuote(self));
-    const QString path = m_paths.state + "/omasettings/sync-install.sh";
+    const QString path = m_paths.state + "/hexciri-settings/sync-install.sh";
     if (const QString error = saveBytes(path, script.toUtf8()); !error.isEmpty())
         return error;
     QFile::setPermissions(path, QFile::ReadOwner | QFile::WriteOwner | QFile::ExeOwner);
-    if (const QString error = launch("omarchy-launch-floating-terminal-with-presentation", {"bash " + shellQuote(path)}); !error.isEmpty())
+    if (const QString error = launch("hexciri-launch-floating-terminal-with-presentation", {"bash " + shellQuote(path)}); !error.isEmpty())
         return error;
     updateSyncState([](QJsonObject &s) {
         s.insert("installing", QDateTime::currentDateTime().toString(Qt::ISODate));
@@ -1347,10 +1347,10 @@ QString Store::syncApply(const QString &reviewed) {
         note(id, actPlugin(p.value("enabled").toBool() ? "plugin.enable" : "plugin.disable", {id}));
     }
     for (const QVariant &v : plan.value("themes").toList())
-        note(v.toMap().value("slug").toString(), runOk("omarchy-theme-install", {v.toMap().value("url").toString()}, 300000));
+        note(v.toMap().value("slug").toString(), runOk("hexciri-theme-install", {v.toMap().value("url").toString()}, 300000));
     for (const QString &rel : plan.value("wallpapers").toStringList())
         if (insideSnapshot(dir, dir + "/wallpapers/" + rel))
-            copyTree(dir + "/wallpapers/" + rel, m_paths.config + "/omarchy/backgrounds/" + rel);
+            copyTree(dir + "/wallpapers/" + rel, m_paths.config + "/hexciri/backgrounds/" + rel);
     for (const QVariant &v : plan.value("webapps").toList()) {
         const QVariantMap w = v.toMap();
         // The icon is one Sync kept in apps/webapp-icons, and nothing else.
@@ -1358,13 +1358,13 @@ QString Store::syncApply(const QString &reviewed) {
         const QString kept = w.value("icon").toString();
         const QString icon = keptIcon.match(kept).hasMatch() && insideSnapshot(dir, dir + "/apps/" + kept)
             ? dir + "/apps/" + kept : QStringLiteral("applications-internet");
-        note(w.value("name").toString(), runOk("omarchy-webapp-install", {w.value("name").toString(), w.value("url").toString(), icon}, 60000));
+        note(w.value("name").toString(), runOk("hexciri-webapp-install", {w.value("name").toString(), w.value("url").toString(), icon}, 60000));
     }
 
     const QStringList desktop = plan.value("desktop").toStringList();
     if (desktop.contains("menu") && insideSnapshot(dir, dir + "/desktop/menu.jsonc")) {
         backUp(menuFile());
-        note(tr("Omarchy menu"), saveBytes(menuFile(), readBytes(dir + "/desktop/menu.jsonc")));
+        note(tr("Hexciri menu"), saveBytes(menuFile(), readBytes(dir + "/desktop/menu.jsonc")));
     }
     if (desktop.contains("shell")) {
         const QJsonObject theirs = loadJson(dir + "/desktop/shell.json").toObject();
@@ -1381,7 +1381,7 @@ QString Store::syncApply(const QString &reviewed) {
     if (desktop.contains("branding"))
         for (const char *name : {"about.txt", "screensaver.txt"})
             if (insideSnapshot(dir, dir + "/desktop/branding/" + name))
-                copyTree(dir + "/desktop/branding/" + name, m_paths.config + "/omarchy/branding/" + name);
+                copyTree(dir + "/desktop/branding/" + name, m_paths.config + "/hexciri/branding/" + name);
 
     const QVariantMap g = plan.value("git").toMap();
     if (g.contains("name"))
@@ -1450,7 +1450,7 @@ QVariant Store::listSync() {
     // What the repository holds, part by part, as the page counts it.
     const QString dir = syncDir();
     int apps = 0;
-    for (const char *f : {"omarchy.txt", "pacman.txt", "aur.txt", "flatpak.txt", "mise.txt"})
+    for (const char *f : {"hexciri.txt", "pacman.txt", "aur.txt", "flatpak.txt", "mise.txt"})
         apps += loadLines(dir + "/apps/" + f).size();
     apps += loadJson(dir + "/apps/webapps.json").toArray().size() + loadJson(dir + "/apps/appimages.json").toArray().size();
     out["counts"] = QVariantMap{
@@ -1512,7 +1512,7 @@ QString Store::actSync(const QString &action, const QVariantList &args) {
     if (action == "sync.dotfile.add") {
         QStringList paths{a0};
         if (a0.isEmpty()) {
-            const ProcResult picked = run("omarchy-file-select", {"--title", tr("Choose a file or folder to sync"), "--multiple"}, 600000);
+            const ProcResult picked = run("hexciri-file-select", {"--title", tr("Choose a file or folder to sync"), "--multiple"}, 600000);
             if (!picked.ok())
                 return {};
             paths = picked.text().split('\n', Qt::SkipEmptyParts);

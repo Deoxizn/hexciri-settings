@@ -1,17 +1,17 @@
 import QtQuick
 import QtQuick.Layouts
 
-// What the Omarchy menu shows. Hiding an item writes `"when": "false"` for
-// it into ~/.config/omarchy/extensions/omarchy-menu.jsonc, the way the menu
+// What the Hexciri menu shows. Hiding an item writes `"when": "false"` for
+// it into ~/.config/hexciri/extensions/hexciri-menu.jsonc, the way the menu
 // documents it; the menu picks the change up on its own.
 SettingsPage {
     id: page
     configFiles: ["menu"]
     pane: "menu"
-    title: qsTr("Omarchy Menu")
+    title: qsTr("Hexciri Menu")
     tagline: qsTr("%n hidden", "", page.items.filter(i => i.hidden).length)
     glyph: "\u{F035C}"
-    description: qsTr("Hide the parts of the Omarchy menu you don't use. Hiding a section hides everything in it, in search too, and showing it brings those back.")
+    description: qsTr("Hide the parts of the Hexciri menu you don't use. Hiding a section hides everything in it, in search too, and showing it brings those back.")
     lists: ["menu", "menuCustom"]
 
     readonly property var items: backend.lists.menu || []
@@ -194,7 +194,7 @@ SettingsPage {
         }
         SettingRow {
             label: qsTr("Show Settings' pages in the menu")
-            sublabel: qsTr("List every page under Settings in the Omarchy menu, and find one by typing “vpn” or “date”")
+            sublabel: qsTr("List every page under Settings in the Hexciri menu, and find one by typing “vpn” or “date”")
             glyph: "\u{F0349}"
             busy: backend.busy.indexOf("menu.searchEntries") >= 0
             OmaToggle {
@@ -212,7 +212,7 @@ SettingsPage {
         collapsed: !page.customOpen
         onToggle: page.customOpen = !page.customOpen
         summary: qsTr("%n items", "", page.custom.length)
-        footer: qsTr("Items you add go into omarchy-menu.jsonc, the way Omarchy's menu takes extensions. A copy of the file is kept before each change.")
+        footer: qsTr("Items you add go into hexciri-menu.jsonc, the way Hexciri's menu takes extensions. A copy of the file is kept before each change.")
         // Stays in view while the list is folded.
         leading: ButtonRow {
             label: page.custom.length === 0 ? qsTr("Add your own commands and submenus to the menu") : ""
@@ -309,7 +309,7 @@ SettingsPage {
     }
 
     SettingsGroup {
-        footer: qsTr("Your own entries and anything more than hiding are in omarchy-menu.jsonc. A copy of it is kept the first time each day Settings changes it.")
+        footer: qsTr("Your own entries and anything more than hiding are in hexciri-menu.jsonc. A copy of it is kept the first time each day Settings changes it.")
         ButtonRow {
             label: qsTr("Restore the default menu")
             sublabel: qsTr("Shows every hidden item again; your own entries stay")
@@ -327,7 +327,7 @@ SettingsPage {
         onAccepted: backend.act("menu.showAll", [""], ["menu"])
         Text {
             Layout.fillWidth: true
-            text: qsTr("The menu goes back to showing everything Omarchy puts in it. Items you added yourself stay, and a copy of your menu file is saved beside it first, so your hiding can be brought back.")
+            text: qsTr("The menu goes back to showing everything Hexciri puts in it. Items you added yourself stay, and a copy of your menu file is saved beside it first, so your hiding can be brought back.")
             horizontalAlignment: Text.AlignLeft
             color: ui.muted
             font.family: ui.font
@@ -386,7 +386,7 @@ SettingsPage {
             id: command
             visible: itemDialog.isCommand
             Layout.fillWidth: true
-            placeholderText: qsTr("Command, e.g. omarchy-launch-editor ~/notes")
+            placeholderText: qsTr("Command, e.g. hexciri-launch-editor ~/notes")
         }
         RowLayout {
             Layout.fillWidth: true

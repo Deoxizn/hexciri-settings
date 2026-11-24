@@ -34,7 +34,7 @@ Item {
             // once it is there.
             property bool placed: false
             screen: modelData
-            title: "omasettings-identify-" + modelData.name
+            title: "hexciri-settings-identify-" + modelData.name
             flags: Qt.FramelessWindowHint | Qt.WindowDoesNotAcceptFocus
             width: 320; height: 240
             color: placed ? Qt.rgba(ui.bg.r, ui.bg.g, ui.bg.b, 0.82) : "transparent"

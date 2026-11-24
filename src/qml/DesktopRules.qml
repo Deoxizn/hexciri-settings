@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Layouts
 
-// Rules for how particular apps' windows open, written through Omarchy's
-// o.window helper into the generated Hyprland file. Omarchy's own rules
+// Rules for how particular apps' windows open, written through Hexciri's
+// o.window helper into the generated Hyprland file. Hexciri's own rules
 // (Steam floats, the file pickers center) are listed too: they live in
-// Omarchy's files, so changing one saves a rule of the user's that comes
+// Hexciri's files, so changing one saves a rule of the user's that comes
 // later in the config and wins where the two differ.
 SettingsPage {
     id: page
@@ -18,7 +18,7 @@ SettingsPage {
     readonly property var windows: info.windows || []
 
     // The rule the form shows: one of the user's (its index), or a new one,
-    // maybe started from one of Omarchy's.
+    // maybe started from one of Hexciri's.
     property int editing: -1
     property var basedOn: null
     property bool othersOpen: false
@@ -116,7 +116,7 @@ SettingsPage {
     }
 
     // Fills the form from a rule's settings: the user's own, or the rules
-    // object of one of Omarchy's.
+    // object of one of Hexciri's.
     function fill(cls, title, rule) {
         appPicker.currentIndex = -1
         cls = cls || ""
@@ -351,7 +351,7 @@ SettingsPage {
     SettingsGroup {
         visible: page.others.length > 0
         title: qsTr("Other Rules")
-        footer: qsTr("Set by Omarchy or your own Hyprland files. Open one to change it: Settings saves the change as a rule of yours, which wins where the two differ.")
+        footer: qsTr("Set by Hexciri or your own Hyprland files. Open one to change it: Settings saves the change as a rule of yours, which wins where the two differ.")
         collapsible: true
         collapsed: !page.othersOpen
         summary: qsTr("%n rules", "", page.others.length)

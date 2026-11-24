@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 // When something misbehaves: restart a part of the desktop, put a config
-// back to Omarchy's, change the kernel, or start over.
+// back to Hexciri's, change the kernel, or start over.
 SettingsPage {
     id: page
     pane: ""
@@ -58,8 +58,8 @@ SettingsPage {
     }
 
     SettingsGroup {
-        title: qsTr("Reset to Omarchy's Defaults")
-        footer: qsTr("Puts a config back the way Omarchy ships it, after saving yours as a backup beside it. Settings' own changes come back on their own.")
+        title: qsTr("Reset to Hexciri's Defaults")
+        footer: qsTr("Puts a config back the way Hexciri ships it, after saving yours as a backup beside it. Settings' own changes come back on their own.")
         Repeater {
             model: [
                 { label: qsTr("Hyprland"), detail: qsTr("Keybindings, monitors, input, and look in ~/.config/hypr"), launch: "refreshHyprland" },
@@ -100,7 +100,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Start Over")
-        footer: qsTr("Erases your files, apps, and settings and puts the computer back to a fresh Omarchy install.")
+        footer: qsTr("Erases your files, apps, and settings and puts the computer back to a fresh Hexciri install.")
         ButtonRow {
             label: qsTr("Reset this computer")
             glyph: "\u{F0026}"
@@ -113,7 +113,7 @@ SettingsPage {
     OmaDialog {
         id: reset
         property var item: ({ label: "", launch: "" })
-        title: qsTr("Reset %1 to Omarchy's defaults?").arg(item.label)
+        title: qsTr("Reset %1 to Hexciri's defaults?").arg(item.label)
         acceptText: qsTr("Reset")
         onAccepted: backend.act("launch", [item.launch])
         Text {
@@ -156,7 +156,7 @@ SettingsPage {
         onAccepted: backend.act("launch", ["factoryReset"])
         Text {
             Layout.fillWidth: true
-            text: qsTr("Your files, apps, and settings are deleted and Omarchy starts fresh. Back up anything you want to keep first. Type RESET to continue; a terminal then asks once more.")
+            text: qsTr("Your files, apps, and settings are deleted and Hexciri starts fresh. Back up anything you want to keep first. Type RESET to continue; a terminal then asks once more.")
             horizontalAlignment: Text.AlignLeft
             color: ui.urgent
             font.family: ui.font

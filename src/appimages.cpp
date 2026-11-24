@@ -338,7 +338,7 @@ QList<QVariantMap> Store::appImageItems() const {
         // Settings once named the ones it couldn't read a name from after
         // their file; those get a proper name, in the launcher too.
         QString name = entry.value("Name", baseName(program));
-        if (entry.value("X-Omasettings-AppImage") == "true" && name == baseName(program) && appImageName(program) != name
+        if (entry.value("X-HexciriSettings-AppImage") == "true" && name == baseName(program) && appImageName(program) != name
             && !hasControl(appImageName(program))) {
             name = appImageName(program);
             QFile f(file);
@@ -355,7 +355,7 @@ QList<QVariantMap> Store::appImageItems() const {
         items << QVariantMap{{"path", program}, {"name", name},
                              {"version", entry.value("X-AppImage-Version", fileVersion(program))}, {"icon", resolveIcon(entry.value("Icon"))},
                              {"publisher", publisher(info)},
-                             {"desktop", file}, {"ours", entry.value("X-Omasettings-AppImage") == "true"},
+                             {"desktop", file}, {"ours", entry.value("X-HexciriSettings-AppImage") == "true"},
                              {"updateKind", kind(info)}, {"integrated", true}, {"location", location(program)},
                              {"modified", QFileInfo(program).lastModified().toMSecsSinceEpoch()}};
     }
@@ -505,7 +505,7 @@ QString Store::integrateAppImage(const QString &path) {
     for (const QString &name : QDir(applications).entryList({"*.desktop"}, QDir::Files)) {
         const QString file = applications + "/" + name;
         const auto entry = desktopEntry(file);
-        if (file != ownEntry && execProgram(entry.value("Exec")) == path && entry.value("X-Omasettings-AppImage") != "true")
+        if (file != ownEntry && execProgram(entry.value("Exec")) == path && entry.value("X-HexciriSettings-AppImage") != "true")
             return {};
     }
 
@@ -557,7 +557,7 @@ QString Store::integrateAppImage(const QString &path) {
             && found.isFile() && found.size() > 0 && found.size() < 8 * 1024 * 1024) {
             QFile f(real);
             const bool svg = f.open(QIODevice::ReadOnly) && f.read(512).contains("<svg");
-            const QString iconDir = m_paths.data + "/icons/omasettings-appimages";
+            const QString iconDir = m_paths.data + "/icons/hexciri-settings-appimages";
             QDir().mkpath(iconDir);
             for (const char *ext : {"png", "svg"})
                 QFile::remove(iconDir + "/" + id + "." + ext);
@@ -583,7 +583,7 @@ QString Store::integrateAppImage(const QString &path) {
     for (const char *key : {"GenericName", "Comment", "Categories", "Keywords", "StartupWMClass", "X-AppImage-Version"})
         if (const QString value = embeddedValue(key); !value.isEmpty())
             lines << QString::fromLatin1(key) + "=" + value;
-    lines << "X-Omasettings-AppImage=true";
+    lines << "X-HexciriSettings-AppImage=true";
     QDir().mkpath(applications);
     QFile out(ownEntry);
     if (!out.open(QIODevice::WriteOnly | QIODevice::Truncate))
@@ -615,7 +615,7 @@ QString Store::appImageUpdateCommand(const QString &path, QStringList &command) 
         .arg(shellQuote(tr("Downloading %1").arg(update.value("file").toString())), shellQuote(part),
              shellQuote(update.value("url").toString()), shellQuote(update.value("sha1").toString() + "  " + part),
              shellQuote(path), shellQuote(self), shellQuote(tr("Updated.")));
-    command = {"omarchy-launch-floating-terminal-with-presentation", script};
+    command = {"hexciri-launch-floating-terminal-with-presentation", script};
     return {};
 }
 
@@ -663,7 +663,7 @@ QString Store::replaceAppImage(const QString &download) {
     if (target != oldPath) {
         QFile::remove(old.value("desktop").toString());
         for (const char *ext : {"png", "svg"})
-            QFile::remove(m_paths.data + "/icons/omasettings-appimages/" + appImageId(oldPath) + "." + ext);
+            QFile::remove(m_paths.data + "/icons/hexciri-settings-appimages/" + appImageId(oldPath) + "." + ext);
     }
     return integrateAppImage(target);
 }
@@ -681,10 +681,10 @@ QString Store::actAppImage(const QString &action, const QVariantList &args) {
         QStringList paths{path};
         if (path.isEmpty()) {
             // No extension filter: the chooser's is case-sensitive and
-            // omarchy-file-select lowercases it, so it would hide every
+            // hexciri-file-select lowercases it, so it would hide every
             // .AppImage, and some AppImages have no extension at all. What's
             // picked is checked to be an AppImage below.
-            const ProcResult picked = run("omarchy-file-select", {"--title", tr("Choose AppImages"), "--multiple"}, 600000);
+            const ProcResult picked = run("hexciri-file-select", {"--title", tr("Choose AppImages"), "--multiple"}, 600000);
             if (!picked.ok())
                 return {};
             paths = picked.text().split('\n', Qt::SkipEmptyParts);
@@ -731,7 +731,7 @@ QString Store::actAppImage(const QString &action, const QVariantList &args) {
             if (execProgram(desktopEntry(applications + "/" + name).value("Exec")) == path)
                 QFile::remove(applications + "/" + name);
         for (const char *ext : {"png", "svg"})
-            QFile::remove(m_paths.data + "/icons/omasettings-appimages/" + appImageId(path) + "." + ext);
+            QFile::remove(m_paths.data + "/icons/hexciri-settings-appimages/" + appImageId(path) + "." + ext);
         return {};
     }
     if (action == "appimage.update") {

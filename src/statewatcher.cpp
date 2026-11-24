@@ -16,12 +16,12 @@ static const QStringList hyprPatterns = {
 static const QStringList hyprLists = {"monitors", "shortcuts", "keybindings", "windowRules", "loginItems"};
 
 QList<WatchRule> StateWatcher::rules(const Paths &p) {
-    const QString state = p.state + "/omarchy";
+    const QString state = p.state + "/hexciri";
     const QString config = p.config;
     return {
         // Do Not Disturb, from the shell's notification service.
         {state + "/notifications/quiet.json", false, {"notifications.doNotDisturb"}, {}},
-        // Omarchy's on/off flags, and the Hyprland snippets its toggles copy in.
+        // Hexciri's on/off flags, and the Hyprland snippets its toggles copy in.
         {state + "/toggles", true,
          {"appearance.*", "desktop.gaps", "desktop.oneWindowRatio", "desktop.barVisible", "desktop.fullscreenDesktop",
           "lock.screensaver", "power.suspendInMenu", "notifications.crashReports", "display.laptopScreen",
@@ -38,19 +38,19 @@ QList<WatchRule> StateWatcher::rules(const Paths &p) {
         {state + "/defaults", true, {"general.editor"}, {}},
         {state + "/settings/weather.json", false, {}, {"weather"}},
         // The shell's settings: idle times, the bar, the dock, the clock, plugins.
-        {config + "/omarchy/shell.json", false,
+        {config + "/hexciri/shell.json", false,
          {"lock.screensaverAfter", "lock.lockAfter", "desktop.barPosition", "desktop.dockPosition",
           "desktop.dockAutohide", "appearance.barBackground", "bar.*", "general.clockFormat",
           "general.clockVerticalFormat"},
          {"bar", "dock", "plugins"}},
-        {config + "/omarchy/shell.toml", false, {"appearance.textSize", "appearance.spacingScale", "bar.*"}, {}},
-        {config + "/omarchy/extensions/omarchy-menu.jsonc", false, {"integration.*"},
+        {config + "/hexciri/shell.toml", false, {"appearance.textSize", "appearance.spacingScale", "bar.*"}, {}},
+        {config + "/hexciri/extensions/hexciri-menu.jsonc", false, {"integration.*"},
          {"menu", "menuCustom", "menuSearch"}},
-        {config + "/omarchy/defaults", true, {"general.agent", "general.dictation"}, {}},
-        {config + "/omarchy/backgrounds", true, {}, {"backgrounds"}},
-        {config + "/omarchy/themes", true, {}, {"themes"}},
-        {config + "/omarchy/plugins", true, {}, {"plugins", "bar"}},
-        {config + "/omarchy/hooks", true, {}, {"hooks"}},
+        {config + "/hexciri/defaults", true, {"general.agent", "general.dictation"}, {}},
+        {config + "/hexciri/backgrounds", true, {}, {"backgrounds"}},
+        {config + "/hexciri/themes", true, {}, {"themes"}},
+        {config + "/hexciri/plugins", true, {}, {"plugins", "bar"}},
+        {config + "/hexciri/hooks", true, {}, {"hooks"}},
         {config + "/xdg-terminals.list", false, {"general.terminal"}, {}},
         {config + "/mimeapps.list", false, {"general.browser"}, {"fileTypes"}},
         {config + "/hypr/hyprsunset.conf", false, {"display.night*"}, {}},

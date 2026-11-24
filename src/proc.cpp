@@ -23,7 +23,7 @@ QString ProcResult::failure(const QString &program) const {
 ProcResult runProcess(const QString &program, const QStringList &args, int timeoutMs, const QByteArray &input) {
     ProcResult result;
     QProcess process;
-    // Omarchy's commands send desktop notifications and translate their output
+    // Hexciri's commands send desktop notifications and translate their output
     // themselves, so they get the session environment unchanged, except that
     // tools print plain English for us to parse.
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();

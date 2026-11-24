@@ -11,7 +11,7 @@
 
 Translator::Translator(const QString &languageFile, const QString &catalogDirectory, QObject *parent)
     : QTranslator(parent),
-      m_languageFile(languageFile.isEmpty() ? QDir::homePath() + "/.config/omarchy/language" : languageFile),
+      m_languageFile(languageFile.isEmpty() ? QDir::homePath() + "/.config/hexciri/language" : languageFile),
       m_catalogDirectory(catalogDirectory) {
     m_debounce.setSingleShot(true);
     m_debounce.setInterval(80);
@@ -31,8 +31,8 @@ QString Translator::readLanguage(const QString &path) {
     return valid.match(code).hasMatch() ? code : "en";
 }
 
-// CLDR cardinal plural categories for whole counts, for Omarchy's languages
-// (the same rules as Omarchy's shell/Commons/Plural.js).
+// CLDR cardinal plural categories for whole counts, for Hexciri's languages
+// (the same rules as Hexciri's shell/Commons/Plural.js).
 QString Translator::pluralCategory(const QString &language, long long count) {
     const long long n = count < 0 ? -count : count, n10 = n % 10, n100 = n % 100;
     const bool millions = n != 0 && n % 1000000 == 0;
@@ -65,11 +65,11 @@ QString Translator::pluralCategory(const QString &language, long long count) {
     return n == 1 ? "one" : "other";
 }
 
-// The locale Omarchy formats this language with, from its registry, so the
+// The locale Hexciri formats this language with, from its registry, so the
 // app's numbers and dates match the desktop's (Arabic there uses Western
-// digits); without Omarchy, Qt's own locale for the code.
+// digits); without Hexciri, Qt's own locale for the code.
 QLocale Translator::formatLocale(const QString &language) {
-    QFile registry(qEnvironmentVariable("OMARCHY_PATH") + "/default/i18n/locales.json");
+    QFile registry(qEnvironmentVariable("HEXCIRI_PATH") + "/default/i18n/locales.json");
     if (registry.open(QIODevice::ReadOnly)) {
         const QString name = QJsonDocument::fromJson(registry.readAll()).object()
                                  .value(language).toObject().value("formatLocale").toString();
@@ -102,7 +102,7 @@ void Translator::reload() {
     if (!paths.isEmpty())
         m_watcher.removePaths(paths);
 
-    // omarchy-language replaces the file, which drops it from the watch, and a
+    // hexciri-language replaces the file, which drops it from the watch, and a
     // first pick creates it; watch its directory too and re-arm every time.
     const QString directory = QFileInfo(m_languageFile).absolutePath();
     if (QFileInfo::exists(directory))

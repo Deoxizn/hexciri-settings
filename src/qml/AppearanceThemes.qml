@@ -93,7 +93,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Add a Theme")
-        footer: qsTr("Find themes at omarchy.org/themes. Paste the theme's git address; it is downloaded and applied.")
+        footer: qsTr("Find themes at github.com/Deoxizn/hexciri/themes. Paste the theme's git address; it is downloaded and applied.")
         SettingRow {
             id: themeUrlRow
             label: qsTr("From a git URL")
@@ -146,7 +146,7 @@ SettingsPage {
         Text {
             Layout.fillWidth: true
             text: removeTheme.target.stock ? qsTr("The built-in theme stays; only your changes to it are deleted.")
-                                          : qsTr("Its folder in ~/.config/omarchy/themes is deleted.")
+                                          : qsTr("Its folder in ~/.config/hexciri/themes is deleted.")
             horizontalAlignment: Text.AlignLeft
             color: ui.muted
             font.family: ui.font

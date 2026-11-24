@@ -12,17 +12,16 @@ SettingsPage {
     readonly property bool checking: backend.busy.indexOf("list:updates") >= 0
 
     SettingsGroup {
-        footer: qsTr("Updates run in a terminal so you can follow along and answer any questions. Omarchy updates the system, its apps, and itself together.")
+        footer: qsTr("Updates run in a terminal so you can follow along and answer any questions. Hexciri updates the system, its apps, and itself together.")
         InfoRow {
-            label: qsTr("Omarchy")
-            value: page.about.omarchy || ""
-            sublabel: page.about.channel ? qsTr("%1 channel").arg(page.about.channel) : ""
+            label: qsTr("Hexciri")
+            value: page.about.hexciri || ""
         }
         ButtonRow {
             label: page.checking ? qsTr("Checking…")
                  : !page.updates.checked ? qsTr("Check whether an update is waiting")
                  : page.updates.available ? qsTr("An update is available")
-                 : qsTr("Omarchy is up to date")
+                 : qsTr("Hexciri is up to date")
             sublabel: page.updates.checked && page.updates.available ? (page.updates.text || "") : ""
             text: qsTr("Check Now")
             busy: page.checking
@@ -37,48 +36,11 @@ SettingsPage {
     }
 
     SettingsGroup {
-        title: qsTr("Update Channel")
-        footer: qsTr("Stable is tested. Release candidates arrive earlier, and edge gets every change as it lands; both can break things. Switching opens a terminal.")
-        SettingRow {
-            label: qsTr("Get updates from")
-            ChoiceBox {
-                maxWidth: Math.round(220 * ui.scale)
-                model: [
-                    { value: "stable", text: qsTr("Stable") },
-                    { value: "rc", text: qsTr("Release candidates") },
-                    { value: "edge", text: qsTr("Edge") }
-                ]
-                textRole: "text"
-                valueRole: "value"
-                currentIndex: ["stable", "rc", "edge"].indexOf(page.about.channel || "stable")
-                onActivated: {
-                    if (currentValue !== page.about.channel) {
-                        channelDialog.channel = currentValue
-                        channelDialog.open()
-                    }
-                    currentIndex = Qt.binding(() => ["stable", "rc", "edge"].indexOf(page.about.channel || "stable"))
-                }
-                Accessible.name: qsTr("Update channel")
-            }
-        }
-    }
-
-    OmaDialog {
-        id: channelDialog
-        property string channel
-        title: qsTr("Switch to the %1 channel?").arg(channel)
-        acceptText: qsTr("Switch")
-        onAccepted: backend.act("launch", ["channel:" + channel], ["about"])
-        Text {
-            Layout.fillWidth: true
-            text: channelDialog.channel === "stable" ? qsTr("Your system moves back to tested releases at the next update.")
-                  : qsTr("You'll get changes before they are fully tested. Switch back to stable at any time.")
-            horizontalAlignment: Text.AlignLeft
-            color: ui.muted
-            font.family: ui.font
-            font.pixelSize: ui.small
-            wrapMode: Text.Wrap
-            textFormat: Text.PlainText
+        title: qsTr("Hexciri Updates")
+        footer: qsTr("Hexciri has no release channel. Updates follow the nyx branch: hexciri update pulls the latest installer and re-applies it.")
+        InfoRow {
+            label: qsTr("Channel")
+            value: qsTr("nyx branch, no channel")
         }
     }
 

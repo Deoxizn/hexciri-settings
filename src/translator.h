@@ -7,8 +7,8 @@
 #include <QTimer>
 #include <QTranslator>
 
-// Follows the language picked under Omarchy's Setup > Language. Catalogs are
-// flat JSON objects from English source text to translation, one per Omarchy
+// Follows the language picked under Hexciri's Setup > Language. Catalogs are
+// flat JSON objects from English source text to translation, one per Hexciri
 // language code (i18n/da.json, i18n/pt-BR.json), so QML keeps plain
 // qsTr("Save") and C++ keeps tr("Save"). A counted string,
 // qsTr("%n clips", "", count), maps to an object of plural forms keyed by

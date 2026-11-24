@@ -7,7 +7,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Language")
-        footer: qsTr("Omarchy and apps that follow it switch right away. Other apps switch the next time you log in.")
+        footer: qsTr("Hexciri and apps that follow it switch right away. Other apps switch the next time you log in.")
         ChoiceRow {
             setting: "general.language"
             label: qsTr("Preferred language")

@@ -3,8 +3,8 @@ import QtQuick.Layouts
 
 // One bar widget's options, as its manifest describes them (every field the
 // shell's own widget settings know: switches, numbers, choices, text), or a
-// form of Settings' own for Omarchy's widgets that draw theirs by hand.
-// Changes go through `omarchy bar set`, to the instance this page was opened
+// form of Settings' own for Hexciri's widgets that draw theirs by hand.
+// Changes go through `hexciri bar set`, to the instance this page was opened
 // for when the bar has the widget more than once.
 SettingsPage {
     id: page
@@ -28,26 +28,26 @@ SettingsPage {
     readonly property var options: widget ? widget.options || {} : {}
     readonly property bool working: backend.busy.indexOf("bar.setOption") >= 0
 
-    // Omarchy's widgets with no schema in their manifest.
+    // Hexciri's widgets with no schema in their manifest.
     readonly property var forms: ({
-        "omarchy.clock": [
+        "hexciri.clock": [
             { key: "format", type: "clock", label: qsTr("Clock"), choicesFrom: "general.clockFormat", defaultValue: "dddd HH:mm" },
             { key: "formatAlt", type: "clock", label: qsTr("After a click"), choicesFrom: "general.clockFormat",
               defaultValue: "d MMMM 'W'ww yyyy" },
             { key: "verticalFormat", type: "clock", label: qsTr("On a bar at the side"),
               choicesFrom: "general.clockVerticalFormat", defaultValue: "HH\n—\nmm" }
         ],
-        "omarchy.weather": [
+        "hexciri.weather": [
             { key: "unit", type: "enum", label: qsTr("Units"), defaultValue: "",
               options: [{ value: "", label: qsTr("As your language uses") }, { value: "metric", label: qsTr("Metric (°C)") },
                         { value: "imperial", label: qsTr("Imperial (°F)") }] },
             { key: "refreshMinutes", type: "integer", label: qsTr("Check for new weather every"), min: 5, max: 120, step: 5,
               defaultValue: 15, unit: "minutes" }
         ],
-        "omarchy.spacer": [
+        "hexciri.spacer": [
             { key: "size", type: "integer", label: qsTr("Size"), min: 2, max: 200, step: 2, defaultValue: 8, unit: "px" }
         ],
-        "omarchy.active-window": [
+        "hexciri.active-window": [
             { key: "maxWidth", type: "integer", label: qsTr("Longest title"), min: 100, max: 800, step: 10,
               defaultValue: 280, unit: "px" }
         ]
@@ -230,7 +230,7 @@ SettingsPage {
     // Where the weather is for, which the weather widget keeps apart from
     // its options.
     SettingsGroup {
-        visible: page.widgetId === "omarchy.weather"
+        visible: page.widgetId === "hexciri.weather"
         title: qsTr("Location")
         footer: qsTr("Leave it to find your city from your internet connection, or type one.")
         SettingRow {

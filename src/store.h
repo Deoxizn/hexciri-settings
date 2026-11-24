@@ -18,7 +18,7 @@
 struct Paths {
     QString config;  // ~/.config
     QString state;   // ~/.local/state
-    QString omarchy; // $OMARCHY_PATH, Omarchy's read-only install
+    QString hexciri; // $HEXCIRI_PATH, Hexciri's read-only install
     QString data;    // ~/.local/share
     QString home;    // ~, where ~/Applications is
     QString downloads; // the Downloads folder
@@ -37,7 +37,7 @@ struct Setting {
     QVariantList choices; // fixed choices: values
     QString choicesList;  // or the name of the list that holds them
     QString hyprOption;   // for settings kept in the generated Hyprland file
-    QVariant omarchyDefault; // what Omarchy ships, for Restore Defaults
+    QVariant hexciriDefault; // what Hexciri ships, for Restore Defaults
     std::function<QVariant()> read;
     // Returns an empty string on success, or what went wrong.
     std::function<QString(const QVariant &)> write;
@@ -67,8 +67,8 @@ public:
 
     // The saved choices behind the generated Hyprland file.
     QJsonObject managedState() const;
-    QString managedLuaPath() const { return m_paths.config + "/hypr/omasettings.lua"; }
-    QString statePath() const { return m_paths.config + "/omarchy/omasettings.json"; }
+    QString managedLuaPath() const { return m_paths.config + "/hypr/hexciri-settings.lua"; }
+    QString statePath() const { return m_paths.config + "/hexciri/hexciri-settings.json"; }
     // A config file a page offers to open, by its key; empty if unknown.
     QString configFilePath(const QString &key) const;
 
@@ -95,7 +95,7 @@ public:
     // What applying the local copy of the repository would change here.
     QVariantMap syncPlan();
     // The packages the person added: explicit ones, less the excluded and
-    // those that come with the machine (kernels, firmware, drivers, Omarchy).
+    // those that come with the machine (kernels, firmware, drivers, Hexciri).
     static QStringList syncPackages(const QStringList &explicitPackages, const QStringList &excluded);
     // The tools in a mise config's [tools] table, as tool@version.
     static QStringList miseTools(const QString &toml);
@@ -154,24 +154,24 @@ private:
     QVariant listMore(const QString &name);
     QString actMore(const QString &action, const QVariantList &args);
     QVariantList apps() const;
-    // Window rules set by Omarchy or the user's own Hyprland files.
+    // Window rules set by Hexciri or the user's own Hyprland files.
     QVariantList otherWindowRules() const;
     QString keyboardBacklight() const;
     QString setNightShift(const QString &key, const QVariant &value);
     QString writeNightShift(const QJsonObject &night);
     QString menuPlace();
     QString setMenuPlace(const QString &place);
-    // Settings' panes and pages in the Omarchy menu's search (see features.cpp).
+    // Settings' panes and pages in the Hexciri menu's search (see features.cpp).
     bool menuSearchOn();
     QString setMenuSearch(const QVariantList &entries, const QString &groupLabel);
     QString updateState(const std::function<QString(QJsonObject &)> &change);
     QJsonObject exportSettings();
 
-    // omarchy.cpp: Omarchy's own flags, the window look, the shell's look in
+    // hexciri.cpp: Hexciri's own flags, the window look, the shell's look in
     // shell.toml, bar widgets' options, the weather's place, and hooks.
-    void buildOmarchy();
-    QVariant listOmarchy(const QString &name);
-    QString actOmarchy(const QString &action, const QVariantList &args);
+    void buildHexciri();
+    QVariant listHexciri(const QString &name);
+    QString actHexciri(const QString &action, const QVariantList &args);
     QString shellToml(const QString &table, const QString &key) const;
     QString setShellToml(const QString &table, const QString &key, const QString &literal);
     QString setSessionVariable(const QString &name, const QString &value);
@@ -188,7 +188,7 @@ private:
     QString menuAction(const QString &action, const QString &id);
     QVariant listMenuCustom();
     QJsonObject defaultMenuItems() const;
-    // software.cpp: the apps and tools Omarchy's Install and Remove menus offer.
+    // software.cpp: the apps and tools Hexciri's Install and Remove menus offer.
     QList<QVariantMap> softwareItems(bool evaluate);
     QVariant listSoftware();
     // Which of the default browser, terminal, and editor choices are installed.
@@ -206,7 +206,7 @@ private:
     QString menuItemAction(const QString &action, const QVariantMap &item);
 
 public:
-    // The app icon, drawn like Omarchy's own menu entries in the theme's colors.
+    // The app icon, drawn like Hexciri's own menu entries in the theme's colors.
     static QString iconSvg(const QString &foreground, double rounding);
     QString iconPath() const;
     QString writeThemedIcon();
@@ -282,6 +282,6 @@ private:
 // exportSettings writes, and nothing else.
 const QStringList &importableManaged();
 
-// Whether a font family name is plain enough to hand to omarchy-font-set,
+// Whether a font family name is plain enough to hand to hexciri-font-set,
 // which pastes it into sed expressions and config files as it is.
 bool safeFontName(const QString &name);

@@ -1,11 +1,11 @@
 import QtQuick
 
-// A pane's glyph, drawn plain the way the Omarchy shell draws its icons.
+// A pane's glyph, drawn plain the way the Hexciri shell draws its icons.
 Text {
     property string glyph
     property color tint: ui.fg
     property int size: ui.icon
-    // Omarchy's menu draws some brand icons from its own "omarchy" font.
+    // Hexciri's menu draws some brand icons from its own "hexciri" font.
     property string family: ""
 
     text: glyph

@@ -102,19 +102,15 @@ SettingsPage {
         }
     }
 
-    // Omarchy themes these apps too when it can; each can keep its own.
+    // Hexciri themes these apps too when it can; each can keep its own.
     SettingsGroup {
-        visible: !!(page.editors.code || page.editors.cursor || page.editors.codium || page.editors.herdr)
+        visible: !!(page.editors.code || page.editors.cursor || page.editors.codium)
         title: qsTr("Other Apps")
         footer: qsTr("Turn one off to keep the theme you chose in that app.")
         ToggleRow { visible: !!page.editors.code; setting: "appearance.themeVscode"; label: qsTr("Theme VS Code") }
         ToggleRow { visible: !!page.editors.cursor; setting: "appearance.themeCursor"; label: qsTr("Theme Cursor") }
         ToggleRow { visible: !!page.editors.codium; setting: "appearance.themeCodium"; label: qsTr("Theme VSCodium") }
-        ToggleRow {
-            visible: !!page.editors.herdr
-            setting: "appearance.themeSync"
-            label: qsTr("Send theme changes to your herdr machines")
-        }
+        // Hexciri: herdr theme sync removed, Herdr is out of v2 scope.
     }
 
 

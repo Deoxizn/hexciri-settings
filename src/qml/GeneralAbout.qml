@@ -75,12 +75,11 @@ SettingsPage {
     }
 
     SettingsGroup {
-        InfoRow { label: qsTr("Omarchy"); value: page.about.omarchy || "" }
-        InfoRow { label: qsTr("Update channel"); value: page.about.channel || "" }
+        InfoRow { label: qsTr("Hexciri"); value: page.about.hexciri || "" }
         InfoRow { label: qsTr("Kernel"); value: page.about.kernel || "" }
         InfoRow { label: qsTr("Up for"); value: page.about.uptimeSeconds ? page.duration(page.about.uptimeSeconds) : "" }
         ButtonRow {
-            label: qsTr("Omarchy's own About screen")
+            label: qsTr("Hexciri's own About screen")
             text: qsTr("Open")
             onClicked: backend.act("about.open", [])
         }
@@ -89,6 +88,6 @@ SettingsPage {
     BrandingGroup {
         which: "about"
         title: qsTr("About Screen Art")
-        footer: qsTr("Omarchy's About screen shows this next to your system details.")
+        footer: qsTr("Hexciri's About screen shows this next to your system details.")
     }
 }

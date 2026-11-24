@@ -12,7 +12,7 @@ SettingsPage {
     })
 
     // Every menu lists only what's installed; Apps installs the rest. The
-    // browser, terminal, and editor are installed when the command Omarchy
+    // browser, terminal, and editor are installed when the command Hexciri
     // checks for is there, the agents and dictation as the Apps pane finds.
     readonly property var commands: backend.lists.defaultApps || ({})
     function installedOf(kind, options) {
@@ -55,7 +55,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("Tools")
-        footer: qsTr("The coding agent opens with Omarchy's agent shortcut; dictation types what you say.")
+        footer: qsTr("The coding agent opens with Hexciri's agent shortcut; dictation types what you say.")
         ChoiceRow {
             setting: "general.agent"
             label: qsTr("Coding agent")
@@ -109,7 +109,7 @@ SettingsPage {
         }
     }
 
-    // Where Omarchy's screenshot and recording tools save.
+    // Where Hexciri's screenshot and recording tools save.
     SettingsGroup {
         title: qsTr("Folders")
         footer: qsTr("Takes effect the next time you log in.")
@@ -123,7 +123,7 @@ SettingsPage {
                 required property var modelData
                 readonly property string value: backend.values[modelData.setting] || ""
                 label: modelData.label
-                sublabel: value.length > 0 ? value : qsTr("%1, as Omarchy picks").arg(modelData.fallback)
+                sublabel: value.length > 0 ? value : qsTr("%1, as Hexciri picks").arg(modelData.fallback)
                 glyph: "\u{F024B}"
                 busy: backend.busy.indexOf(modelData.setting) >= 0 || backend.busy.indexOf("folder.choose") >= 0
                 OmaButton {
@@ -135,7 +135,7 @@ SettingsPage {
                     visible: folderRow.value.length > 0
                     glyph: "\u{F0156}"
                     bordered: false
-                    tooltip: qsTr("Use Omarchy's")
+                    tooltip: qsTr("Use Hexciri's")
                     anchors.verticalCenter: parent.verticalCenter
                     onClicked: backend.set(folderRow.modelData.setting, "")
                 }

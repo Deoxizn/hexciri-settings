@@ -5,7 +5,7 @@ ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 mkdir -p "$ROOT/build"
 cd "$ROOT/build"
 
-qmake6 "$ROOT/omasettings.pro"
+qmake6 "$ROOT/hexciri-settings.pro"
 make -j"$(nproc)"
 
-echo "Built $ROOT/build/omasettings"
+echo "Built $ROOT/build/hexciri-settings"

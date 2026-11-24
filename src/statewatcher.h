@@ -13,7 +13,7 @@
 #include "store.h"
 
 // Where a setting's value lives on disk, so a change made anywhere else (a
-// keybinding, the Omarchy menu, a terminal) shows in the window at once.
+// keybinding, the Hexciri menu, a terminal) shows in the window at once.
 // `ids` are setting ids, or a prefix ending in '*'; `lists` are the lists to
 // load again when they are already showing.
 struct WatchRule {

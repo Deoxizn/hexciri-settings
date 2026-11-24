@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 // Web apps: sites that open in their own window and sit in the launcher,
-// made and removed with omarchy webapp.
+// made and removed with hexciri webapp.
 SettingsPage {
     id: page
     pane: ""

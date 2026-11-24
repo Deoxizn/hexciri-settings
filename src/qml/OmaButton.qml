@@ -1,6 +1,6 @@
 import QtQuick
 
-// The Omarchy shell's button: monospace text (and an optional glyph) in a
+// The Hexciri shell's button: monospace text (and an optional glyph) in a
 // box that fills on hover and when selected. `bordered` draws its outline
 // at rest, as the shell's choice buttons do.
 Rectangle {

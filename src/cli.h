@@ -5,7 +5,7 @@
 class Store;
 
 // Commands that need no display, so agents and scripts can read and change
-// settings: omasettings list|get|set|data|skill. Returns the exit code, or -1
+// settings: hexciri-settings list|get|set|data|skill. Returns the exit code, or -1
 // when the arguments ask for the window instead.
 int runCli(const QStringList &args, Store &store);
 

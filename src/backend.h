@@ -62,7 +62,7 @@ public:
     // rects are [{x, y, width, height}], the result [{x, y}] (Layout::place).
     Q_INVOKABLE QVariantList placeMonitor(const QVariantList &rects, int moved, int x, int y, int snap) const;
 
-    // Follows changes made outside Settings (a keybinding, the Omarchy menu,
+    // Follows changes made outside Settings (a keybinding, the Hexciri menu,
     // a terminal) and shows them on every page; `events` also listens to
     // Hyprland and PulseAudio.
     void watch(bool events = true);

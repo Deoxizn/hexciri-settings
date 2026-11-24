@@ -28,13 +28,13 @@ Item {
   }
 
   function notify(args) {
-    const n = notifier.createObject(root, { command: ["notify-send", "--app-name=Settings", "--icon=omasettings"].concat(args) })
+    const n = notifier.createObject(root, { command: ["notify-send", "--app-name=Settings", "--icon=hexciri-settings"].concat(args) })
     n.running = true
   }
 
   Component.onCompleted: check()
 
-  // `omarchy plugin update` moves the checkout to a new commit, which git
+  // `hexciri plugin update` moves the checkout to a new commit, which git
   // records in its reflog; a copy that isn't a checkout changes its
   // manifest instead. Either way, look again once the update settles.
   FileView {
@@ -104,14 +104,14 @@ Item {
   // when asked.
   Process {
     id: toolsPrompt
-    command: ["notify-send", "--app-name=Settings", "--icon=omasettings", "--wait",
+    command: ["notify-send", "--app-name=Settings", "--icon=hexciri-settings", "--wait",
               "--action=install=" + strings.t("tools.action"),
               strings.t("tools.title"), strings.t("tools.body")]
     stdout: StdioCollector {
       waitForEnd: true
       onStreamFinished: {
         if (text.trim() === "install") {
-          terminal.command = ["omarchy-launch-floating-terminal-with-presentation",
+          terminal.command = ["hexciri-launch-floating-terminal-with-presentation",
                               "'" + root.installer.replace(/'/g, "'\\''") + "'"]
           terminal.running = true
         }

@@ -1,10 +1,10 @@
 # Settings
 
-![Settings for Omarchy: the Displays pane arranging two monitors, the theme gallery, and more panes, in the current theme](docs/screenshot.png)
+![Settings for Hexciri: the Displays pane arranging two monitors, the theme gallery, and more panes, in the current theme](docs/screenshot.png)
 
 One window for the things you would otherwise change by hand in config files
-on [Omarchy](https://omarchy.org), laid out like a desktop settings app and
-drawn like the Omarchy shell's own panels, in the current theme's colors and
+on [Hexciri](https://github.com/Deoxizn/hexciri), laid out like a desktop settings app and
+drawn like the Hexciri shell's own panels, in the current theme's colors and
 monospace font.
 
 - **23 panes**, from Wi-Fi, sound, and power to the keyboard, printers, and
@@ -15,14 +15,14 @@ monospace font.
   which workspaces open where, and set adaptive sync, 10-bit color, and HDR.
   Each monitor keeps its settings on whatever port it is plugged into.
 - **Make it yours**: themes, fonts, wallpaper, the bar's widgets, the dock,
-  window rules, and the Omarchy menu.
-- **Every app Omarchy offers**, installed and removed from one list, plus
+  window rules, and the Hexciri menu.
+- **Every app Hexciri offers**, installed and removed from one list, plus
   AppImages added to the launcher with their icons and kept up to date.
-- **Sync**: keep your settings, apps (Omarchy's, pacman, AUR, Flatpak, mise,
+- **Sync**: keep your settings, apps (Hexciri's, pacman, AUR, Flatpak, mise,
   web apps, AppImages), themes, plugins, and chosen dotfiles in a private
   GitHub repository. Changes upload on their own; another computer matches
   it with one click, after showing what will change. Hardware stays behind.
-- **Always current**: change something with a keybinding, the Omarchy menu,
+- **Always current**: change something with a keybinding, the Hexciri menu,
   or a terminal, and every page shows it at once.
 - **The files behind each page**: a page whose settings live in a config
   file lists it at the bottom with an Open button, and Ctrl+E opens it in
@@ -32,11 +32,11 @@ monospace font.
   undone unless you keep them.
 - **14 languages**: Arabic, Chinese (Simplified and Traditional), English,
   French, German, Italian, Japanese, Korean, Polish, Portuguese (Brazil),
-  Russian, Spanish (Mexico), and Turkish, right to left included. Omarchy's
+  Russian, Spanish (Mexico), and Turkish, right to left included. Hexciri's
   other languages get their number and date formats and English text.
   Theme, text size, corner, and language changes show up live.
 - **Scriptable**: every setting can be read and changed with the
-  `omasettings` command, for scripts and AI agents.
+  `hexciri-settings` command, for scripts and AI agents.
 
 | Pane | What's in it |
 | --- | --- |
@@ -44,9 +44,9 @@ monospace font.
 | Bluetooth, VPN | Pairing; WireGuard and OpenVPN connections (import, sign in, install support) |
 | Power | Power mode now, on the adapter, and on battery; hibernation |
 | General | About, updates and update channel, language, time zone and clock, default apps and file types, where screenshots and recordings go, login items, web apps, hooks (your scripts that run after an update or a theme change), Sync, changes and backup |
-| Apps | Everything Omarchy's Install and Remove menus offer (browsers, AI apps, coding agents, services, editors, terminals, games, dev environments, dictation, package pickers), with what's installed, so those menus can stay hidden; AppImages, added to the app launcher with their own icons and updated from where their makers publish them |
+| Apps | Everything Hexciri's Install and Remove menus offer (browsers, AI apps, coding agents, services, editors, terminals, games, dev environments, dictation, package pickers), with what's installed, so those menus can stay hidden; AppImages, added to the app launcher with their own icons and updated from where their makers publish them |
 | Appearance | Theme gallery, installing and removing themes, corners or a radius of your own, transparency, animations, shadows, which apps follow the theme, text size, spacing, font |
-| Desktop & Dock, Bar, Omarchy Menu, Plugins | Dock and pinned apps, window layout and gaps, full screen desktop, window rules, focus and the pointer; the bar's widgets, their order, and each widget's own options (the clock, weather and its place, indicators, agents, and any plugin's), the bar's size and opacity; hiding parts of the Omarchy menu, your own menu items, and every Settings page as a submenu under Settings in the menu (and in its search); shell plugins and updates |
+| Desktop & Dock, Bar, Hexciri Menu, Plugins | Dock and pinned apps, window layout and gaps, full screen desktop, window rules, focus and the pointer; the bar's widgets, their order, and each widget's own options (the clock, weather and its place, indicators, agents, and any plugin's), the bar's size and opacity; hiding parts of the Hexciri menu, your own menu items, and every Settings page as a submenu under Settings in the menu (and in its search); shell plugins and updates |
 | Displays, Wallpaper | Arranging displays by dragging them edge to edge, identifying which is which, the main display, mirroring, which workspaces open on which display; resolution, refresh, scale, rotation, adaptive sync, 10-bit color and HDR, remembered per monitor whichever port it is plugged into; Night Shift and its schedule; wallpapers and adding your own |
 | Notifications, Sound | Do Not Disturb, crash reports; output and input devices and volume |
 | Lock Screen, Login & Security, Firewall | Idle times; password, fingerprint, security keys; ufw on/off and open ports |
@@ -54,14 +54,14 @@ monospace font.
 
 ## Getting to a page
 
-- **From the Omarchy menu.** Turn on *Find Settings' pages in the menu
-  search* in Settings › Omarchy Menu, then press Super + Space and type
+- **From the Hexciri menu.** Turn on *Find Settings' pages in the menu
+  search* in Settings › Hexciri Menu, then press Super + Space and type
   `vpn`, `monitor`, or `date`: every pane and page is there, in your
   language and in English, and opens right where you asked. The entries are
-  a hidden group in `omarchy-menu.jsonc`, so they show only in search, never
+  a hidden group in `hexciri-menu.jsonc`, so they show only in search, never
   while browsing the menu.
-- **From a terminal or a keybinding.** `omasettings open vpn` opens a pane,
-  and `omasettings open general/datetime` a page inside one (the pages:
+- **From a terminal or a keybinding.** `hexciri-settings open vpn` opens a pane,
+  and `hexciri-settings open general/datetime` a page inside one (the pages:
   `general/about`, `update`, `language`, `datetime`, `loginitems`,
   `webapps`, `apps`, `hooks`, `troubleshooting`, `sync`, `settingsapp`; `appearance/themes`,
   `desktop/rules`, `lock/bootscreen`, `keyboard/shortcuts`).
@@ -70,24 +70,24 @@ monospace font.
 
 ## Install
 
-Settings ships as an Omarchy plugin. Add it and enable it:
+Settings ships as an Hexciri plugin. Add it and enable it:
 
 ```sh
-omarchy plugin add https://github.com/ipkalid/omarchy-settings.git --enable
+hexciri plugin add https://github.com/Deoxizn/hexciri-settings --enable
 ```
 
 Enabling it builds the app (a minute or so) and installs it for you alone,
 under `~/.local`, so no password is needed. A notification says when it's
 ready, and Settings is then in the app launcher (Super + Space). After
-`omarchy plugin update ipkalid.settings`, it is rebuilt the same way. If a
+`hexciri plugin update ipkalid.settings`, it is rebuilt the same way. If a
 build tool is missing, a notification offers to add it in a terminal.
 
 ### Requirements
 
-Omarchy with shell plugins (Quattro). Building needs `gcc`, `make`, and Qt 6
-(`qt6-base`, `qt6-declarative`, `qt6-wayland`, `qt6-imageformats`); Omarchy
+Hexciri with shell plugins (Quattro). Building needs `gcc`, `make`, and Qt 6
+(`qt6-base`, `qt6-declarative`, `qt6-wayland`, `qt6-imageformats`); Hexciri
 has them already, and the plugin offers to add any that are missing. Panes
-use the tools Omarchy ships for them and say so when one is missing:
+use the tools Hexciri ships for them and say so when one is missing:
 NetworkManager for Wi-Fi, `bluez-utils` for Bluetooth, `pactl` for sound,
 `power-profiles-daemon` for power modes, `brightnessctl` for laptop
 brightness, `ufw` for the firewall, CUPS for printers, and `squashfs-tools`
@@ -96,7 +96,7 @@ for reading an AppImage's name and icon without running it.
 Settings changes your own config files (under `~/.config`) only when you
 change a setting, keeps a backup before rewriting one, and lists everything
 it changed under General › Changes & Backup. On first start it adds a small
-theme hook (`~/.config/omarchy/hooks/theme-set.d/omasettings-icon`) that
+theme hook (`~/.config/hexciri/hooks/theme-set.d/hexciri-settings-icon`) that
 redraws its icon in the new theme's colors.
 
 The plugin does nothing else in the shell. If the Arch package from
@@ -105,29 +105,29 @@ The plugin does nothing else in the shell. If the Arch package from
 To remove the app as well as the plugin:
 
 ```sh
-~/.local/share/omasettings/uninstall
-omarchy plugin remove ipkalid.settings
+~/.local/share/hexciri-settings/uninstall
+hexciri plugin remove ipkalid.settings
 ```
 
 ## How it changes things
 
 Settings never rewrites a file you wrote.
 
-- Where Omarchy has a command for something (`omarchy theme set`,
-  `omarchy hyprland corners`, `omarchy bar position`, `omarchy toggle ...`),
-  Settings runs that command, so it behaves exactly as Omarchy's menus do.
+- Where Hexciri has a command for something (`hexciri theme set`,
+  `hexciri hyprland corners`, `hexciri bar position`, `hexciri toggle ...`),
+  Settings runs that command, so it behaves exactly as Hexciri's menus do.
 - Hyprland options (keyboard, mouse, trackpad, gaps, focus, displays) go into
-  one generated file, `~/.config/hypr/omasettings.lua`, loaded after your own
+  one generated file, `~/.config/hypr/hexciri-settings.lua`, loaded after your own
   config. After every change Settings reloads Hyprland and checks
   `hyprctl configerrors`; if Hyprland rejects the change, it is rolled back.
-  Delete a line there (or run `omasettings reset <id>`) to hand that option
+  Delete a line there (or run `hexciri-settings reset <id>`) to hand that option
   back to your own files. The choices behind the file are kept in
-  `~/.config/omarchy/omasettings.json`.
+  `~/.config/hexciri/hexciri-settings.json`.
 - So are your own shortcuts, login items, window rules, and Night Shift's
   schedule (which also writes `~/.config/hypr/hyprsunset.conf`, after
   backing up yours). Every change Settings keeps is listed under General >
   Changes & Backup, with a reset for each.
-- Idle and lock times are written into `~/.config/omarchy/shell.json` in
+- Idle and lock times are written into `~/.config/hexciri/shell.json` in
   place, keeping its formatting. A file with a syntax error is left alone.
 - Display changes undo themselves after 15 seconds unless you keep them, and
   the last display showing its own picture can't be turned off or mirrored
@@ -135,7 +135,7 @@ Settings never rewrites a file you wrote.
   Displays are saved by their make, model, and serial number
   (`desc:...`), so a monitor keeps its settings on any port or dock.
 - Interactive setup (passwords, fingerprint, security keys, updates) opens in
-  a terminal, the way Omarchy's menus do it.
+  a terminal, the way Hexciri's menus do it.
 
 Everything is written atomically (beside the target, then renamed), and every
 change can be undone with Ctrl+Z.
@@ -143,15 +143,15 @@ change can be undone with Ctrl+Z.
 ## Sync
 
 General › Sync connects Settings to a private GitHub repository, through the
-`gh` login (it creates one, `omarchy-sync`, if you like). The repository
+`gh` login (it creates one, `hexciri-sync`, if you like). The repository
 holds plain files, so its history on GitHub reads like a changelog:
 
 | Path | What it is |
 | --- | --- |
 | `settings.json` | Everything Export writes: settings, shortcuts, login items, window rules |
-| `desktop/` | The Omarchy menu file, the dock and bar layout, apps for file types, branding |
+| `desktop/` | The Hexciri menu file, the dock and bar layout, apps for file types, branding |
 | `hypr/` | `~/.config/hypr`: your keybindings, input, look and feel, autostart, `hyprland.lua`, and the rest, except `monitors.lua` (and backups) |
-| `apps/` | Omarchy's apps, the pacman and AUR packages you added, Flatpak apps, mise tools, web apps, AppImages that publish updates |
+| `apps/` | Hexciri's apps, the pacman and AUR packages you added, Flatpak apps, mise tools, web apps, AppImages that publish updates |
 | `themes.json`, `wallpapers/` | Themes added by git URL, wallpapers you added |
 | `plugins.json` | Shell plugins by git URL, and which are on |
 | `git.json` | The name and email on your commits |
@@ -179,7 +179,7 @@ holds plain files, so its history on GitHub reads like a changelog:
   Sync asks GitHub whether it is public and refuses it if so. A repository
   on any other host, or on GitHub without `gh`, is used as given, so make
   sure it's private yourself.
-- The local copy (`~/.local/share/omasettings/sync`) can only be opened by
+- The local copy (`~/.local/share/hexciri-settings/sync`) can only be opened by
   your account.
 
 ## Privileges
@@ -192,7 +192,7 @@ Settings runs as you. It never runs as root, and `plugin/install` and
   `ufw disable`, `ufw allow`, `ufw delete`), removing a printer
   (`lpadmin -x`), and listing and taking snapshots (`snapper list`,
   `snapper create`).
-- **sudo in a terminal**: these run Omarchy's own script in a floating
+- **sudo in a terminal**: these run Hexciri's own script in a floating
   terminal, and sudo asks for your password there: sudo without a
   password, Docker without sudo (the docker group; the change takes effect
   after a restart), switching the kernel, the boot screen, factory reset,
@@ -201,12 +201,12 @@ Settings runs as you. It never runs as root, and `plugin/install` and
   security keys, updates, firmware, the drive password, hybrid graphics,
   and adding printing, firewall, or VPN tools) works the same way.
 - **Sync's Apply**: after you review the list, missing apps install in one
-  terminal through Omarchy's scripts, which ask for sudo once: pacman
-  packages with `omarchy-pkg-add` (`sudo pacman -S`), AUR packages with
-  `omarchy-pkg-aur-add` (`yay -S --noconfirm`), and Omarchy's apps with the
-  install action from Omarchy's menu.
+  terminal through Hexciri's scripts, which ask for sudo once: pacman
+  packages with `hexciri-pkg-add` (`sudo pacman -S`), AUR packages with
+  `hexciri-pkg-aur-add` (`yay -S --noconfirm`), and Hexciri's apps with the
+  install action from Hexciri's menu.
 - **The plugin** builds and installs under `~/.local` without a password.
-  Only when a build tool is missing does it add it with `omarchy-pkg-add`,
+  Only when a build tool is missing does it add it with `hexciri-pkg-add`,
   in a terminal.
 - **`bin/install`** is for working on Settings, not used by the plugin: it
   builds the working tree with `makepkg` and installs the package with
@@ -234,36 +234,36 @@ Settings runs as you. It never runs as root, and `plugin/install` and
 Every setting in the window can be read and changed without a display:
 
 ```sh
-omasettings list --json                 # every setting: type, range, choices, value
-omasettings get keyboard.repeatRate
-omasettings set keyboard.repeatRate 45 --json
-omasettings reset keyboard.repeatRate   # back to your own config
-omasettings data monitors --json        # wifi, bluetooth, sinks, monitors, themes, ...
-omasettings act shortcut.add "SUPER + E" Files launch org.gnome.Nautilus.desktop
-omasettings export ~/Documents           # settings, shortcuts, login items, rules
-omasettings import ~/Documents/omarchy-settings-2026-11-06.json
-omasettings sync status                 # Sync: connected? newer settings waiting?
-omasettings sync upload                 # or: apply, check, connect <url>, create
-omasettings open displays               # open the window on a pane
-omasettings open general/datetime       # or on a page inside one
-omasettings skill install               # a short skill so agents know how
+hexciri-settings list --json                 # every setting: type, range, choices, value
+hexciri-settings get keyboard.repeatRate
+hexciri-settings set keyboard.repeatRate 45 --json
+hexciri-settings reset keyboard.repeatRate   # back to your own config
+hexciri-settings data monitors --json        # wifi, bluetooth, sinks, monitors, themes, ...
+hexciri-settings act shortcut.add "SUPER + E" Files launch org.gnome.Nautilus.desktop
+hexciri-settings export ~/Documents           # settings, shortcuts, login items, rules
+hexciri-settings import ~/Documents/hexciri-settings-2026-11-06.json
+hexciri-settings sync status                 # Sync: connected? newer settings waiting?
+hexciri-settings sync upload                 # or: apply, check, connect <url>, create
+hexciri-settings open displays               # open the window on a pane
+hexciri-settings open general/datetime       # or on a page inside one
+hexciri-settings skill install               # a short skill so agents know how
 ```
 
 Commands exit 0 on success and 1 on failure, with the reason on stderr.
 
 ## Build
 
-Everything it needs is part of Omarchy.
+Everything it needs is part of Hexciri.
 
 ```sh
-bin/build      # build/omasettings
+bin/build      # build/hexciri-settings
 bin/test       # the Qt Test suite, offscreen
 bin/install    # makepkg -fsi, so it shows up in the app launcher (Super + Space)
 ```
 
 ## Translations
 
-Catalogs are `src/i18n/<code>.json`, one per Omarchy language code, mapping
+Catalogs are `src/i18n/<code>.json`, one per Hexciri language code, mapping
 English text to its translation; counted strings map to their plural forms.
 `ar.json` holds every string Settings shows, and the test suite fails if any
 other catalog misses one, changes a placeholder, or lacks a plural form its
@@ -273,11 +273,11 @@ language uses.
 tools/i18n.py extract        # strings in the source that ar.json lacks
 tools/i18n.py check          # every catalog complete and well formed
 tools/i18n.py todo de        # what de.json still needs, as JSON
-OMASETTINGS_LANGUAGE_FILE=/tmp/lang build/omasettings   # /tmp/lang holds a code, e.g. de
+HEXCIRI_SETTINGS_LANGUAGE_FILE=/tmp/lang build/hexciri-settings   # /tmp/lang holds a code, e.g. de
 ```
 
-A new catalog also needs a line in `src/resources.qrc`. Use Omarchy's own
-terms for the language, from `$OMARCHY_PATH/default/i18n/<code>/`.
+A new catalog also needs a line in `src/resources.qrc`. Use Hexciri's own
+terms for the language, from `$HEXCIRI_PATH/default/i18n/<code>/`.
 
 ## License
 

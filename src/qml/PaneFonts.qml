@@ -63,7 +63,7 @@ SettingsPage {
 
     SettingsGroup {
         title: qsTr("More Fonts")
-        footer: qsTr("Coding fonts Omarchy offers. Installing one opens a terminal and switches to it when done.")
+        footer: qsTr("Coding fonts Hexciri offers. Installing one opens a terminal and switches to it when done.")
         Repeater {
             model: backend.lists.fontCatalog || []
             delegate: SettingRow {

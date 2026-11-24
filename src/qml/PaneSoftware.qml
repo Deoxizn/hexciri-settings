@@ -1,8 +1,8 @@
 import QtQuick
 import QtQuick.Layouts
 
-// Everything Omarchy's Install and Remove menus offer, so hiding those menus
-// costs nothing. The list comes from Omarchy's own menu, what's installed
+// Everything Hexciri's Install and Remove menus offer, so hiding those menus
+// costs nothing. The list comes from Hexciri's own menu, what's installed
 // is what the menu itself checks, and each button runs the menu's own
 // command, most of which open a terminal to finish.
 SettingsPage {
@@ -11,7 +11,7 @@ SettingsPage {
     title: qsTr("Apps")
     tagline: qsTr("%n installed", "", page.items.filter(i => i.installed && i.category !== "tools").length)
     glyph: "\u{F003B}"
-    description: qsTr("Install and remove the apps and tools Omarchy offers, even with the menu's Install and Remove hidden.")
+    description: qsTr("Install and remove the apps and tools Hexciri offers, even with the menu's Install and Remove hidden.")
     lists: ["software", "appimages"]
     // Installs finish in a terminal after the click; look again for a while.
     pollMs: watching ? 6000 : 0
@@ -49,7 +49,7 @@ SettingsPage {
         "aur": { label: qsTr("AUR packages"), detail: qsTr("Pick packages from the Arch User Repository") },
         "tui": { label: qsTr("Terminal apps"), detail: qsTr("Add a terminal app to the app launcher") },
         "windows": { label: qsTr("Windows", "operating system"), detail: qsTr("Windows in a virtual machine") },
-        "preinstalls": { label: qsTr("Preinstalled apps"), detail: qsTr("The apps Omarchy comes with") }
+        "preinstalls": { label: qsTr("Preinstalled apps"), detail: qsTr("The apps Hexciri comes with") }
     })
 
     // Which groups are open. Only the first, Packages & Tools, starts open,
@@ -257,7 +257,7 @@ SettingsPage {
             id: miseRow
             visible: miseRow.value === true || miseRow.value === false
             setting: "software.miseDefaultTools"
-            label: qsTr("Omarchy's default mise tools")
+            label: qsTr("Hexciri's default mise tools")
             sublabel: qsTr("Coding agents, gh, Node and uv, each installed the first time you run it. Tools you set up with mise yourself stay either way.")
         }
     }
@@ -438,11 +438,11 @@ SettingsPage {
             Layout.fillWidth: true
             text: removeDialog.item.appimage ? qsTr("It goes to the trash and leaves the app launcher.")
                   : removeDialog.item.category === "agent"
-                  ? (removeDialog.drop ? qsTr("A terminal opens to remove it from mise, where Omarchy installed it.")
+                  ? (removeDialog.drop ? qsTr("A terminal opens to remove it from mise, where Hexciri installed it.")
                                        : qsTr("It comes with its desktop app: a terminal opens to remove the app, and may ask for your password."))
                   : removeDialog.drop
                   ? qsTr("A terminal opens to remove the %1 package, and asks for your password.").arg(removeDialog.item.package || "")
-                  : qsTr("A terminal opens to remove it the way Omarchy's menu does, and may ask for your password.")
+                  : qsTr("A terminal opens to remove it the way Hexciri's menu does, and may ask for your password.")
             horizontalAlignment: Text.AlignLeft
             color: ui.muted
             font.family: ui.font
@@ -453,7 +453,7 @@ SettingsPage {
         Text {
             visible: removeDialog.item.defaultKind === "agent"
             Layout.fillWidth: true
-            text: qsTr("It's your coding agent. Pick another under General › Default Apps, or Omarchy's agent shortcut offers to install it again.")
+            text: qsTr("It's your coding agent. Pick another under General › Default Apps, or Hexciri's agent shortcut offers to install it again.")
             horizontalAlignment: Text.AlignLeft
             color: ui.urgent
             font.family: ui.font

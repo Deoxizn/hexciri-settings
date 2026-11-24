@@ -1,5 +1,5 @@
 // Branding and the boot screen, default tools, security setup, and
-// troubleshooting: mostly Omarchy's own setup commands, with the state
+// troubleshooting: mostly Hexciri's own setup commands, with the state
 // each one leaves behind read back so the window can show it.
 
 #include "store.h"
@@ -43,18 +43,18 @@ void Store::buildSystem() {
         Setting s;
         s.id = "general.agent"; s.pane = "general"; s.type = "choice"; s.label = "Coding agent";
         s.choices = asVariants(agents);
-        s.read = [this] { return QVariant(output("omarchy-default-agent", {})); };
+        s.read = [this] { return QVariant(output("hexciri-default-agent", {})); };
         // An agent that isn't installed is installed first, in a terminal.
-        s.write = [this](const QVariant &v) { return runOk("omarchy-default-agent", {v.toString()}, 20000); };
+        s.write = [this](const QVariant &v) { return runOk("hexciri-default-agent", {v.toString()}, 20000); };
         add(s);
     }
     {
         Setting s;
         s.id = "general.dictation"; s.pane = "general"; s.type = "choice"; s.label = "Dictation";
         s.choices = asVariants({"superwhisper", "voxtype"});
-        s.read = [this] { return QVariant(output("omarchy-default-dictation", {})); };
+        s.read = [this] { return QVariant(output("hexciri-default-dictation", {})); };
         // Choosing one runs its installer in a terminal, which outlives us.
-        s.write = [this](const QVariant &v) { return launch("omarchy-default-dictation", {v.toString()}); };
+        s.write = [this](const QVariant &v) { return launch("hexciri-default-dictation", {v.toString()}); };
         add(s);
     }
     {
@@ -62,29 +62,29 @@ void Store::buildSystem() {
         s.id = "desktop.oneWindowRatio"; s.pane = "desktop"; s.type = "bool"; s.label = "Keep a lone window from stretching";
         s.read = [this] { return QVariant(flag("hypr/single-window-aspect-ratio.lua")); };
         s.write = [this](const QVariant &v) {
-            return runOk("omarchy-hyprland-toggle", {"single-window-aspect-ratio", v.toBool() ? "on" : "off"});
+            return runOk("hexciri-hyprland-toggle", {"single-window-aspect-ratio", v.toBool() ? "on" : "off"});
         };
         add(s);
     }
     {
         Setting s;
         s.id = "bar.batteryPercentage"; s.pane = "bar"; s.type = "bool"; s.label = "Show battery percentage";
-        s.read = [this] { return QVariant(output("omarchy-bar", {"get", "omarchy.power", "showPercentage"}) == "true"); };
+        s.read = [this] { return QVariant(output("hexciri-bar", {"get", "hexciri.power", "showPercentage"}) == "true"); };
         s.write = [this](const QVariant &v) {
-            if ((output("omarchy-bar", {"get", "omarchy.power", "showPercentage"}) == "true") == v.toBool())
+            if ((output("hexciri-bar", {"get", "hexciri.power", "showPercentage"}) == "true") == v.toBool())
                 return QString();
-            return runOk("omarchy-shell", {"omarchy.power", "togglePercentage"});
+            return runOk("hexciri-shell", {"hexciri.power", "togglePercentage"});
         };
         add(s);
     }
-    // The laptop's own screen: off or mirrored, by Omarchy's toggles, which
+    // The laptop's own screen: off or mirrored, by Hexciri's toggles, which
     // only flip, so they run only when the state differs.
     for (const QString &which : {QStringLiteral("disable"), QStringLiteral("mirror")}) {
         Setting s;
         s.id = which == "disable" ? "display.laptopScreen" : "display.mirror"; s.pane = "displays"; s.type = "bool";
         s.label = which == "disable" ? "Use the laptop's screen" : "Mirror the laptop's screen";
         const QString toggle = "hypr/internal-monitor-" + which + ".lua";
-        const QString command = which == "disable" ? "omarchy-hyprland-monitor-internal" : "omarchy-hyprland-monitor-internal-mirror";
+        const QString command = which == "disable" ? "hexciri-hyprland-monitor-internal" : "hexciri-hyprland-monitor-internal-mirror";
         const bool inverted = which == "disable";
         s.read = [this, toggle, inverted] { return QVariant(flag(toggle) != inverted); };
         s.write = [this, toggle, inverted, command](const QVariant &v) {
@@ -98,17 +98,17 @@ void Store::buildSystem() {
         Setting s;
         s.id = "general.clockVerticalFormat"; s.pane = "general"; s.type = "choice"; s.label = "Clock in a side bar";
         s.choices = asVariants({"HH\n—\nmm", "h\n—\nmm\nAP", "dd\nMMM\n'W'ww\n''yy", "HH\nmm"});
-        s.read = [this] { return QVariant(output("omarchy-bar", {"get", "omarchy.clock", "verticalFormat"})); };
-        s.write = [this](const QVariant &v) { return runOk("omarchy-bar", {"set", "omarchy.clock", "verticalFormat", v.toString()}); };
+        s.read = [this] { return QVariant(output("hexciri-bar", {"get", "hexciri.clock", "verticalFormat"})); };
+        s.write = [this](const QVariant &v) { return runOk("hexciri-bar", {"set", "hexciri.clock", "verticalFormat", v.toString()}); };
         add(s);
     }
     {
         Setting s;
         s.id = "fonts.cjk"; s.pane = "fonts"; s.type = "choice"; s.label = "Chinese, Japanese, and Korean text";
         s.choices = asVariants({"default", "jp", "kr", "sc", "tc", "hk"});
-        s.read = [this] { return QVariant(output("omarchy-font-cjk", {}).toLower()); };
+        s.read = [this] { return QVariant(output("hexciri-font-cjk", {}).toLower()); };
         // Restarts the shell, which takes a moment.
-        s.write = [this](const QVariant &v) { return runOk("omarchy-font-cjk", {v.toString()}, 30000); };
+        s.write = [this](const QVariant &v) { return runOk("hexciri-font-cjk", {v.toString()}, 30000); };
         add(s);
     }
     for (const QString &field : {QStringLiteral("name"), QStringLiteral("email")}) {
@@ -123,14 +123,14 @@ void Store::buildSystem() {
             static const QRegularExpression email(R"(^[^@\s]+@[^@\s]+$)");
             if (field == "email" && !email.match(value).hasMatch())
                 return tr("That doesn't look like an email address");
-            return runOk("omarchy-setup-git", {"--" + field, value}, 15000);
+            return runOk("hexciri-setup-git", {"--" + field, value}, 15000);
         };
         add(s);
     }
 }
 
 // Why the firmware can't take a direct boot entry, by the same rules
-// omarchy-setup-direct-boot applies, or "" when it can.
+// hexciri-setup-direct-boot applies, or "" when it can.
 QString Store::directBootProblem() {
     const QString vendor = readText("/sys/class/dmi/id/bios_vendor").toLower();
     if (vendor.contains("american megatrends"))
@@ -142,7 +142,7 @@ QString Store::directBootProblem() {
     return {};
 }
 
-// The six Nerd Fonts Omarchy's menu offers to install: name, package, and
+// The six Nerd Fonts Hexciri's menu offers to install: name, package, and
 // the family it switches to.
 static const QList<QStringList> &fontCatalog() {
     static const QList<QStringList> fonts{
@@ -158,67 +158,67 @@ static const QList<QStringList> &fontCatalog() {
 
 QVariant Store::listSystem(const QString &name) {
     if (name == "security") {
-        // omarchy-sudo-docker --configured fails once the account is in the
+        // hexciri-sudo-docker --configured fails once the account is in the
         // docker group. A session keeps the groups it started with, so this
         // one (and Settings) can differ from the account until a restart;
         // `id -Gn` with no user names the groups of this process.
-        const bool dockerSudoless = !run("omarchy-sudo-docker", {"--configured"}).ok();
+        const bool dockerSudoless = !run("hexciri-sudo-docker", {"--configured"}).ok();
         const bool sessionHasDocker = output("id", {"-Gn"}).split(' ', Qt::SkipEmptyParts).contains("docker");
         return QVariantMap{
             {"sshd", output("systemctl", {"is-enabled", "sshd"}) == "enabled"},
-            {"fingerprint", run("omarchy-pkg-present", {"fprintd"}).ok()},
-            {"fido2", run("omarchy-pkg-present", {"pam-u2f"}).ok()},
+            {"fingerprint", run("hexciri-pkg-present", {"fprintd"}).ok()},
+            {"fido2", run("hexciri-pkg-present", {"pam-u2f"}).ok()},
             {"docker", !QStandardPaths::findExecutable("docker").isEmpty()},
             {"dockerSudoless", dockerSudoless},
             {"dockerAfterRestart", dockerSudoless != sessionHasDocker},
-            {"passwordlessSudo", run("omarchy-sudo-passwordless", {"--active"}, 5000).ok()},
-            {"directBoot", !output("omarchy-boot-direct", {"--number"}).isEmpty()},
+            {"passwordlessSudo", run("hexciri-sudo-passwordless", {"--active"}, 5000).ok()},
+            {"directBoot", !output("hexciri-boot-direct", {"--number"}).isEmpty()},
             {"directBootSupported", directBootProblem().isEmpty()},
             {"directBootProblem", directBootProblem()}};
     }
     if (name == "system") {
         return QVariantMap{
-            {"haptics", run("omarchy-hw-dell-xps-haptic-touchpad", {}).ok()
+            {"haptics", run("hexciri-hw-dell-xps-haptic-touchpad", {}).ok()
                             && !QStandardPaths::findExecutable("dell-xps-touchpad-haptics").isEmpty()},
-            {"themeExtras", run("omarchy-theme-extras", {}).ok()},
-            {"kernel", output("omarchy-kernel", {"get"})},
-            {"kernels", output("omarchy-kernel", {"list"}).split('\n', Qt::SkipEmptyParts)}};
+            {"themeExtras", run("hexciri-theme-extras", {}).ok()},
+            {"kernel", output("hexciri-kernel", {"get"})},
+            {"kernels", output("hexciri-kernel", {"list"}).split('\n', Qt::SkipEmptyParts)}};
     }
     if (name == "hardware") {
         return QVariantMap{
-            {"laptop", run("omarchy-hw-laptop", {}).ok()},
-            {"hybridGpu", run("omarchy-hw-hybrid-gpu", {}).ok()},
+            {"laptop", run("hexciri-hw-laptop", {}).ok()},
+            {"hybridGpu", run("hexciri-hw-hybrid-gpu", {}).ok()},
             {"hybridMode", readText("/etc/supergfxd.conf").contains("\"mode\": \"Hybrid\"")},
-            {"wifiConnected", run("omarchy-network-wifi-connected", {}).ok()},
+            {"wifiConnected", run("hexciri-network-wifi-connected", {}).ok()},
             {"sshAgent", run("systemctl", {"--user", "-q", "is-enabled", "gcr-ssh-agent.socket"}).ok()}};
     }
     if (name == "reminders")
-        return QJsonDocument::fromJson(run("omarchy-reminder", {"show", "--json"}).out).object().toVariantMap();
+        return QJsonDocument::fromJson(run("hexciri-reminder", {"show", "--json"}).out).object().toVariantMap();
     if (name == "fontCatalog") {
-        const QStringList installed = output("omarchy-font-list", {}, 10000).split('\n');
+        const QStringList installed = output("hexciri-font-list", {}, 10000).split('\n');
         QVariantList out;
         for (const QStringList &f : fontCatalog())
             out << QVariantMap{{"key", f[0]}, {"name", f[1]}, {"family", f[3]}, {"installed", installed.contains(f[3])}};
         return out;
     }
     if (name == "branding") {
-        return QVariantMap{{"about", readText(m_paths.config + "/omarchy/branding/about.txt")},
-                           {"screensaver", readText(m_paths.config + "/omarchy/branding/screensaver.txt")}};
+        return QVariantMap{{"about", readText(m_paths.config + "/hexciri/branding/about.txt")},
+                           {"screensaver", readText(m_paths.config + "/hexciri/branding/screensaver.txt")}};
     }
     if (name == "bootScreens") {
         // The disk-unlock screen can take any theme's look; each theme ships a
         // preview of it.
         QVariantList out;
-        const QString current = output("omarchy-plymouth-current", {});
+        const QString current = output("hexciri-plymouth-current", {});
         auto preview = [this](const QString &slug) {
-            for (const QString &dir : {m_paths.config + "/omarchy/themes/" + slug, m_paths.omarchy + "/themes/" + slug})
+            for (const QString &dir : {m_paths.config + "/hexciri/themes/" + slug, m_paths.hexciri + "/themes/" + slug})
                 if (QFileInfo::exists(dir + "/preview-unlock.png"))
                     return "file://" + dir + "/preview-unlock.png";
             return QString();
         };
-        out << QVariantMap{{"name", "default"}, {"preview", "file://" + m_paths.omarchy + "/default/plymouth/preview-unlock.png"},
+        out << QVariantMap{{"name", "default"}, {"preview", "file://" + m_paths.hexciri + "/default/plymouth/preview-unlock.png"},
                            {"current", current == "default" || current.isEmpty()}};
-        for (const QString &slug : output("omarchy-plymouth-list", {}, 10000).split('\n', Qt::SkipEmptyParts))
+        for (const QString &slug : output("hexciri-plymouth-list", {}, 10000).split('\n', Qt::SkipEmptyParts))
             out << QVariantMap{{"name", slug}, {"preview", preview(slug)}, {"current", slug == current}};
         return out;
     }
@@ -230,7 +230,7 @@ QString Store::actSystem(const QString &action, const QVariantList &args) {
     if (action.startsWith("branding.")) {
         if (a0 != "about" && a0 != "screensaver")
             return tr("Unknown branding %1").arg(a0);
-        const QString command = "omarchy-branding-" + a0;
+        const QString command = "hexciri-branding-" + a0;
         // Editing opens an editor and an image opens the file chooser; both
         // outlive the click.
         if (action == "branding.edit")
@@ -259,29 +259,29 @@ QString Store::actSystem(const QString &action, const QVariantList &args) {
         QStringList command{QString::number(minutes)};
         if (!message.isEmpty())
             command << message;
-        return runOk("omarchy-reminder", command, 10000);
+        return runOk("hexciri-reminder", command, 10000);
     }
     if (action == "reminder.clear")
-        return runOk("omarchy-reminder", {"clear"}, 10000);
+        return runOk("hexciri-reminder", {"clear"}, 10000);
     if (action == "summon") {
-        // Omarchy's own panels for these: they draw live results.
-        static const QStringList panels{"omarchy.speedtest", "omarchy.disk-speedtest", "omarchy.wifiqr"};
+        // Hexciri's own panels for these: they draw live results.
+        static const QStringList panels{"hexciri.speedtest", "hexciri.disk-speedtest", "hexciri.wifiqr"};
         if (!panels.contains(a0))
             return tr("Unknown panel %1").arg(a0);
-        return runOk("omarchy-shell", {"shell", "summon", a0}, 5000);
+        return runOk("hexciri-shell", {"shell", "summon", a0}, 5000);
     }
     if (action == "plugin.clone") {
-        static const QRegularExpression validId("^omarchy\\.[a-z0-9._-]+$");
+        static const QRegularExpression validId("^hexciri\\.[a-z0-9._-]+$");
         if (!validId.match(a0).hasMatch())
-            return tr("Only Omarchy's own plugins can be copied");
-        return runOk("omarchy-plugin-clone", {a0}, 30000);
+            return tr("Only Hexciri's own plugins can be copied");
+        return runOk("hexciri-plugin-clone", {a0}, 30000);
     }
     if (action == "xcompose.edit")
         return act("edit", {"xcompose"});
     if (action == "restart.shell")
-        return launch("omarchy-restart-shell", {});
+        return launch("hexciri-restart-shell", {});
     if (action == "restart.nightLight")
-        return runOk("omarchy-restart-hyprsunset", {}, 15000);
+        return runOk("hexciri-restart-hyprsunset", {}, 15000);
     return tr("Unknown action %1").arg(action);
 }
 
@@ -289,51 +289,51 @@ QString Store::actSystem(const QString &action, const QVariantList &args) {
 // known set.
 QStringList Store::terminalCommand(const QString &id) {
     static const QMap<QString, QStringList> commands{
-        {"sshdSetup", {"omarchy-setup-security-sshd"}},
-        {"sshdRemove", {"omarchy-remove-security-sshd"}},
-        {"fingerprintRemove", {"omarchy-remove-security-fingerprint"}},
-        {"fido2Remove", {"omarchy-remove-security-fido2"}},
-        {"dockerSetup", {"omarchy-setup-security-sudoless-docker"}},
-        {"dockerRemove", {"omarchy-remove-security-sudoless-docker"}},
-        {"sudoPasswordless", {"omarchy-sudo-passwordless"}},
-        {"sudoPasswordlessOff", {"omarchy-sudo-passwordless", "--disable"}},
-        {"directBoot", {"omarchy-setup-direct-boot"}},
-        {"gitSetup", {"omarchy-setup-git"}},
+        {"sshdSetup", {"hexciri-setup-security-sshd"}},
+        {"sshdRemove", {"hexciri-remove-security-sshd"}},
+        {"fingerprintRemove", {"hexciri-remove-security-fingerprint"}},
+        {"fido2Remove", {"hexciri-remove-security-fido2"}},
+        {"dockerSetup", {"hexciri-setup-security-sudoless-docker"}},
+        {"dockerRemove", {"hexciri-remove-security-sudoless-docker"}},
+        {"sudoPasswordless", {"hexciri-sudo-passwordless"}},
+        {"sudoPasswordlessOff", {"hexciri-sudo-passwordless", "--disable"}},
+        {"directBoot", {"hexciri-setup-direct-boot"}},
+        {"gitSetup", {"hexciri-setup-git"}},
         {"githubLogin", {"gh", "auth", "login", "--web", "--git-protocol", "https"}},
-        {"themeUpdate", {"omarchy-theme-update"}},
-        {"timeSync", {"omarchy-update-time"}},
-        {"restartAudio", {"omarchy-restart-audio"}},
-        {"restartWifi", {"omarchy-restart-wifi"}},
-        {"restartBluetooth", {"omarchy-restart-bluetooth"}},
-        {"restartTrackpad", {"omarchy-restart-trackpad"}},
-        {"refreshHyprland", {"omarchy-refresh-hyprland"}},
-        {"refreshShell", {"omarchy-refresh-shell"}},
-        {"refreshHyprsunset", {"omarchy-refresh-hyprsunset"}},
-        {"refreshPlymouth", {"omarchy-refresh-plymouth"}},
-        {"refreshTmux", {"omarchy-refresh-tmux"}},
-        {"plymouthReset", {"omarchy-plymouth-reset"}},
-        {"factoryReset", {"omarchy-system-factory-reset"}},
-        {"hybridGpu", {"omarchy-toggle-hybrid-gpu"}},
-        {"sshAgentRemove", {"omarchy-remove-service-ssh-agent"}},
+        {"themeUpdate", {"hexciri-theme-update"}},
+        {"timeSync", {"hexciri-update-time"}},
+        {"restartAudio", {"hexciri-restart-audio"}},
+        {"restartWifi", {"hexciri-restart-wifi"}},
+        {"restartBluetooth", {"hexciri-restart-bluetooth"}},
+        {"restartTrackpad", {"hexciri-restart-trackpad"}},
+        {"refreshHyprland", {"hexciri-refresh-hyprland"}},
+        {"refreshShell", {"hexciri-refresh-shell"}},
+        {"refreshHyprsunset", {"hexciri-refresh-hyprsunset"}},
+        {"refreshPlymouth", {"hexciri-refresh-plymouth"}},
+        {"refreshTmux", {"hexciri-refresh-tmux"}},
+        {"plymouthReset", {"hexciri-plymouth-reset"}},
+        {"factoryReset", {"hexciri-system-factory-reset"}},
+        {"hybridGpu", {"hexciri-toggle-hybrid-gpu"}},
+        {"sshAgentRemove", {"hexciri-remove-service-ssh-agent"}},
     };
     if (commands.contains(id))
         return commands.value(id);
     const QString kind = id.section(':', 0, 0), value = id.section(':', 1);
-    if (kind == "kernel" && output("omarchy-kernel", {"list"}).split('\n').contains(value))
-        return {"omarchy-kernel", "set", value};
-    if (kind == "bootScreen" && output("omarchy-plymouth-list", {}, 10000).split('\n').contains(value))
-        return {"omarchy-plymouth-set-by-theme", value};
+    if (kind == "kernel" && output("hexciri-kernel", {"list"}).split('\n').contains(value))
+        return {"hexciri-kernel", "set", value};
+    if (kind == "bootScreen" && output("hexciri-plymouth-list", {}, 10000).split('\n').contains(value))
+        return {"hexciri-plymouth-set-by-theme", value};
     if (kind == "font")
         for (const QStringList &f : fontCatalog())
             if (f[0] == value)
-                return {"omarchy-install-font", f[1], f[2], f[3]};
+                return {"hexciri-install-font", f[1], f[2], f[3]};
     return {};
 }
 
-// --- The Omarchy menu ---------------------------------------------------------------
+// --- The Hexciri menu ---------------------------------------------------------------
 //
-// Items are hidden the way Omarchy's menu extension documents: an entry in
-// ~/.config/omarchy/extensions/omarchy-menu.jsonc whose "when" is "false".
+// Items are hidden the way Hexciri's menu extension documents: an entry in
+// ~/.config/hexciri/extensions/hexciri-menu.jsonc whose "when" is "false".
 // The menu reads that file as JSON once whole-line // comments are gone and
 // trailing commas dropped, and a later entry for the same id replaces an
 // earlier one, so edits are made line by line and checked the same way.
@@ -389,19 +389,19 @@ static QList<int> lineDepths(const QStringList &lines) {
 }
 
 QString Store::menuFile() const {
-    return m_paths.config + "/omarchy/extensions/omarchy-menu.jsonc";
+    return m_paths.config + "/hexciri/extensions/hexciri-menu.jsonc";
 }
 
-// Omarchy's own menu as shipped, keyed by item id. Read-only: it belongs to
-// the omarchy package.
+// Hexciri's own menu as shipped, keyed by item id. Read-only: it belongs to
+// the hexciri package.
 QJsonObject Store::defaultMenuItems() const {
-    const QString defaults = readText(m_paths.omarchy + "/default/omarchy/omarchy-menu.jsonc");
+    const QString defaults = readText(m_paths.hexciri + "/default/hexciri/hexciri-menu.jsonc");
     return QJsonDocument::fromJson(stripJsonc(defaults).toUtf8()).object();
 }
 
 QVariant Store::listMenu() {
-    // Omarchy's own items, in the order its file lists them (one per line).
-    const QString defaults = readText(m_paths.omarchy + "/default/omarchy/omarchy-menu.jsonc");
+    // Hexciri's own items, in the order its file lists them (one per line).
+    const QString defaults = readText(m_paths.hexciri + "/default/hexciri/hexciri-menu.jsonc");
     const QJsonObject defaultItems = QJsonDocument::fromJson(stripJsonc(defaults).toUtf8()).object();
     static const QRegularExpression key(R"re(^\s*"([a-z0-9][a-z0-9._-]*)"\s*:)re");
     QStringList order;
@@ -554,7 +554,7 @@ QString Store::editMenu(const QStringList &hide, const QStringList &show, QJsonO
     if (!validMenuText(next))
         return tr("Changing the menu file would break it, so nothing was changed");
     // One backup a day keeps the hand-written version without piling up.
-    const QString backup = file + ".bak.omasettings-" + QDateTime::currentDateTime().toString("yyyyMMdd");
+    const QString backup = file + ".bak.hexciri-settings-" + QDateTime::currentDateTime().toString("yyyyMMdd");
     if (QFileInfo::exists(file) && !QFileInfo::exists(backup))
         QFile::copy(file, backup);
     QDir().mkpath(QFileInfo(file).absolutePath());
@@ -631,7 +631,7 @@ QString Store::menuAction(const QString &action, const QString &id) {
         }
         hide.removeDuplicates();
     } else if (action == "menu.showAll") {
-        // Back to Omarchy's menu: every hidden item shown, conditions the
+        // Back to Hexciri's menu: every hidden item shown, conditions the
         // user wrote put back, and their own entries left as they are. A
         // copy of the file as it was is kept first, so the hiding can be
         // brought back by hand.
@@ -639,7 +639,7 @@ QString Store::menuAction(const QString &action, const QString &id) {
             if (hiddenNow.value(other))
                 show << other;
         cascade = QJsonObject();
-        const QString backup = menuFile() + ".bak.omasettings-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss");
+        const QString backup = menuFile() + ".bak.hexciri-settings-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss");
         if (!show.isEmpty() && QFileInfo::exists(menuFile()) && !QFile::copy(menuFile(), backup))
             return tr("Could not back up %1").arg(menuFile());
     } else {
@@ -664,7 +664,7 @@ QString Store::menuAction(const QString &action, const QString &id) {
 
 // --- The app's icon ------------------------------------------------------------------
 //
-// Launchers like Keystroke draw Omarchy's own entries as a Nerd Font glyph
+// Launchers like Keystroke draw Hexciri's own entries as a Nerd Font glyph
 // in the theme's text color on a faint tile of the same color, and an app's
 // icon as-is. So the icon is drawn the same way, from the same font's
 // "tune" glyph, in the current theme's colors, and drawn again whenever the
@@ -688,13 +688,13 @@ QString Store::iconSvg(const QString &foreground, double rounding) {
 }
 
 QString Store::iconPath() const {
-    return m_paths.data + "/icons/hicolor/scalable/apps/omasettings.svg";
+    return m_paths.data + "/icons/hicolor/scalable/apps/hexciri-settings.svg";
 }
 
 // The icon in the current theme's text color and window rounding, in the
 // user's icon folder, which wins over the packaged one.
 QString Store::writeThemedIcon() {
-    const QVariantMap colors = Theme::readColors(m_paths.state + "/omarchy/current/theme/colors.toml");
+    const QVariantMap colors = Theme::readColors(m_paths.state + "/hexciri/current/theme/colors.toml");
     const QString foreground = colors.value("foreground", "#a9b1d6").toString();
     static const QRegularExpression hex("^#[0-9a-fA-F]{6}$");
     if (!hex.match(foreground).hasMatch())
@@ -714,32 +714,32 @@ QString Store::writeThemedIcon() {
 }
 
 // A theme-set hook so the icon follows theme changes made anywhere, not only
-// while Settings is open. Installed through `omarchy hook install`.
+// while Settings is open. Installed through `hexciri hook install`.
 QString Store::ensureIconHook() {
-    const QString hook = m_paths.config + "/omarchy/hooks/theme-set.d/omasettings-icon";
+    const QString hook = m_paths.config + "/hexciri/hooks/theme-set.d/hexciri-settings-icon";
     if (QFileInfo::exists(hook))
         return {};
     QTemporaryDir dir;
-    const QString script = dir.filePath("omasettings-icon");
+    const QString script = dir.filePath("hexciri-settings-icon");
     QFile file(script);
     if (!file.open(QIODevice::WriteOnly))
         return tr("Could not write %1").arg(script);
     file.write("#!/bin/bash\n"
                "# Draws the Settings app icon in the new theme's colors (installed by Settings).\n"
-               "command -v omasettings >/dev/null && omasettings icon >/dev/null 2>&1\n"
+               "command -v hexciri-settings >/dev/null && hexciri-settings icon >/dev/null 2>&1\n"
                "exit 0\n");
     file.close();
-    return runOk("omarchy-hook-install", {"theme-set", script}, 10000);
+    return runOk("hexciri-hook-install", {"theme-set", script}, 10000);
 }
 
 // --- Restore Defaults -------------------------------------------------------------------
 //
-// What Omarchy ships, from its own files: default/hypr/input.lua and
-// looknfeel.lua, config/omarchy/shell.json, and its commands' resets.
+// What Hexciri ships, from its own files: default/hypr/input.lua and
+// looknfeel.lua, config/hexciri/shell.json, and its commands' resets.
 // Settings that are personal (keyboard layouts, the computer's name, the
 // theme) have no default here and are never reset.
 
-static const QHash<QString, QVariant> &omarchyDefaults() {
+static const QHash<QString, QVariant> &hexciriDefaults() {
     static const QHash<QString, QVariant> d{
         {"appearance.corners", "theme"}, {"appearance.transparency", "transparent"}, {"appearance.animations", true},
         {"appearance.font", "JetBrainsMono Nerd Font"}, {"appearance.textSize", 12}, {"fonts.cjk", "default"},
@@ -780,15 +780,15 @@ static bool sameValue(const QVariant &a, const QVariant &b) {
     return a.toString() == b.toString();
 }
 
-// Omarchy's keyboard options for the layouts in use: Compose on Shift+Caps,
+// Hexciri's keyboard options for the layouts in use: Compose on Shift+Caps,
 // and both Alt keys to switch layouts when one of them can't type Latin.
 QString Store::defaultKbOptions() const {
     QString nonLatin = " af am ara bd bg by et ge gr il in iq ir kg kh kz la lk mk mm mn mv np rs ru sy th tj ua ";
     static const QRegularExpression listed(R"re(non_latin_layouts\s*=\s*"([^"]+)")re");
-    const auto m = listed.match(readText(m_paths.omarchy + "/default/hypr/input.lua"));
+    const auto m = listed.match(readText(m_paths.hexciri + "/default/hypr/input.lua"));
     if (m.hasMatch())
         nonLatin = m.captured(1);
-    QString options = "omarchy:shift_caps_compose";
+    QString options = "hexciri:shift_caps_compose";
     for (const QString &layout : hyprGet("input:kb_layout").toString().split(',', Qt::SkipEmptyParts))
         if (nonLatin.contains(" " + layout.trimmed() + " ")) {
             options += ",grp:alts_toggle";
@@ -799,7 +799,7 @@ QString Store::defaultKbOptions() const {
 
 QVariantList Store::defaultsFor(const QString &pane) {
     QVariantList out;
-    const QHash<QString, QVariant> &d = omarchyDefaults();
+    const QHash<QString, QVariant> &d = hexciriDefaults();
     for (const Setting &s : m_settings) {
         if (s.pane != pane || !d.contains(s.id))
             continue;
@@ -812,19 +812,19 @@ QVariantList Store::defaultsFor(const QString &pane) {
         out << QVariantMap{{"id", "keyboard.options"}, {"label", "Special keys"}, {"value", hyprGet("input:kb_options")},
                            {"default", defaultKbOptions()}};
     if (pane == "desktop") {
-        const QJsonArray pinned = QJsonDocument::fromJson(readText(m_paths.omarchy + "/config/omarchy/shell.json").toUtf8())
+        const QJsonArray pinned = QJsonDocument::fromJson(readText(m_paths.hexciri + "/config/hexciri/shell.json").toUtf8())
                                       .object().value("dock").toObject().value("pinned").toArray();
         QStringList want;
         for (const QJsonValue &v : pinned)
             want << v.toString();
-        const QStringList now = output("omarchy-dock", {"pinned"}).split('\n', Qt::SkipEmptyParts);
+        const QStringList now = output("hexciri-dock", {"pinned"}).split('\n', Qt::SkipEmptyParts);
         if (!want.isEmpty() && now != want)
             out << QVariantMap{{"id", "desktop.dockPinned"}, {"label", "Pinned apps"},
                                {"value", now.isEmpty() ? QStringLiteral("none") : now.join(", ")}, {"default", want.join(", ")}};
     }
     if (pane == "bar")
         out << QVariantMap{{"id", "bar.layout"}, {"label", "Widgets, position, and background"}, {"value", ""},
-                           {"default", "Omarchy's bar"}};
+                           {"default", "Hexciri's bar"}};
     if (pane == "displays") {
         const QJsonObject state = managedState();
         if (!state.value("monitors").toObject().isEmpty() || state.contains("workspaces") || state.contains("primary"))
@@ -836,18 +836,18 @@ QVariantList Store::defaultsFor(const QString &pane) {
 
 QString Store::resetPane(const QString &pane) {
     QStringList failed;
-    const QHash<QString, QVariant> &d = omarchyDefaults();
+    const QHash<QString, QVariant> &d = hexciriDefaults();
     for (const QVariant &change : defaultsFor(pane)) {
         const QString id = change.toMap().value("id").toString();
         QString error;
         if (id == "keyboard.options") {
             error = hyprSet({{"input:kb_options", defaultKbOptions()}});
         } else if (id == "desktop.dockPinned") {
-            error = runOk("omarchy-dock", QStringList{"pinned"} + change.toMap().value("default").toString().split(", "));
+            error = runOk("hexciri-dock", QStringList{"pinned"} + change.toMap().value("default").toString().split(", "));
         } else if (id == "bar.layout") {
-            // Omarchy's own reset for the bar: its widgets, position, and
+            // Hexciri's own reset for the bar: its widgets, position, and
             // background, in one write.
-            error = runOk("omarchy-bar", {"defaults"}, 15000);
+            error = runOk("hexciri-bar", {"defaults"}, 15000);
         } else if (id == "display.monitors") {
             error = updateState([](QJsonObject &state) {
                 for (const char *key : {"monitors", "workspaces", "primary"})
@@ -865,7 +865,7 @@ QString Store::resetPane(const QString &pane) {
 
 // --- Your own menu items ----------------------------------------------------------------
 //
-// Items that aren't in Omarchy's menu, kept in the same extension file:
+// Items that aren't in Hexciri's menu, kept in the same extension file:
 // listed with all their fields, added as one-line entries, and edited or
 // deleted whether they were written on one line or several.
 
@@ -895,7 +895,7 @@ static QJsonObject entryObject(const QStringList &lines, QPair<int, int> range) 
 }
 
 QVariant Store::listMenuCustom() {
-    const QString defaults = readText(m_paths.omarchy + "/default/omarchy/omarchy-menu.jsonc");
+    const QString defaults = readText(m_paths.hexciri + "/default/hexciri/hexciri-menu.jsonc");
     const QJsonObject defaultItems = QJsonDocument::fromJson(stripJsonc(defaults).toUtf8()).object();
     const QStringList lines = readText(menuFile()).split('\n');
     static const QRegularExpression key(R"re(^\s*"([a-z0-9][a-z0-9._-]*)"\s*:)re");
@@ -905,7 +905,7 @@ QVariant Store::listMenuCustom() {
         const auto m = key.match(lines[i]);
         // Settings' own pages are switched in This App, not listed one by one.
         if (m.hasMatch() && depths[i] == 1 && !defaultItems.contains(m.captured(1)) && !ids.contains(m.captured(1))
-            && !m.captured(1).startsWith("omasettings-search"))
+            && !m.captured(1).startsWith("hexciri-settings-search"))
             ids << m.captured(1);
     }
     QVariantList out;
@@ -915,9 +915,9 @@ QVariant Store::listMenuCustom() {
                            {"action", e.value("action").toString()}, {"description", e.value("description").toString()},
                            {"parent", id.contains('.') ? id.section('.', 0, -2) : QString()},
                            // Settings' entry is only hidden while its pages' submenu stands in for it.
-                           {"hidden", e.value("when").toString() == "false" && id != "setup.omasettings" && id != "omasettings"},
+                           {"hidden", e.value("when").toString() == "false" && id != "setup.hexciri-settings" && id != "hexciri-settings"},
                            // The Settings menu entry is the switch in Changes & Backup.
-                           {"managed", id == "setup.omasettings" || id == "omasettings"}};
+                           {"managed", id == "setup.hexciri-settings" || id == "hexciri-settings"}};
     }
     return out;
 }
@@ -935,7 +935,7 @@ QString Store::rewriteMenu(const std::function<QString(QStringList &)> &change) 
     const QString next = lines.join('\n');
     if (!validMenuText(next))
         return tr("Changing the menu file would break it, so nothing was changed");
-    const QString backup = file + ".bak.omasettings-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss");
+    const QString backup = file + ".bak.hexciri-settings-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss");
     if (QFileInfo::exists(file) && !QFileInfo::exists(backup))
         QFile::copy(file, backup);
     QDir().mkpath(QFileInfo(file).absolutePath());

@@ -33,11 +33,11 @@ SettingsPage {
         { key: "settings", title: qsTr("Settings"), glyph: "\u{F0493}",
           about: qsTr("Everything in Settings that isn't hardware, with shortcuts, login items, and window rules") },
         { key: "desktop", title: qsTr("Desktop"), glyph: "\u{F01C4}",
-          about: qsTr("The Omarchy menu, dock and bar, apps for file types, branding") },
+          about: qsTr("The Hexciri menu, dock and bar, apps for file types, branding") },
         { key: "hypr", title: qsTr("Hyprland"), glyph: "\u{F030C}",
           about: qsTr("Keybindings, input, look and feel, autostart, and the rest of ~/.config/hypr, except displays") },
         { key: "apps", title: qsTr("Apps"), glyph: "\u{F003B}",
-          about: qsTr("Omarchy's apps, pacman and AUR packages, Flatpak, mise tools, web apps, AppImages") },
+          about: qsTr("Hexciri's apps, pacman and AUR packages, Flatpak, mise tools, web apps, AppImages") },
         { key: "themes", title: qsTr("Themes & Wallpapers"), glyph: "\u{F03D8}",
           about: qsTr("Themes added by URL, and wallpapers you added") },
         { key: "plugins", title: qsTr("Plugins"), glyph: "\u{F0431}",
@@ -76,7 +76,7 @@ SettingsPage {
         }
         ButtonRow {
             label: qsTr("Create a private repository")
-            sublabel: qsTr("Named omarchy-sync, on your GitHub account")
+            sublabel: qsTr("Named hexciri-sync, on your GitHub account")
             glyph: "\u{F0415}"
             text: qsTr("Create")
             highlighted: true
@@ -91,7 +91,7 @@ SettingsPage {
             OmaField {
                 id: repoUrl
                 width: Math.max(ui.s(120), Math.min(Math.round(260 * ui.scale), connectRow.controlRoom - connectButton.width - ui.s(8)))
-                placeholderText: "https://github.com/you/omarchy-sync"
+                placeholderText: "https://github.com/you/hexciri-sync"
                 onAccepted: connectButton.clicked()
             }
             OmaButton {

@@ -26,7 +26,7 @@ public:
     QVariantMap colors() const { return m_colors; }
     bool dark() const { return m_dark; }
     int textSize() const { return m_textSize; }
-    // The desktop's monospace font, which the Omarchy shell draws everything in.
+    // The desktop's monospace font, which the Hexciri shell draws everything in.
     QString fontFamily() const { return m_fontFamily; }
 
     static QString readAccent(const QString &path);

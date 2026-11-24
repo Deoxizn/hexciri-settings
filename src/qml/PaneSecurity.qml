@@ -3,7 +3,7 @@ import QtQuick.Controls
 import QtQuick.Layouts
 
 // Passwords, ways to unlock, remote login, administrator access, git
-// identity, and booting. Setup runs Omarchy's own commands in a terminal,
+// identity, and booting. Setup runs Hexciri's own commands in a terminal,
 // as its menu does, and the status of each is read back here.
 SettingsPage {
     id: page
@@ -162,7 +162,7 @@ SettingsPage {
     SettingsGroup {
         title: qsTr("Booting")
         footer: page.sec.directBootSupported === false ? page.sec.directBootProblem
-                : qsTr("A direct boot entry starts Omarchy straight from the firmware, skipping the boot menu.")
+                : qsTr("A direct boot entry starts Hexciri straight from the firmware, skipping the boot menu.")
         SetupRow {
             label: qsTr("Direct boot")
             sublabel: page.sec.directBoot ? qsTr("On") : qsTr("Off")

@@ -6,7 +6,7 @@
 #include <QVariant>
 
 // Pure helpers for the one Hyprland file Settings owns,
-// ~/.config/hypr/omasettings.lua. It is generated in full from the saved
+// ~/.config/hypr/hexciri-settings.lua. It is generated in full from the saved
 // choices every time, and Hyprland executes it, so everything written into it
 // is validated or escaped here.
 namespace Hypr {
@@ -16,7 +16,7 @@ namespace Hypr {
 // "gestures": {"workspaceSwipe": true}}.
 QString renderLua(const QJsonObject &state);
 
-// The Omarchy toggle (in ~/.local/state/omarchy/toggles/hypr) an option gives
+// The Hexciri toggle (in ~/.local/state/hexciri/toggles/hypr) an option gives
 // way to while it is on, or "" when none sets it.
 QString yieldsTo(const QString &option);
 

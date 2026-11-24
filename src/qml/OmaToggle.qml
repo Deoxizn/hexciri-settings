@@ -1,6 +1,6 @@
 import QtQuick
 
-// The Omarchy shell's toggle (qs.Ui ToggleSwitch): a box with a knob,
+// The Hexciri shell's toggle (qs.Ui ToggleSwitch): a box with a knob,
 // square unless windows are rounded, filled when on.
 Item {
     id: root

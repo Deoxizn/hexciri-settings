@@ -22,7 +22,7 @@ SettingsPage {
         NavRow {
             label: qsTr("Software Update")
             glyph: "\u{F06B0}"
-            detail: page.about.omarchy ? qsTr("Omarchy %1").arg(page.about.omarchy) : ""
+            detail: page.about.hexciri ? qsTr("Hexciri %1").arg(page.about.hexciri) : ""
             onOpen: win.openSub("GeneralUpdate", qsTr("Software Update"))
         }
     }
